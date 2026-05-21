@@ -1,0 +1,62 @@
+# Dependencies
+node_modules/
+.npm
+
+# Build outputs
+build/
+dist/
+*.aab
+*.apk
+*.ipa
+
+# Environment & Secrets
+.env
+.env.local
+.env.production
+key.properties
+*.jks
+*.keystore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Flutter
+monorepo/app/.dart_tool/
+monorepo/app/.flutter-plugins
+monorepo/app/.flutter-plugins-dependencies
+monorepo/app/.packages
+monorepo/app/build/
+monorepo/app/ios/Pods/
+monorepo/app/ios/.symlinks/
+monorepo/app/ios/Flutter/Generated.xcconfig
+monorepo/app/ios/Flutter/flutter_export_environment.sh
+monorepo/app/android/.gradle/
+monorepo/app/android/local.properties
+
+# Backend
+monorepo/backend/dist/
+
+# Admin
+monorepo/admin/dist/
+
+# Landing
+monorepo/landing/dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Temp
+tmp/
+.tmp/
