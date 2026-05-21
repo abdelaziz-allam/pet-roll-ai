@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../docker/Dockerfile.backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - GCP_PROJECT_ID=petroll-mvp
+      - FIREBASE_PROJECT_ID=petroll-mvp
+      - FIRESTORE_EMULATOR_HOST=firebase-emulator:8080
+      - FIREBASE_AUTH_EMULATOR_HOST=firebase-emulator:9099
+      - FIREBASE_STORAGE_EMULATOR_HOST=firebase-emulator:9199
+      - JWT_SECRET=dev-secret-minimum-16-chars-long
+      - JWT_EXPIRY=1h
+      - REFRESH_TOKEN_EXPIRY=7d
+      - CORS_ORIGINS=http://localhost:5173,http://localhost:3001
+    depends_on:
+      firebase-emulator:
+        condition: service_healthy
+    volumes:
+      - ./backend/src:/app/src
+    networks:
+      - petroll-network
+
+  admin:
+    build:
+      context: ./admin
+      dockerfile: ../docker/Dockerfile.admin
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3000/api/v1
+      - VITE_FIREBASE_PROJECT_ID=petroll-mvp
+    volumes:
+      - ./admin/src:/app/src
+    networks:
+      - petroll-network
+
+  firebase-emulator:
+    image: node:20-slim
+    working_dir: /app
+    command: >
+      sh -c "npm install -g firebase-tools &&
+             firebase emulators:start --project petroll-mvp --import=/app/seed"
+    ports:
+      - "8080:8080"
+      - "9099:9099"
+      - "9199:9199"
+      - "4000:4000"
+    volumes:
+      - ./firebase:/app
+      - ./shared/seed-data:/app/seed
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    networks:
+      - petroll-network
+
+networks:
+  petroll-network:
+    driver: bridge

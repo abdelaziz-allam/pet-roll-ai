@@ -1,0 +1,94 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(ownerId) {
+      return isAuthenticated() && request.auth.uid == ownerId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'super_admin'];
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /pets/{petId} {
+      allow read: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
+    }
+
+    match /health_records/{recordId} {
+      allow read, write: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+    }
+
+    match /vaccinations/{vacId} {
+      allow read, write: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+    }
+
+    match /pregnancies/{pregId} {
+      allow read, write: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+    }
+
+    match /schedules/{scheduleId} {
+      allow read, write: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+    }
+
+    match /mating_listings/{listingId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
+    }
+
+    match /mating_requests/{requestId} {
+      allow read: if isAuthenticated() &&
+        (resource.data.senderId == request.auth.uid || resource.data.receiverId == request.auth.uid);
+      allow create: if isAuthenticated() && request.resource.data.senderId == request.auth.uid;
+      allow update: if isAuthenticated() && resource.data.receiverId == request.auth.uid;
+    }
+
+    match /chat_rooms/{roomId} {
+      allow read: if isAuthenticated() && request.auth.uid in resource.data.participants;
+    }
+
+    match /chat_rooms/{roomId}/messages/{messageId} {
+      allow read: if isAuthenticated() &&
+        request.auth.uid in get(/databases/$(database)/documents/chat_rooms/$(roomId)).data.participants;
+      allow create: if isAuthenticated() &&
+        request.auth.uid in get(/databases/$(database)/documents/chat_rooms/$(roomId)).data.participants;
+    }
+
+    match /notifications/{notifId} {
+      allow read, update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    match /breeds/{breedId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /reports/{reportId} {
+      allow read: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+    }
+
+    match /app_config/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+  }
+}

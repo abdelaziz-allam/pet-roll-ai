@@ -1,0 +1,24 @@
+{
+  "dogs": [
+    { "id": "dog-ms-1", "week": 1, "title": "Fertilization", "description": "Sperm reaches the eggs and fertilization occurs. Embryos begin forming.", "tips": ["Maintain normal diet", "Continue regular exercise", "Note the mating date accurately"] },
+    { "id": "dog-ms-2", "week": 2, "title": "Cell Division", "description": "Fertilized eggs divide and travel to the uterus for implantation.", "tips": ["No dietary changes needed yet", "Avoid strenuous activity", "Keep stress levels low"] },
+    { "id": "dog-ms-3", "week": 3, "title": "Implantation", "description": "Embryos implant into the uterine wall. Hormonal changes begin.", "tips": ["Watch for mild morning sickness", "Some appetite loss is normal", "Schedule vet confirmation visit"] },
+    { "id": "dog-ms-4", "week": 4, "title": "Development Begins", "description": "Spinal cords develop. Facial features start forming. Vet can confirm pregnancy via ultrasound.", "tips": ["Increase food by 10%", "Start prenatal supplements if recommended", "Ultrasound confirmation possible"] },
+    { "id": "dog-ms-5", "week": 5, "title": "Organ Formation", "description": "Organs develop rapidly. Toes, claws, and whiskers form. Gender can be determined.", "tips": ["Switch to high-quality puppy food", "Increase food portions gradually", "Limit jumping and rough play"] },
+    { "id": "dog-ms-6", "week": 6, "title": "Rapid Growth", "description": "Puppies grow quickly. Coat color develops. Mother's belly becomes noticeably larger.", "tips": ["Feed smaller, more frequent meals", "Prepare whelping area", "Monitor weight gain closely"] },
+    { "id": "dog-ms-7", "week": 7, "title": "Puppies Nearly Formed", "description": "Puppies are nearly fully formed. They move into birthing position.", "tips": ["X-ray can count puppies", "Have whelping supplies ready", "Take rectal temperature daily"] },
+    { "id": "dog-ms-8", "week": 8, "title": "Pre-Labor", "description": "Milk production begins. Nesting behavior starts. Puppies can be born any day.", "tips": ["Monitor for labor signs", "Temperature drop indicates labor within 24hrs", "Keep vet contact information handy"] },
+    { "id": "dog-ms-9", "week": 9, "title": "Birth", "description": "Labor and delivery. Average litter size varies by breed (1-12 puppies).", "tips": ["Stay calm and supportive", "Time between puppies: 30-60 minutes", "Contact vet if labor stalls over 2 hours"] }
+  ],
+  "cats": [
+    { "id": "cat-ms-1", "week": 1, "title": "Fertilization", "description": "Mating triggers ovulation in cats. Fertilization occurs within 24 hours.", "tips": ["Note mating date", "Continue normal routine", "Cats can mate with multiple males in one cycle"] },
+    { "id": "cat-ms-2", "week": 2, "title": "Implantation", "description": "Embryos travel to the uterus and implant. Early development begins.", "tips": ["No dietary changes yet", "Keep environment calm", "Watch for behavioral changes"] },
+    { "id": "cat-ms-3", "week": 3, "title": "Early Development", "description": "Nipples become pink and enlarged (pinking up). Morning sickness may occur.", "tips": ["Vet can confirm pregnancy", "Some appetite changes are normal", "Begin planning for kittens"] },
+    { "id": "cat-ms-4", "week": 4, "title": "Growth Phase", "description": "Kittens are developing rapidly. Mother's belly starts to swell.", "tips": ["Gradually increase food intake", "Switch to kitten food for extra nutrition", "Avoid handling belly roughly"] },
+    { "id": "cat-ms-5", "week": 5, "title": "Organ Development", "description": "All major organs forming. Kittens develop their nervous systems.", "tips": ["Ultrasound can show kittens", "Keep all vet appointments", "Maintain high-nutrition diet"] },
+    { "id": "cat-ms-6", "week": 6, "title": "Rapid Growth", "description": "Kittens grow quickly. Mother eats significantly more. Movement may be felt.", "tips": ["Feed 25-50% more than normal", "Prepare birthing area", "Keep indoors for safety"] },
+    { "id": "cat-ms-7", "week": 7, "title": "Near Full Term", "description": "Kittens are nearly fully formed. Mother begins nesting.", "tips": ["Provide nesting box", "Monitor for discharge", "Keep environment quiet and safe"] },
+    { "id": "cat-ms-8", "week": 8, "title": "Pre-Labor", "description": "Milk production begins. Queen becomes restless. Birth imminent.", "tips": ["Watch for labor signs", "Temperature drop below 100°F signals labor", "Average litter: 4-6 kittens"] },
+    { "id": "cat-ms-9", "week": 9, "title": "Birth", "description": "Most cats deliver between day 63-67. Kittens arrive 15-30 minutes apart.", "tips": ["Let mother manage birth naturally", "Intervene only if distress noted", "Contact vet for problems"] }
+  ]
+}

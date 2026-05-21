@@ -1,0 +1,18 @@
+{
+  "dogs": [
+    { "id": "vax-dog-rabies", "name": "Rabies", "species": "dog", "required": true, "firstDoseWeeks": 12, "boosterIntervalMonths": 12, "description": "Required by law in most regions. Protects against rabies virus." },
+    { "id": "vax-dog-distemper", "name": "Distemper (DHPP)", "species": "dog", "required": true, "firstDoseWeeks": 6, "boosterIntervalMonths": 12, "description": "Core vaccine protecting against distemper, hepatitis, parainfluenza, and parvovirus." },
+    { "id": "vax-dog-parvo", "name": "Parvovirus", "species": "dog", "required": true, "firstDoseWeeks": 6, "boosterIntervalMonths": 12, "description": "Critical protection against canine parvovirus, especially for puppies." },
+    { "id": "vax-dog-bordetella", "name": "Bordetella (Kennel Cough)", "species": "dog", "required": false, "firstDoseWeeks": 8, "boosterIntervalMonths": 6, "description": "Recommended for dogs in social environments like boarding or daycare." },
+    { "id": "vax-dog-leptospirosis", "name": "Leptospirosis", "species": "dog", "required": false, "firstDoseWeeks": 12, "boosterIntervalMonths": 12, "description": "Protects against bacterial infection spread through contaminated water." },
+    { "id": "vax-dog-lyme", "name": "Lyme Disease", "species": "dog", "required": false, "firstDoseWeeks": 12, "boosterIntervalMonths": 12, "description": "Recommended for dogs in tick-prevalent areas." },
+    { "id": "vax-dog-canine-influenza", "name": "Canine Influenza", "species": "dog", "required": false, "firstDoseWeeks": 8, "boosterIntervalMonths": 12, "description": "Protects against canine flu strains H3N2 and H3N8." }
+  ],
+  "cats": [
+    { "id": "vax-cat-rabies", "name": "Rabies", "species": "cat", "required": true, "firstDoseWeeks": 12, "boosterIntervalMonths": 12, "description": "Required by law. Essential for all cats." },
+    { "id": "vax-cat-fvrcp", "name": "FVRCP", "species": "cat", "required": true, "firstDoseWeeks": 6, "boosterIntervalMonths": 12, "description": "Core vaccine: feline viral rhinotracheitis, calicivirus, and panleukopenia." },
+    { "id": "vax-cat-felv", "name": "Feline Leukemia (FeLV)", "species": "cat", "required": false, "firstDoseWeeks": 8, "boosterIntervalMonths": 12, "description": "Recommended for outdoor cats or those in multi-cat households." },
+    { "id": "vax-cat-fiv", "name": "Feline Immunodeficiency Virus (FIV)", "species": "cat", "required": false, "firstDoseWeeks": 8, "boosterIntervalMonths": 12, "description": "For cats at high risk of fighting with infected cats." },
+    { "id": "vax-cat-chlamydia", "name": "Chlamydia", "species": "cat", "required": false, "firstDoseWeeks": 9, "boosterIntervalMonths": 12, "description": "Recommended for multi-cat environments with known chlamydia risk." }
+  ]
+}
