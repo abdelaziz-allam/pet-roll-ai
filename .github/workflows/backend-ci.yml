@@ -104,8 +104,9 @@ jobs:
             --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated \
+            --port 3000 \
             --service-account petroll-cloudrun@${{ env.PROJECT_ID }}.iam.gserviceaccount.com \
-            --set-env-vars "^||^NODE_ENV=production||PORT=3000||GCP_PROJECT_ID=${{ env.PROJECT_ID }}||CORS_ORIGINS=https://admin.petroll.site,https://petroll.site" \
+            --set-env-vars "^||^NODE_ENV=production||GCP_PROJECT_ID=${{ env.PROJECT_ID }}||CORS_ORIGINS=https://admin.petroll.site,https://petroll.site" \
             --set-secrets "JWT_SECRET=jwt-secret:latest" \
             --min-instances 0 \
             --max-instances 2 \
