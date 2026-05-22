@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, Form, Input, Button, Alert, Typography, Space, Divider } from 'antd';
 import { MailOutlined, LockOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useAuth } from '@/hooks/useAuth';
+import { api } from '@/services/api';
 
 const { Title, Text, Link } = Typography;
 
@@ -42,13 +43,7 @@ const LoginPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/v1/admin-auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: values.email }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Request failed');
+      const data = await api.post<{ message: string }>('/admin-auth/forgot-password', { email: values.email });
       setSuccessMsg(data.message);
       setView('reset-sent');
     } catch (err: any) {

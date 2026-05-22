@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { api } from '@/services/api';
 
 export interface AdminUser {
   id: string;
@@ -33,13 +34,7 @@ export function useAuth(): AuthState {
     const token = localStorage.getItem(TOKEN_KEY);
     if (token && !user) {
       setLoading(true);
-      fetch('/api/v1/admin-auth/me', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error('Unauthorized');
-          return res.json();
-        })
+      api.get<AdminUser>('/admin-auth/me')
         .then((data) => {
           setUser(data);
           localStorage.setItem(USER_KEY, JSON.stringify(data));
@@ -57,18 +52,10 @@ export function useAuth(): AuthState {
   const login = useCallback(async (email: string, password: string) => {
     setLoading(true);
     try {
-      const res = await fetch('/api/v1/admin-auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || 'Login failed');
-      }
-
-      const data = await res.json();
+      const data = await api.post<{ user: AdminUser; accessToken: string; refreshToken: string }>(
+        '/admin-auth/login',
+        { email, password }
+      );
       localStorage.setItem(TOKEN_KEY, data.accessToken);
       localStorage.setItem(REFRESH_KEY, data.refreshToken);
       localStorage.setItem(USER_KEY, JSON.stringify(data.user));
