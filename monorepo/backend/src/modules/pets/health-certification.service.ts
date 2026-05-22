@@ -73,7 +73,7 @@ class HealthCertificationService {
 
   // Admin methods
   async getAllCertifications(filters?: { status?: string; species?: string; country?: string; city?: string }) {
-    let query: FirebaseFirestore.Query = this.certRef;
+    let query: any = this.certRef;
     if (filters?.status) {
       query = query.where('status', '==', filters.status);
     }
