@@ -19,8 +19,6 @@ provider "google" {
   region  = var.region
 }
 
-# ─── Variables ───────────────────────────────────────────────────────────────
-
 variable "project_id" {
   description = "GCP Project ID"
   default     = "petroll-production"
@@ -41,7 +39,7 @@ variable "domain" {
   default     = "petroll.site"
 }
 
-# ─── Enable Required APIs (Free or minimal cost) ────────────────────────────
+# ─── Enable Required APIs ───────────────────────────────────────────────────
 
 resource "google_project_service" "apis" {
   for_each = toset([
@@ -60,7 +58,7 @@ resource "google_project_service" "apis" {
   disable_on_destroy = false
 }
 
-# ─── Artifact Registry (Store Docker images) ─────────────────────────────────
+# ─── Artifact Registry ──────────────────────────────────────────────────────
 
 resource "google_artifact_registry_repository" "docker" {
   location      = var.region
@@ -71,7 +69,7 @@ resource "google_artifact_registry_repository" "docker" {
   depends_on = [google_project_service.apis["artifactregistry.googleapis.com"]]
 }
 
-# ─── Firestore Database (Free tier: 1GB storage, 50K reads/day) ──────────────
+# ─── Firestore Database ─────────────────────────────────────────────────────
 
 resource "google_firestore_database" "main" {
   project     = var.project_id
@@ -82,7 +80,7 @@ resource "google_firestore_database" "main" {
   depends_on = [google_project_service.apis["firestore.googleapis.com"]]
 }
 
-# ─── Secret Manager (6 active secrets free) ──────────────────────────────────
+# ─── Secret Manager ─────────────────────────────────────────────────────────
 
 resource "google_secret_manager_secret" "jwt_secret" {
   secret_id = "jwt-secret"
@@ -121,216 +119,14 @@ resource "google_project_iam_member" "cloud_run_secrets" {
   member  = "serviceAccount:${google_service_account.cloud_run.email}"
 }
 
-# ─── Cloud Run: Backend API (Free tier: 2M requests/month) ───────────────────
-
-resource "google_cloud_run_v2_service" "backend" {
-  name     = "petroll-api"
-  location = var.region
-  ingress  = "INGRESS_TRAFFIC_ALL"
-
-  template {
-    service_account = google_service_account.cloud_run.email
-
-    scaling {
-      min_instance_count = 0
-      max_instance_count = 2
-    }
-
-    containers {
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/petroll-images/backend:latest"
-
-      ports {
-        container_port = 3000
-      }
-
-      resources {
-        limits = {
-          cpu    = "1"
-          memory = "512Mi"
-        }
-        cpu_idle          = true
-        startup_cpu_boost = true
-      }
-
-      env {
-        name  = "NODE_ENV"
-        value = "production"
-      }
-      env {
-        name  = "PORT"
-        value = "3000"
-      }
-      env {
-        name  = "GCP_PROJECT_ID"
-        value = var.project_id
-      }
-      env {
-        name = "JWT_SECRET"
-        value_source {
-          secret_key_ref {
-            secret  = google_secret_manager_secret.jwt_secret.secret_id
-            version = "latest"
-          }
-        }
-      }
-      env {
-        name  = "CORS_ORIGINS"
-        value = "https://admin.${var.domain},https://${var.domain}"
-      }
-    }
-  }
-
-  depends_on = [
-    google_project_service.apis["run.googleapis.com"],
-    google_artifact_registry_repository.docker,
-  ]
-}
-
-resource "google_cloud_run_v2_service_iam_member" "backend_public" {
-  project  = var.project_id
-  location = var.region
-  name     = google_cloud_run_v2_service.backend.name
-  role     = "roles/run.invoker"
-  member   = "allUsers"
-}
-
-# ─── Cloud Run: Admin Portal (Static site via Cloud Run) ─────────────────────
-
-resource "google_cloud_run_v2_service" "admin" {
-  name     = "petroll-admin"
-  location = var.region
-  ingress  = "INGRESS_TRAFFIC_ALL"
-
-  template {
-    scaling {
-      min_instance_count = 0
-      max_instance_count = 1
-    }
-
-    containers {
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/petroll-images/admin:latest"
-
-      ports {
-        container_port = 80
-      }
-
-      resources {
-        limits = {
-          cpu    = "1"
-          memory = "256Mi"
-        }
-        cpu_idle = true
-      }
-    }
-  }
-
-  depends_on = [
-    google_project_service.apis["run.googleapis.com"],
-    google_artifact_registry_repository.docker,
-  ]
-}
-
-resource "google_cloud_run_v2_service_iam_member" "admin_public" {
-  project  = var.project_id
-  location = var.region
-  name     = google_cloud_run_v2_service.admin.name
-  role     = "roles/run.invoker"
-  member   = "allUsers"
-}
-
-# ─── Cloud Run: Landing Page ─────────────────────────────────────────────────
-
-resource "google_cloud_run_v2_service" "landing" {
-  name     = "petroll-landing"
-  location = var.region
-  ingress  = "INGRESS_TRAFFIC_ALL"
-
-  template {
-    scaling {
-      min_instance_count = 0
-      max_instance_count = 1
-    }
-
-    containers {
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/petroll-images/landing:latest"
-
-      ports {
-        container_port = 80
-      }
-
-      resources {
-        limits = {
-          cpu    = "1"
-          memory = "128Mi"
-        }
-        cpu_idle = true
-      }
-    }
-  }
-
-  depends_on = [
-    google_project_service.apis["run.googleapis.com"],
-    google_artifact_registry_repository.docker,
-  ]
-}
-
-resource "google_cloud_run_v2_service_iam_member" "landing_public" {
-  project  = var.project_id
-  location = var.region
-  name     = google_cloud_run_v2_service.landing.name
-  role     = "roles/run.invoker"
-  member   = "allUsers"
-}
-
-# ─── Service Account for GitHub Actions CI/CD ────────────────────────────────
-
-resource "google_service_account" "github_actions" {
-  account_id   = "github-actions-deploy"
-  display_name = "GitHub Actions Deployer"
-}
-
-resource "google_project_iam_member" "github_actions_roles" {
-  for_each = toset([
-    "roles/run.admin",
-    "roles/artifactregistry.writer",
-    "roles/iam.serviceAccountUser",
-    "roles/cloudbuild.builds.editor",
-    "roles/storage.admin",
-  ])
-
-  project = var.project_id
-  role    = each.value
-  member  = "serviceAccount:${google_service_account.github_actions.email}"
-}
-
-resource "google_service_account_key" "github_actions_key" {
-  service_account_id = google_service_account.github_actions.name
-}
-
-# ─── Outputs ─────────────────────────────────────────────────────────────────
-
-output "backend_url" {
-  value       = google_cloud_run_v2_service.backend.uri
-  description = "Backend API URL"
-}
-
-output "admin_url" {
-  value       = google_cloud_run_v2_service.admin.uri
-  description = "Admin Portal URL"
-}
-
-output "github_actions_sa_key" {
-  value       = google_service_account_key.github_actions_key.private_key
-  description = "GitHub Actions Service Account Key (base64 encoded)"
-  sensitive   = true
-}
-
-output "landing_url" {
-  value       = google_cloud_run_v2_service.landing.uri
-  description = "Landing Page URL"
-}
+# ─── Outputs ────────────────────────────────────────────────────────────────
 
 output "artifact_registry" {
   value       = "${var.region}-docker.pkg.dev/${var.project_id}/petroll-images"
   description = "Artifact Registry path"
+}
+
+output "region" {
+  value       = var.region
+  description = "Deployment region"
 }
