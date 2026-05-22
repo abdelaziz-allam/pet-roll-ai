@@ -99,83 +99,31 @@ export async function buildApp() {
 
   app.get('/health', { schema: { tags: ['Health'], security: [] } }, async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
 
-  function withTag(tag: string) {
+  function taggedRoutes(routes: (fastify: FastifyInstance) => Promise<void>, tag: string) {
     return async (instance: FastifyInstance) => {
       instance.addHook('onRoute', (routeOptions) => {
         if (!routeOptions.schema) routeOptions.schema = {};
         if (!(routeOptions.schema as any).tags) (routeOptions.schema as any).tags = [tag];
       });
+      await routes(instance);
     };
   }
 
   await app.register(async (api) => {
-    await api.register(withTag('Auth'));
-    await api.register(authRoutes, { prefix: '/auth' });
-  }, { prefix: '/api/v1' });
-
-  await app.register(async (api) => {
-    await api.register(withTag('Pets'));
-    await api.register(petsRoutes, { prefix: '/pets' });
-  }, { prefix: '/api/v1' });
-
-  await app.register(async (api) => {
-    await api.register(withTag('Health Records'));
-    await api.register(healthRoutes, { prefix: '' });
-  }, { prefix: '/api/v1' });
-
-  await app.register(async (api) => {
-    await api.register(withTag('Vaccinations'));
-    await api.register(vaccinationRoutes, { prefix: '' });
-  }, { prefix: '/api/v1' });
-
-  await app.register(async (api) => {
-    await api.register(withTag('Pregnancy'));
-    await api.register(pregnancyRoutes, { prefix: '' });
-  }, { prefix: '/api/v1' });
-
-  await app.register(async (api) => {
-    await api.register(withTag('Schedules'));
-    await api.register(schedulesRoutes, { prefix: '' });
-  }, { prefix: '/api/v1' });
-
-  await app.register(async (api) => {
-    await api.register(withTag('Mating'));
-    await api.register(matingRoutes, { prefix: '/mating' });
-  }, { prefix: '/api/v1' });
-
-  await app.register(async (api) => {
-    await api.register(withTag('Chat'));
-    await api.register(chatRoutes, { prefix: '/chat' });
-  }, { prefix: '/api/v1' });
-
-  await app.register(async (api) => {
-    await api.register(withTag('Notifications'));
-    await api.register(notificationsRoutes, { prefix: '/notifications' });
-  }, { prefix: '/api/v1' });
-
-  await app.register(async (api) => {
-    await api.register(withTag('Reports'));
-    await api.register(reportsRoutes, { prefix: '' });
-  }, { prefix: '/api/v1' });
-
-  await app.register(async (api) => {
-    await api.register(withTag('Admin'));
-    await api.register(adminRoutes, { prefix: '/admin' });
-  }, { prefix: '/api/v1' });
-
-  await app.register(async (api) => {
-    await api.register(withTag('Admin Auth'));
-    await api.register(adminAuthRoutes, { prefix: '/admin-auth' });
-  }, { prefix: '/api/v1' });
-
-  await app.register(async (api) => {
-    await api.register(withTag('Cron'));
-    await api.register(cronRoutes, { prefix: '/cron' });
-  }, { prefix: '/api/v1' });
-
-  await app.register(async (api) => {
-    await api.register(withTag('Verification'));
-    await api.register(verificationRoutes, { prefix: '/verification' });
+    await api.register(taggedRoutes(authRoutes, 'Auth'), { prefix: '/auth' });
+    await api.register(taggedRoutes(petsRoutes, 'Pets'), { prefix: '/pets' });
+    await api.register(taggedRoutes(healthRoutes, 'Health Records'), { prefix: '' });
+    await api.register(taggedRoutes(vaccinationRoutes, 'Vaccinations'), { prefix: '' });
+    await api.register(taggedRoutes(pregnancyRoutes, 'Pregnancy'), { prefix: '' });
+    await api.register(taggedRoutes(schedulesRoutes, 'Schedules'), { prefix: '' });
+    await api.register(taggedRoutes(matingRoutes, 'Mating'), { prefix: '/mating' });
+    await api.register(taggedRoutes(chatRoutes, 'Chat'), { prefix: '/chat' });
+    await api.register(taggedRoutes(notificationsRoutes, 'Notifications'), { prefix: '/notifications' });
+    await api.register(taggedRoutes(reportsRoutes, 'Reports'), { prefix: '' });
+    await api.register(taggedRoutes(adminRoutes, 'Admin'), { prefix: '/admin' });
+    await api.register(taggedRoutes(adminAuthRoutes, 'Admin Auth'), { prefix: '/admin-auth' });
+    await api.register(taggedRoutes(cronRoutes, 'Cron'), { prefix: '/cron' });
+    await api.register(taggedRoutes(verificationRoutes, 'Verification'), { prefix: '/verification' });
   }, { prefix: '/api/v1' });
 
   await seedInitialData();
