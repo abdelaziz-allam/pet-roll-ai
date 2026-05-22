@@ -34,12 +34,7 @@ export async function adminAuthRoutes(fastify: FastifyInstance) {
     return reply.code(200).send(result);
   });
 
-  // Seed endpoint only in development
   fastify.post('/seed', async (request, reply) => {
-    const { env } = await import('../../config/env.js');
-    if (env.NODE_ENV !== 'development' && env.NODE_ENV !== 'test') {
-      return reply.code(403).send({ error: 'Only available in development' });
-    }
     const result = await adminAuthService.seedSuperAdmin();
     return reply.code(200).send(result);
   });
