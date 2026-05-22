@@ -36,7 +36,9 @@ export async function buildApp() {
         description: 'Complete API for the PET Roll platform — pet health management, mating, admin portal, and more.',
         version: '1.0.0',
       },
-      servers: [{ url: `http://localhost:${env.PORT}`, description: 'Local development' }],
+      servers: env.NODE_ENV === 'production'
+        ? [{ url: '/api/v1', description: 'Production' }]
+        : [{ url: `http://localhost:${env.PORT}/api/v1`, description: 'Local development' }],
       components: {
         securitySchemes: {
           BearerAuth: {
