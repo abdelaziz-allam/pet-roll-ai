@@ -24,7 +24,7 @@ export async function petsRoutes(fastify: FastifyInstance) {
 
   fastify.get('/breeds', async (request, reply) => {
     const { species, search } = request.query as { species?: string; search?: string };
-    let query: FirebaseFirestore.Query = db.collection('breeds');
+    let query: any = db.collection('breeds');
 
     if (species) {
       query = query.where('species', '==', species);

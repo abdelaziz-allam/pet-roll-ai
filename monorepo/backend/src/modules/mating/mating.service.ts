@@ -67,7 +67,7 @@ export class MatingService {
   }
 
   async browseListings(filters: any, page = 1, limit = 20) {
-    let query: FirebaseFirestore.Query = this.listingsRef.where('status', '==', 'active');
+    let query: any = this.listingsRef.where('status', '==', 'active');
 
     if (filters.species) {
       query = query.where('species', '==', filters.species);
