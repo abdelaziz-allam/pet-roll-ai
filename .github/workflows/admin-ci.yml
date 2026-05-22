@@ -79,7 +79,7 @@ jobs:
           docker build \
             -f ../docker/Dockerfile.admin \
             --target production \
-            --build-arg VITE_API_URL=$API_URL \
+            --build-arg "VITE_API_URL=${API_URL}" \
             -t $IMAGE \
             -t $IMAGE_LATEST \
             .
