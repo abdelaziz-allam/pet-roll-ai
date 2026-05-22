@@ -142,6 +142,7 @@ jobs:
   deploy-admin:
     runs-on: ubuntu-latest
     needs: [deploy-backend]
+    if: always() && needs.deploy-backend.result == 'success'
     permissions:
       contents: read
       id-token: write
