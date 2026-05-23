@@ -8,14 +8,47 @@ export async function matingRoutes(fastify: FastifyInstance) {
   fastify.addHook('preHandler', requireAuth);
 
   fastify.post('/listings', async (request, reply) => {
-    const userDoc = await db.collection('users').doc(request.user!.uid).get();
-    if (!userDoc.exists || !userDoc.data()?.isVerifiedBreeder) {
-      return reply.code(403).send({ error: 'Only verified breeders can create mating listings' });
+    const body = createListingSchema.parse(request.body);
+
+    const petDoc = await db.collection('pets').doc(body.petId).get();
+    if (!petDoc.exists || petDoc.data()!.ownerId !== request.user!.uid) {
+      return reply.code(404).send({ error: 'Pet not found' });
+    }
+    if (!petDoc.data()!.isAvailableForMating) {
+      return reply.code(400).send({ error: 'Pet must be marked as available for mating' });
     }
 
-    const body = createListingSchema.parse(request.body);
+    const pregSnap = await db.collection('pregnancies')
+      .where('petId', '==', body.petId)
+      .where('status', '==', 'active')
+      .limit(1)
+      .get();
+    if (!pregSnap.empty) {
+      return reply.code(400).send({ error: 'Cannot create listing for a pregnant pet' });
+    }
+
     const listing = await matingService.createListing(request.user!.uid, body);
     return reply.code(201).send(listing);
+  });
+
+  fastify.get('/eligible-pets', async (request, reply) => {
+    const petsSnap = await db.collection('pets')
+      .where('ownerId', '==', request.user!.uid)
+      .where('isAvailableForMating', '==', true)
+      .get();
+
+    const eligible: any[] = [];
+    for (const doc of petsSnap.docs) {
+      const pregSnap = await db.collection('pregnancies')
+        .where('petId', '==', doc.id)
+        .where('status', '==', 'active')
+        .limit(1)
+        .get();
+      if (pregSnap.empty) {
+        eligible.push({ id: doc.id, ...doc.data() });
+      }
+    }
+    return reply.code(200).send(eligible);
   });
 
   fastify.get('/listings', async (request, reply) => {
@@ -57,6 +90,24 @@ export async function matingRoutes(fastify: FastifyInstance) {
 
   fastify.post('/requests', async (request, reply) => {
     const body = sendRequestSchema.parse(request.body);
+
+    const senderPetDoc = await db.collection('pets').doc(body.petId).get();
+    if (!senderPetDoc.exists || senderPetDoc.data()!.ownerId !== request.user!.uid) {
+      return reply.code(404).send({ error: 'Pet not found' });
+    }
+    if (!senderPetDoc.data()!.isAvailableForMating) {
+      return reply.code(400).send({ error: 'Pet must be marked as available for mating' });
+    }
+
+    const pregSnap = await db.collection('pregnancies')
+      .where('petId', '==', body.petId)
+      .where('status', '==', 'active')
+      .limit(1)
+      .get();
+    if (!pregSnap.empty) {
+      return reply.code(400).send({ error: 'Cannot send request with a pregnant pet' });
+    }
+
     const result = await matingService.sendRequest(request.user!.uid, body);
     return reply.code(201).send(result);
   });
