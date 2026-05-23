@@ -74,12 +74,12 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
     if (listingId.isEmpty) return;
 
     try {
-      final petsData = await ApiService().get('/pets?limit=50');
-      final pets = (petsData is Map ? petsData['data'] : petsData) as List? ?? [];
+      final petsData = await ApiService().get('/mating/eligible-pets');
+      final pets = petsData is List ? petsData : [];
       if (pets.isEmpty) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('You need to register a pet first'), backgroundColor: AppTheme.warning),
+            const SnackBar(content: Text('No eligible pets available for mating. Mark a pet as available for mating first.'), backgroundColor: AppTheme.warning),
           );
         }
         return;

@@ -50,6 +50,7 @@ export function seedPet(id: string, ownerId: string, overrides: Record<string, a
     dateOfBirth: '2022-01-15',
     weight: 30,
     microchipId: null,
+    isAvailableForMating: true,
     ownerId,
     photos: [],
     createdAt: new Date().toISOString(),

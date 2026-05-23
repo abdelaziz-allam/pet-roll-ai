@@ -179,6 +179,72 @@ describe('Mating API Integration', () => {
     });
   });
 
+  describe('GET /api/v1/mating/eligible-pets', () => {
+    it('returns pets marked as available for mating', async () => {
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/v1/mating/eligible-pets',
+        headers: { authorization: `Bearer ${token}` },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const body = res.json();
+      expect(Array.isArray(body)).toBe(true);
+      expect(body.length).toBe(1);
+      expect(body[0].id).toBe('pet-1');
+    });
+
+    it('excludes pets not marked as available for mating', async () => {
+      seedPet('pet-3', 'user-1', { name: 'Rex', isAvailableForMating: false });
+
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/v1/mating/eligible-pets',
+        headers: { authorization: `Bearer ${token}` },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const body = res.json();
+      const ids = body.map((p: any) => p.id);
+      expect(ids).not.toContain('pet-3');
+    });
+
+    it('excludes pregnant pets', async () => {
+      seedStore('pregnancies', 'preg-1', {
+        petId: 'pet-1',
+        status: 'active',
+        matingDate: '2024-01-01',
+      });
+
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/v1/mating/eligible-pets',
+        headers: { authorization: `Bearer ${token}` },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const body = res.json();
+      const ids = body.map((p: any) => p.id);
+      expect(ids).not.toContain('pet-1');
+    });
+
+    it('returns empty list when no pets are available', async () => {
+      clearStore();
+      seedUser('user-1', { email: 'john@test.com' });
+      seedPet('pet-1', 'user-1', { isAvailableForMating: false });
+
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/v1/mating/eligible-pets',
+        headers: { authorization: `Bearer ${token}` },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const body = res.json();
+      expect(body.length).toBe(0);
+    });
+  });
+
   describe('POST /api/v1/mating/requests', () => {
     it('sends a mating request', async () => {
       seedMatingListing('listing-1', 'user-2');
@@ -198,6 +264,63 @@ describe('Mating API Integration', () => {
       const body = res.json();
       expect(body.id).toBeDefined();
       expect(body.status).toBe('pending');
+    });
+
+    it('rejects request when pet is not marked as available for mating', async () => {
+      seedPet('pet-unavailable', 'user-1', { name: 'Shadow', isAvailableForMating: false });
+      seedMatingListing('listing-1', 'user-2');
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/mating/requests',
+        headers: { authorization: `Bearer ${token}` },
+        payload: {
+          listingId: 'listing-1',
+          petId: 'pet-unavailable',
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.json().error).toContain('available for mating');
+    });
+
+    it('rejects request when pet is pregnant', async () => {
+      seedMatingListing('listing-1', 'user-2');
+      seedStore('pregnancies', 'preg-1', {
+        petId: 'pet-1',
+        status: 'active',
+        matingDate: '2024-01-01',
+      });
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/mating/requests',
+        headers: { authorization: `Bearer ${token}` },
+        payload: {
+          listingId: 'listing-1',
+          petId: 'pet-1',
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.json().error).toContain('pregnant');
+    });
+
+    it('rejects request with pet not owned by sender', async () => {
+      seedMatingListing('listing-1', 'user-2');
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/mating/requests',
+        headers: { authorization: `Bearer ${token}` },
+        payload: {
+          listingId: 'listing-1',
+          petId: 'pet-2',
+        },
+      });
+
+      expect(res.statusCode).toBe(404);
+      expect(res.json().error).toContain('Pet not found');
     });
   });
 
