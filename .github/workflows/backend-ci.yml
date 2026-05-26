@@ -64,14 +64,13 @@ jobs:
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
       - name: Build and Push Docker image
-        working-directory: monorepo/backend
+        working-directory: monorepo
         run: |
           IMAGE=${{ env.REGISTRY }}/backend:${{ github.sha }}
           IMAGE_LATEST=${{ env.REGISTRY }}/backend:latest
 
           docker build \
-            -f ../docker/Dockerfile.backend \
-            --target production \
+            -f docker/Dockerfile.backend \
             -t $IMAGE \
             -t $IMAGE_LATEST \
             .
@@ -103,7 +102,7 @@ jobs:
             --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated \
-            --port 3000 \
+            --port 8080 \
             --service-account petroll-cloudrun@${{ env.PROJECT_ID }}.iam.gserviceaccount.com \
             --set-env-vars "^||^NODE_ENV=production||GCP_PROJECT_ID=${{ env.PROJECT_ID }}||FIREBASE_PROJECT_ID=${{ env.PROJECT_ID }}||CORS_ORIGINS=https://admin.petfolioo.com,https://petfolioo.com,https://petroll-admin-poxnhad27q-lz.a.run.app" \
             --set-secrets "JWT_SECRET=jwt-secret:latest" \

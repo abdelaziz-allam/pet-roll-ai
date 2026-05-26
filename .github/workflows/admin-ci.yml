@@ -64,18 +64,14 @@ jobs:
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
       - name: Build and Push Docker image
-        working-directory: monorepo/admin
+        working-directory: monorepo
         run: |
           IMAGE=${{ env.REGISTRY }}/admin:${{ github.sha }}
           IMAGE_LATEST=${{ env.REGISTRY }}/admin:latest
 
-          API_URL="https://api.petfolioo.com/api/v1"
-          echo "Building admin with API_URL=${API_URL}"
-
           docker build \
-            -f ../docker/Dockerfile.admin \
-            --target production \
-            --build-arg "VITE_API_URL=${API_URL}" \
+            -f docker/Dockerfile.admin \
+            --build-arg "VITE_API_URL=https://api.petfolioo.com/api/v1" \
             -t $IMAGE \
             -t $IMAGE_LATEST \
             .
@@ -107,7 +103,7 @@ jobs:
             --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated \
-            --port 80 \
+            --port 8080 \
             --min-instances 0 \
             --max-instances 1 \
             --memory 256Mi \
