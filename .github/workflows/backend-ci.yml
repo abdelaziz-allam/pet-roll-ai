@@ -86,7 +86,6 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    environment: production
 
     steps:
       - id: auth
