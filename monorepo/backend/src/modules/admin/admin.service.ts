@@ -944,7 +944,7 @@ export class AdminService {
   private defaultSettings = {
     general: {
       appName: 'PET Roll',
-      supportEmail: 'support@petroll.com',
+      supportEmail: 'support@petfolioo.com',
       defaultLanguage: 'en',
       maintenanceMode: false,
     },

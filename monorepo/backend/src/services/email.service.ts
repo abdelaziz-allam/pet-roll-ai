@@ -51,7 +51,7 @@ class EmailService {
 
     try {
       await this.transporter.sendMail({
-        from: `"PET Roll" <${process.env.SMTP_FROM || 'noreply@petroll.com'}>`,
+        from: `"PET Roll" <${process.env.SMTP_FROM || 'noreply@petfolioo.com'}>`,
         to: recipients.join(', '),
         subject: `💕 Congratulations! ${data.senderPetName} & ${data.receiverPetName} are matched! 💕`,
         html,
