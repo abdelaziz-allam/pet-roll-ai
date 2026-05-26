@@ -2,36 +2,60 @@ import { z } from 'zod';
 
 export const createListingSchema = z.object({
   petId: z.string().min(1),
-  species: z.enum(['dog', 'cat']),
-  breed: z.string().min(1),
-  gender: z.enum(['male', 'female']),
-  age: z.number().positive(),
-  description: z.string().max(1000).optional(),
-  healthCertified: z.boolean().default(false),
+  description: z.string().max(500).optional(),
   location: z.object({
-    city: z.string(),
-    country: z.string(),
+    city: z.string().min(1),
+    country: z.string().min(1),
+    coordinates: z.object({
+      lat: z.number(),
+      lng: z.number(),
+    }).optional(),
+  }),
+  preferences: z.object({
+    minAge: z.number().min(0).optional(),
+    maxAge: z.number().min(0).optional(),
+    preferredBreeds: z.array(z.string()).optional(),
+  }).optional(),
+});
+
+export const updateListingSchema = z.object({
+  description: z.string().max(500).optional(),
+  location: z.object({
+    city: z.string().min(1),
+    country: z.string().min(1),
     coordinates: z.object({
       lat: z.number(),
       lng: z.number(),
     }).optional(),
   }).optional(),
-  photos: z.array(z.string().url()).optional(),
-  price: z.number().min(0).optional(),
-  requirements: z.string().max(500).optional(),
+  preferences: z.object({
+    minAge: z.number().min(0).optional(),
+    maxAge: z.number().min(0).optional(),
+    preferredBreeds: z.array(z.string()).optional(),
+  }).optional(),
+  status: z.enum(['active', 'paused', 'removed']).optional(),
 });
 
-export const updateListingSchema = createListingSchema.partial();
-
-export const sendRequestSchema = z.object({
+export const createMatchRequestSchema = z.object({
   listingId: z.string().min(1),
-  petId: z.string().min(1),
-  message: z.string().max(500).optional(),
+  message: z.string().max(300).optional(),
 });
 
-export const respondRequestSchema = z.object({
+export const updateMatchRequestSchema = z.object({
   status: z.enum(['accepted', 'rejected']),
 });
 
+export const browseListingsQuerySchema = z.object({
+  species: z.string().optional(),
+  breed: z.string().optional(),
+  city: z.string().optional(),
+  country: z.string().optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+
 export type CreateListingInput = z.infer<typeof createListingSchema>;
-export type SendRequestInput = z.infer<typeof sendRequestSchema>;
+export type UpdateListingInput = z.infer<typeof updateListingSchema>;
+export type CreateMatchRequestInput = z.infer<typeof createMatchRequestSchema>;
+export type UpdateMatchRequestInput = z.infer<typeof updateMatchRequestSchema>;
+export type BrowseListingsQuery = z.infer<typeof browseListingsQuerySchema>;

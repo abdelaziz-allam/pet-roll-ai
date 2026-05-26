@@ -1,71 +1,157 @@
-import { FastifyInstance } from 'fastify';
-import { db, FieldValue, storage } from '../../config/firebase';
-import { requireAuth } from '../../middleware/require-auth';
+import type { FastifyInstance } from 'fastify';
+import { requireAuth } from '../../middleware/require-auth.js';
+import { db } from '../../config/firebase.js';
+import { uploadImage, getSignedUrl } from '../../utils/image-upload.js';
+import { generateHealthReport } from '../../utils/pdf-generator.js';
+import { generateReportSchema } from './reports.schema.js';
 
-export async function reportsRoutes(fastify: FastifyInstance) {
-  fastify.addHook('preHandler', requireAuth);
-
-  fastify.post('/pets/:petId/reports/health', async (request, reply) => {
+export async function reportsRoutes(app: FastifyInstance) {
+  // POST /pets/:petId/reports/health - generate health PDF
+  app.post('/pets/:petId/reports/health', { preHandler: [requireAuth] }, async (request, reply) => {
     const { petId } = request.params as { petId: string };
     const uid = request.user!.uid;
 
-    const pet = await db.collection('pets').doc(petId).get();
-    if (!pet.exists || pet.data()!.ownerId !== uid) {
-      return reply.code(404).send({ error: 'Pet not found' });
+    const body = generateReportSchema.parse({ ...request.body as object, petId });
+
+    // Verify pet ownership
+    const petDoc = await db.collection('pets').doc(petId).get();
+    if (!petDoc.exists) {
+      return reply.status(404).send({ message: 'Pet not found' });
+    }
+    const petData = petDoc.data()!;
+    if (petData.ownerId !== uid) {
+      return reply.status(403).send({ message: 'Access denied' });
+    }
+    const pet = { id: petDoc.id, ...petData } as { id: string; name: string; [key: string]: unknown };
+
+    // Fetch health records
+    let healthQuery = db
+      .collection('pets')
+      .doc(petId)
+      .collection('health_records')
+      .orderBy('date', 'desc');
+
+    if (body.dateRange) {
+      healthQuery = healthQuery
+        .where('date', '>=', body.dateRange.from)
+        .where('date', '<=', body.dateRange.to);
     }
 
-    const healthRecords = await db.collection('health_records')
-      .where('petId', '==', petId)
-      .orderBy('date', 'desc')
-      .limit(50)
-      .get();
+    const healthSnap = await healthQuery.get();
+    const healthRecords = healthSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
-    const vaccinations = await db.collection('vaccinations')
-      .where('petId', '==', petId)
-      .orderBy('dateAdministered', 'desc')
-      .get();
+    // Fetch vaccinations
+    let vaccQuery = db
+      .collection('pets')
+      .doc(petId)
+      .collection('vaccinations')
+      .orderBy('dateAdministered', 'desc');
 
-    const reportData = {
-      petId,
-      ownerId: uid,
-      type: 'health_summary',
-      status: 'generated',
-      petName: pet.data()!.name,
-      recordCount: healthRecords.size,
-      vaccinationCount: vaccinations.size,
+    if (body.dateRange) {
+      vaccQuery = vaccQuery
+        .where('dateAdministered', '>=', body.dateRange.from)
+        .where('dateAdministered', '<=', body.dateRange.to);
+    }
+
+    const vaccSnap = await vaccQuery.get();
+    const vaccinations = vaccSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+    // Generate PDF
+    const pdfBuffer = await generateHealthReport(pet, healthRecords, vaccinations);
+
+    // Upload to Cloud Storage
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `${pet.name}_health_report_${timestamp}.pdf`;
+    const destination = `reports/${uid}`;
+
+    const uploadResult = await uploadImage(pdfBuffer, destination, 'application/pdf');
+
+    // Save report metadata
+    const reportRef = await db
+      .collection('pets')
+      .doc(petId)
+      .collection('reports')
+      .add({
+        type: body.type,
+        fileName: filename,
+        storagePath: uploadResult.path,
+        downloadUrl: uploadResult.url,
+        dateRange: body.dateRange ?? null,
+        generatedAt: new Date().toISOString(),
+        userId: uid,
+      });
+
+    return reply.status(201).send({
+      id: reportRef.id,
+      fileName: filename,
+      downloadUrl: uploadResult.url,
       generatedAt: new Date().toISOString(),
-      createdAt: FieldValue.serverTimestamp(),
-    };
-
-    const reportDoc = await db.collection('reports').add(reportData);
-    return reply.code(201).send({ id: reportDoc.id, ...reportData });
+    });
   });
 
-  fastify.get('/pets/:petId/reports', async (request, reply) => {
+  // GET /pets/:petId/reports - list generated reports
+  app.get('/pets/:petId/reports', { preHandler: [requireAuth] }, async (request, reply) => {
     const { petId } = request.params as { petId: string };
-    const snapshot = await db.collection('reports')
-      .where('petId', '==', petId)
-      .where('ownerId', '==', request.user!.uid)
-      .orderBy('createdAt', 'desc')
-      .get();
+    const uid = request.user!.uid;
 
-    const reports = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    return reply.code(200).send(reports);
-  });
-
-  fastify.get('/reports/:reportId/download', async (request, reply) => {
-    const { reportId } = request.params as { reportId: string };
-    const doc = await db.collection('reports').doc(reportId).get();
-    if (!doc.exists || doc.data()!.ownerId !== request.user!.uid) {
-      return reply.code(404).send({ error: 'Report not found' });
+    // Verify pet ownership
+    const petDoc = await db.collection('pets').doc(petId).get();
+    if (!petDoc.exists) {
+      return reply.status(404).send({ message: 'Pet not found' });
+    }
+    if (petDoc.data()!.ownerId !== uid) {
+      return reply.status(403).send({ message: 'Access denied' });
     }
 
-    const filePath = `reports/${request.user!.uid}/${reportId}.pdf`;
-    const [url] = await storage.bucket().file(filePath).getSignedUrl({
-      action: 'read',
-      expires: Date.now() + 15 * 60 * 1000,
-    });
+    const reportsSnap = await db
+      .collection('pets')
+      .doc(petId)
+      .collection('reports')
+      .orderBy('generatedAt', 'desc')
+      .get();
 
-    return reply.code(200).send({ downloadUrl: url });
+    const reports = reportsSnap.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    return reply.send({ reports });
+  });
+
+  // GET /reports/:reportId/download - get signed download URL
+  app.get('/reports/:reportId/download', { preHandler: [requireAuth] }, async (request, reply) => {
+    const { reportId } = request.params as { reportId: string };
+    const uid = request.user!.uid;
+
+    // Search across all pets for this report
+    const petsSnap = await db.collection('pets').where('ownerId', '==', uid).get();
+
+    let reportData: FirebaseFirestore.DocumentData | null = null;
+
+    for (const petDoc of petsSnap.docs) {
+      const reportDoc = await db
+        .collection('pets')
+        .doc(petDoc.id)
+        .collection('reports')
+        .doc(reportId)
+        .get();
+
+      if (reportDoc.exists) {
+        reportData = reportDoc.data()!;
+        break;
+      }
+    }
+
+    if (!reportData) {
+      return reply.status(404).send({ message: 'Report not found' });
+    }
+
+    if (reportData.userId !== uid) {
+      return reply.status(403).send({ message: 'Access denied' });
+    }
+
+    const downloadUrl = await getSignedUrl(reportData.storagePath, 24);
+
+    return reply.send({ downloadUrl });
   });
 }

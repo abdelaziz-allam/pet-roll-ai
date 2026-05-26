@@ -1,0 +1,10 @@
+Initial release of PET Roll:
+- Pet profile management with photos
+- Vaccination tracking & smart reminders
+- Complete medical history timeline
+- Pregnancy tracking with milestones
+- Feeding & medication schedules
+- Mating marketplace for breeders
+- In-app chat
+- Push notifications
+- PDF health reports

@@ -1,62 +1,105 @@
-import { FastifyInstance } from 'fastify';
-import { db, FieldValue } from '../../config/firebase';
-import { requireAuth } from '../../middleware/require-auth';
+import type { FastifyInstance } from 'fastify';
+import { requireAuth } from '../../middleware/require-auth.js';
+import { db } from '../../config/firebase.js';
+import { FieldValue } from 'firebase-admin/firestore';
+import { paginationSchema } from '../../types/common.js';
+import { z } from 'zod';
 
-export async function notificationsRoutes(fastify: FastifyInstance) {
-  fastify.addHook('preHandler', requireAuth);
+const notificationQuerySchema = paginationSchema.extend({
+  read: z.enum(['true', 'false']).optional(),
+});
 
-  fastify.get('/', async (request, reply) => {
-    const { page = 1, limit = 20 } = request.query as any;
-    const offset = (+page - 1) * +limit;
+export async function notificationRoutes(app: FastifyInstance) {
+  // GET / - list user's notifications (paginated, ordered by createdAt desc, filter by read)
+  app.get('/', { preHandler: [requireAuth] }, async (request, reply) => {
+    const query = notificationQuerySchema.parse(request.query);
+    const { page, limit, read } = query;
+    const offset = (page - 1) * limit;
 
-    const snapshot = await db.collection('notifications')
+    let ref = db
+      .collection('notifications')
       .where('userId', '==', request.user!.uid)
-      .orderBy('createdAt', 'desc')
-      .offset(offset)
-      .limit(+limit)
-      .get();
+      .orderBy('createdAt', 'desc');
 
-    const notifications = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    return reply.code(200).send(notifications);
-  });
-
-  fastify.put('/:id/read', async (request, reply) => {
-    const { id } = request.params as { id: string };
-    const doc = await db.collection('notifications').doc(id).get();
-    if (!doc.exists || doc.data()!.userId !== request.user!.uid) {
-      return reply.code(404).send({ error: 'Notification not found' });
+    if (read !== undefined) {
+      ref = ref.where('read', '==', read === 'true');
     }
-    await db.collection('notifications').doc(id).update({ read: true, readAt: new Date().toISOString() });
-    return reply.code(200).send({ success: true });
+
+    // Get total count
+    const countSnap = await ref.count().get();
+    const total = countSnap.data().count;
+
+    // Get page
+    const snapshot = await ref.offset(offset).limit(limit).get();
+    const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+    return reply.send({
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasNext: page * limit < total,
+      },
+    });
   });
 
-  fastify.put('/read-all', async (request, reply) => {
-    const snapshot = await db.collection('notifications')
+  // PUT /:id/read - mark single notification as read
+  app.put('/:id/read', { preHandler: [requireAuth] }, async (request, reply) => {
+    const { id } = request.params as { id: string };
+
+    const docRef = db.collection('notifications').doc(id);
+    const doc = await docRef.get();
+
+    if (!doc.exists || doc.data()?.userId !== request.user!.uid) {
+      return reply.status(404).send({ message: 'Notification not found' });
+    }
+
+    await docRef.update({ read: true, readAt: FieldValue.serverTimestamp() });
+    return reply.send({ message: 'Notification marked as read' });
+  });
+
+  // PUT /read-all - mark all user's notifications as read
+  app.put('/read-all', { preHandler: [requireAuth] }, async (request, reply) => {
+    const snapshot = await db
+      .collection('notifications')
       .where('userId', '==', request.user!.uid)
       .where('read', '==', false)
       .get();
 
     const batch = db.batch();
     snapshot.docs.forEach((doc) => {
-      batch.update(doc.ref, { read: true, readAt: new Date().toISOString() });
+      batch.update(doc.ref, { read: true, readAt: FieldValue.serverTimestamp() });
     });
     await batch.commit();
-    return reply.code(200).send({ success: true, count: snapshot.size });
+
+    return reply.send({ message: 'All notifications marked as read', count: snapshot.size });
   });
 
-  fastify.post('/devices', async (request, reply) => {
+  // POST /devices - register FCM token
+  app.post('/devices', { preHandler: [requireAuth] }, async (request, reply) => {
     const { token } = request.body as { token: string };
+
+    if (!token) {
+      return reply.status(400).send({ message: 'token is required' });
+    }
+
     await db.collection('users').doc(request.user!.uid).update({
       fcmTokens: FieldValue.arrayUnion(token),
     });
-    return reply.code(200).send({ success: true });
+
+    return reply.status(201).send({ message: 'Device token registered' });
   });
 
-  fastify.delete('/devices/:token', async (request, reply) => {
+  // DELETE /devices/:token - unregister FCM token
+  app.delete('/devices/:token', { preHandler: [requireAuth] }, async (request, reply) => {
     const { token } = request.params as { token: string };
+
     await db.collection('users').doc(request.user!.uid).update({
       fcmTokens: FieldValue.arrayRemove(token),
     });
-    return reply.code(204).send();
+
+    return reply.send({ message: 'Device token removed' });
   });
 }

@@ -1,0 +1,2 @@
+json_key_file("/tmp/play-publisher-key.json")
+package_name("com.petroll.app")

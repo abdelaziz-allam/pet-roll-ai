@@ -1,0 +1,33 @@
+PET Roll is the complete pet health management app for dedicated pet owners and professional breeders.
+
+MULTI-PET PROFILES
+Create detailed profiles for all your pets — dogs, cats, birds, rabbits, and more. Track breed, weight, age, and upload photos to build a complete health portfolio.
+
+VACCINATION TRACKING & REMINDERS
+Never miss a vaccination again. Log every vaccine, get smart reminders before they're due, and keep a verified vaccination history ready for vet visits or travel.
+
+COMPLETE MEDICAL HISTORY
+Build a comprehensive health timeline for each pet. Record vet visits, diagnoses, surgeries, medications, and treatments — all organized chronologically.
+
+PREGNANCY TRACKING
+Monitor your pet's pregnancy week by week with milestone checklists, weight tracking, and care instructions tailored to each species. Know exactly what to expect at every stage.
+
+FEEDING & MEDICATION SCHEDULES
+Set daily feeding times and medication reminders. Mark completions, track missed doses, and ensure your pet's routine is never disrupted.
+
+MATING & BREEDING
+Browse verified breeders, search for compatible mates by breed and location, send match requests, and connect directly through in-app chat.
+
+HEALTH REPORTS
+Generate professional PDF health reports with your pet's complete medical history — perfect for vet referrals, travel documentation, or breeder records.
+
+PUSH NOTIFICATIONS
+Stay informed with timely reminders for vaccinations, medications, feeding times, and pregnancy milestones. Notifications work even when the app is closed.
+
+BREEDER VERIFICATION
+Apply for verified breeder status to build trust with potential matches. Verified breeders get a badge displayed on all their listings.
+
+BUILT FOR PET LOVERS
+Whether you have one family pet or manage a breeding program, PET Roll keeps all your pet health information organized, accessible, and shareable.
+
+Download PET Roll today and give your pets the health management they deserve.
