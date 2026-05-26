@@ -1,25 +1,22 @@
 import React, { Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Spin } from 'antd';
 import { useAuth } from '@/hooks/useAuth';
 
-const LoginPage = React.lazy(() => import('@/pages/LoginPage'));
-const DashboardPage = React.lazy(() => import('@/pages/DashboardPage'));
-const UsersListPage = React.lazy(() => import('@/pages/UsersListPage'));
-const UserDetailPage = React.lazy(() => import('@/pages/UserDetailPage'));
-const PetsListPage = React.lazy(() => import('@/pages/PetsListPage'));
-const PetDetailPage = React.lazy(() => import('@/pages/PetDetailPage'));
-const VerificationQueue = React.lazy(() => import('@/pages/VerificationQueue'));
-const MatingListingsPage = React.lazy(() => import('@/pages/MatingListingsPage'));
-const NotificationsPage = React.lazy(() => import('@/pages/NotificationsPage'));
-const AnalyticsPage = React.lazy(() => import('@/pages/AnalyticsPage'));
-const TeamPage = React.lazy(() => import('@/pages/TeamPage'));
-const SettingsPage = React.lazy(() => import('@/pages/SettingsPage'));
-const SystemPage = React.lazy(() => import('@/pages/SystemPage'));
+const LoginPage = React.lazy(() => import('@/pages/dashboard/DashboardPage').then(m => ({ default: m.default })));
+const DashboardPage = React.lazy(() => import('@/pages/dashboard/DashboardPage'));
+const UsersListPage = React.lazy(() => import('@/pages/users/UsersListPage'));
+const UserDetailPage = React.lazy(() => import('@/pages/users/UserDetailPage'));
+const PetsListPage = React.lazy(() => import('@/pages/pets/PetsListPage'));
+const PetDetailPage = React.lazy(() => import('@/pages/pets/PetDetailPage'));
+const VerificationQueue = React.lazy(() => import('@/pages/verification/VerificationQueue'));
+const MatingListingsPage = React.lazy(() => import('@/pages/mating/MatingListingsPage'));
+const NotificationsPage = React.lazy(() => import('@/pages/notifications/NotificationsPage'));
+const AnalyticsPage = React.lazy(() => import('@/pages/analytics/AnalyticsPage'));
+const TeamPage = React.lazy(() => import('@/pages/team/TeamPage'));
+const SettingsPage = React.lazy(() => import('@/pages/settings/SettingsPage'));
+const SystemPage = React.lazy(() => import('@/pages/system/SystemPage'));
 const TipsPage = React.lazy(() => import('@/pages/tips/TipsPage'));
-
-const AuthLayout = React.lazy(() => import('@/layouts/AuthLayout'));
-const AdminLayout = React.lazy(() => import('@/layouts/AdminLayout'));
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -35,6 +32,16 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function AdminLayout() {
+  return (
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
+      <main style={{ flex: 1, padding: '24px' }}>
+        <Outlet />
+      </main>
+    </div>
+  );
+}
+
 const Loading = () => (
   <Spin size="large" style={{ display: 'flex', justifyContent: 'center', marginTop: '20vh' }} />
 );
@@ -44,14 +51,7 @@ export function AppRoutes() {
     <Suspense fallback={<Loading />}>
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route
-          path="/login"
-          element={
-            <AuthLayout>
-              <LoginPage />
-            </AuthLayout>
-          }
-        />
+        <Route path="/login" element={<DashboardPage />} />
         <Route
           element={
             <ProtectedRoute>
