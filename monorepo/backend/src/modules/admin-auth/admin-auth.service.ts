@@ -367,7 +367,7 @@ export class AdminAuthService {
   }
 
   async seedSuperAdmin() {
-    const defaultPassword = 'P@tR0ll@2612210106022312';
+    const defaultPassword = 'P@tF0lioo@2612210106022312';
     const existing = await this.adminUsersRef
       .where('role', '==', 'super_admin')
       .limit(1)
@@ -385,7 +385,7 @@ export class AdminAuthService {
     const passwordHash = hashPassword(defaultPassword, salt);
 
     const adminData = {
-      email: 'admin@petroll.com',
+      email: 'admin@petfolioo.com',
       displayName: 'Super Admin',
       role: 'super_admin',
       status: 'active',
@@ -399,7 +399,7 @@ export class AdminAuthService {
     };
 
     await this.adminUsersRef.add(adminData);
-    return { message: 'Super admin seeded: admin@petroll.com', seeded: true };
+    return { message: 'Super admin seeded: admin@petfolioo.com', seeded: true };
   }
 
   private generateTokens(uid: string, email: string, type: string) {

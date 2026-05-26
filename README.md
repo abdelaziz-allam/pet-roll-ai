@@ -88,8 +88,8 @@ Then login at http://localhost:4173 with:
 
 | Field    | Value                |
 |----------|----------------------|
-| Email    | admin@petroll.com    |
-| Password | admin123456          |
+| Email    | admin@petfolioo.com    |
+| Password | P@tF0lioo@2612210106022312          |
 
 ---
 
@@ -242,7 +242,7 @@ The backend uses these environment variables (see `.env`):
 | SMTP_PORT                     | SMTP server port                     | 587                                        |
 | SMTP_USER                     | SMTP username                        | -                                          |
 | SMTP_PASS                     | SMTP password                        | -                                          |
-| SMTP_FROM                     | Email sender address                 | noreply@petroll.com                        |
+| SMTP_FROM                     | Email sender address                 | noreply@petfolioo.com                        |
 
 ---
 
@@ -268,7 +268,7 @@ Run these in order after starting the backend:
 
 | # | Endpoint                           | What it creates                                                |
 |---|-------------------------------------|----------------------------------------------------------------|
-| 1 | `POST /api/v1/admin-auth/seed`     | Super admin account (admin@petroll.com / admin123456)           |
+| 1 | `POST /api/v1/admin-auth/seed`     | Super admin account (admin@petfolioo.com / P@tF0lioo@2612210106022312)           |
 | 2 | `POST /api/v1/admin/locations/seed` | 195 countries with major cities (global coverage)              |
 | 3 | `POST /api/v1/admin/categories/seed` | 9 default pet categories (Dog, Cat, Bird, Horse, etc.)       |
 | 4 | `POST /api/v1/admin/seed-data`     | Sample app users + pets with photos, locations, and health data |
@@ -284,7 +284,7 @@ curl -X POST http://localhost:3000/api/v1/admin-auth/seed
 # 2. Login to get token
 TOKEN=$(curl -s -X POST http://localhost:3000/api/v1/admin-auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@petroll.com","password":"admin123456"}' | jq -r '.accessToken')
+  -d '{"email":"admin@petfolioo.com","password":"P@tF0lioo@2612210106022312"}' | jq -r '.accessToken')
 
 # 3. Seed all data
 curl -X POST http://localhost:3000/api/v1/admin/locations/seed -H "Authorization: Bearer $TOKEN"
