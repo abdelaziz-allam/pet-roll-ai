@@ -3,9 +3,10 @@ name: Deploy Admin Portal
 on:
   push:
     branches: [main]
-    paths: ['monorepo/admin/**']
+    paths: ['monorepo/admin/**', '.github/workflows/admin-deploy.yml']
   pull_request:
     paths: ['monorepo/admin/**']
+  workflow_dispatch:
 
 env:
   GCP_PROJECT_ID: petroll-production

@@ -3,9 +3,10 @@ name: Deploy Backend
 on:
   push:
     branches: [main]
-    paths: ['monorepo/backend/**']
+    paths: ['monorepo/backend/**', '.github/workflows/backend-deploy.yml']
   pull_request:
     paths: ['monorepo/backend/**']
+  workflow_dispatch:
 
 env:
   GCP_PROJECT_ID: petroll-production
@@ -36,9 +37,6 @@ jobs:
       - name: Run tests
         working-directory: monorepo/backend
         run: npm test || true
-        env:
-          NODE_ENV: test
-          FIRESTORE_EMULATOR_HOST: localhost:8080
 
   deploy:
     needs: test
