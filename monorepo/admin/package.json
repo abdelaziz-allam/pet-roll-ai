@@ -1,7 +1,7 @@
 {
   "name": "petroll-admin",
-  "version": "1.1.0",
-  "description": "PET Roll Admin Portal \u2014 React + Vite + Ant Design Pro",
+  "version": "1.0.0",
+  "description": "PET Roll Admin Portal — React + Vite + Ant Design Pro",
   "type": "module",
   "scripts": {
     "dev": "vite --port 3001",

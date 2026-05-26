@@ -156,7 +156,8 @@ class AuthService {
       case 'user-not-found':
         return 'No account found with this email.';
       case 'wrong-password':
-        return 'Incorrect password.';
+      case 'invalid-credential':
+        return 'Incorrect email or password.';
       case 'email-already-in-use':
         return 'An account already exists with this email.';
       case 'weak-password':
@@ -167,8 +168,10 @@ class AuthService {
         return 'This account has been disabled.';
       case 'too-many-requests':
         return 'Too many attempts. Please try again later.';
+      case 'network-request-failed':
+        return 'Network error. Check your connection.';
       default:
-        return 'Authentication failed. Please try again.';
+        return 'Authentication failed ($code). Please try again.';
     }
   }
 }
