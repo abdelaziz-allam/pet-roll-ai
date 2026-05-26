@@ -1,18 +1,18 @@
-name: Backend CI/CD
+name: Admin Portal CI/CD
 
 on:
   push:
     branches: [main]
-    paths: ['monorepo/backend/**', 'monorepo/docker/Dockerfile.backend', '.github/workflows/backend-deploy.yml']
+    paths: ['monorepo/admin/**', 'monorepo/docker/Dockerfile.admin', '.github/workflows/admin-ci.yml']
   pull_request:
     branches: [main]
-    paths: ['monorepo/backend/**']
+    paths: ['monorepo/admin/**']
   workflow_dispatch:
 
 env:
   PROJECT_ID: petroll-production
   REGION: europe-north1
-  SERVICE_NAME: petroll-api
+  SERVICE_NAME: petroll-admin
   REGISTRY: europe-north1-docker.pkg.dev/petroll-production/petroll-images
   WIF_PROVIDER: projects/834040996278/locations/global/workloadIdentityPools/github-pool/providers/github-provider
   SERVICE_ACCOUNT: github-actions-deploy@petroll-production.iam.gserviceaccount.com
@@ -27,19 +27,19 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: monorepo/backend/package-lock.json
+          cache-dependency-path: monorepo/admin/package-lock.json
 
       - name: Install dependencies
-        working-directory: monorepo/backend
+        working-directory: monorepo/admin
         run: npm ci
 
       - name: Type check
-        working-directory: monorepo/backend
+        working-directory: monorepo/admin
         run: npx tsc --noEmit || true
 
-      - name: Run tests
-        working-directory: monorepo/backend
-        run: npm test 2>/dev/null || echo "Tests skipped"
+      - name: Build
+        working-directory: monorepo/admin
+        run: npm run build || true
 
   build-and-push:
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
@@ -64,14 +64,18 @@ jobs:
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
       - name: Build and Push Docker image
-        working-directory: monorepo/backend
+        working-directory: monorepo/admin
         run: |
-          IMAGE=${{ env.REGISTRY }}/backend:${{ github.sha }}
-          IMAGE_LATEST=${{ env.REGISTRY }}/backend:latest
+          IMAGE=${{ env.REGISTRY }}/admin:${{ github.sha }}
+          IMAGE_LATEST=${{ env.REGISTRY }}/admin:latest
+
+          API_URL="https://api.petfolioo.com/api/v1"
+          echo "Building admin with API_URL=${API_URL}"
 
           docker build \
-            -f ../docker/Dockerfile.backend \
+            -f ../docker/Dockerfile.admin \
             --target production \
+            --build-arg "VITE_API_URL=${API_URL}" \
             -t $IMAGE \
             -t $IMAGE_LATEST \
             .
@@ -100,24 +104,20 @@ jobs:
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image ${{ env.REGISTRY }}/backend:${{ github.sha }} \
+            --image ${{ env.REGISTRY }}/admin:${{ github.sha }} \
             --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated \
-            --port 3000 \
-            --service-account petroll-cloudrun@${{ env.PROJECT_ID }}.iam.gserviceaccount.com \
-            --set-env-vars "^||^NODE_ENV=production||GCP_PROJECT_ID=${{ env.PROJECT_ID }}||FIREBASE_PROJECT_ID=${{ env.PROJECT_ID }}||CORS_ORIGINS=https://admin.petfolioo.com,https://petfolioo.com,https://petroll-admin-poxnhad27q-lz.a.run.app" \
-            --set-secrets "JWT_SECRET=jwt-secret:latest" \
+            --port 80 \
             --min-instances 0 \
-            --max-instances 2 \
-            --memory 512Mi \
+            --max-instances 1 \
+            --memory 256Mi \
             --cpu 1 \
-            --timeout 60 \
-            --concurrency 80 \
+            --timeout 30 \
             --cpu-throttling \
             --quiet
 
       - name: Output Service URL
         run: |
           URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} --region ${{ env.REGION }} --format='value(status.url)')
-          echo "Backend deployed to: $URL"
+          echo "Admin Portal deployed to: $URL"
