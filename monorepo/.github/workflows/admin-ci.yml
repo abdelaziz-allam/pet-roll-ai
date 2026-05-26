@@ -69,12 +69,7 @@ jobs:
           IMAGE=${{ env.REGISTRY }}/admin:${{ github.sha }}
           IMAGE_LATEST=${{ env.REGISTRY }}/admin:latest
 
-          API_URL=$(gcloud run services describe petroll-api --region ${{ env.REGION }} --format='value(status.url)' 2>/dev/null || echo "")
-          if [ -n "$API_URL" ]; then
-            API_URL="${API_URL}/api/v1"
-          else
-            API_URL="https://petroll-api-834040996278.${{ env.REGION }}.run.app/api/v1"
-          fi
+          API_URL="https://api.petfolioo.com/api/v1"
 
           docker build \
             -f ../docker/Dockerfile.admin \

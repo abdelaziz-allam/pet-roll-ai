@@ -12,7 +12,7 @@ const envSchema = z.object({
   FIRESTORE_EMULATOR_HOST: z.string().optional(),
   FIREBASE_AUTH_EMULATOR_HOST: z.string().optional(),
   FIREBASE_STORAGE_EMULATOR_HOST: z.string().optional(),
-  CORS_ORIGINS: z.string().default('http://localhost:5173'),
+  CORS_ORIGINS: z.string().default('http://localhost:5173,http://localhost:3001,https://admin.petfolioo.com,https://petfolioo.com'),
   RATE_LIMIT_MAX: z.coerce.number().default(100),
   RATE_LIMIT_WINDOW: z.coerce.number().default(60000),
   GCS_BUCKET: z.string().default('petroll-mvp.appspot.com'),

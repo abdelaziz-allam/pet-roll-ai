@@ -118,7 +118,7 @@ jobs:
             --allow-unauthenticated \
             --port 3000 \
             --service-account petroll-cloudrun@${{ env.PROJECT_ID }}.iam.gserviceaccount.com \
-            --set-env-vars "^||^NODE_ENV=production||GCP_PROJECT_ID=${{ env.PROJECT_ID }}||FIREBASE_PROJECT_ID=${{ env.PROJECT_ID }}||CORS_ORIGINS=https://admin.petroll.site,https://petroll.site,https://petroll-admin-poxnhad27q-lz.a.run.app" \
+            --set-env-vars "^||^NODE_ENV=production||GCP_PROJECT_ID=${{ env.PROJECT_ID }}||FIREBASE_PROJECT_ID=${{ env.PROJECT_ID }}||CORS_ORIGINS=https://admin.petfolioo.com,https://petfolioo.com,https://petroll-admin-poxnhad27q-lz.a.run.app" \
             --set-secrets "JWT_SECRET=jwt-secret:latest" \
             --min-instances 0 \
             --max-instances 2 \
@@ -168,7 +168,7 @@ jobs:
           IMAGE=${{ env.REGISTRY }}/admin:${{ github.sha }}
           IMAGE_LATEST=${{ env.REGISTRY }}/admin:latest
 
-          API_URL="${{ needs.deploy-backend.outputs.backend_url }}/api/v1"
+          API_URL="https://api.petfolioo.com/api/v1"
           echo "Building admin with API_URL=${API_URL}"
 
           docker build \
