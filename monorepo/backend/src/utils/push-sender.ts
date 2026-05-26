@@ -1,4 +1,3 @@
-import { messaging } from '../config/firebase.js';
 import { db } from '../config/firebase.js';
 import { FieldValue } from 'firebase-admin/firestore';
 
@@ -28,6 +27,9 @@ export async function sendPushNotification(payload: PushPayload): Promise<void> 
   };
 
   try {
+    const { getMessaging } = await import('firebase-admin/messaging');
+    const { getApps } = await import('firebase-admin/app');
+    const messaging = getMessaging(getApps()[0]!);
     const response = await messaging.sendEachForMulticast(message);
 
     const tokensToRemove: string[] = [];

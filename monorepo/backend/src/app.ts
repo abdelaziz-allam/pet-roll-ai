@@ -1,76 +1,62 @@
-import Fastify from 'fastify';
-import cors from '@fastify/cors';
+import type { FastifyInstance } from 'fastify';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import multipart from '@fastify/multipart';
-import { env } from './config/env';
-import authPlugin from './plugins/auth';
-import errorHandler from './plugins/error-handler';
-import { authRoutes } from './modules/auth/auth.routes';
-import { petsRoutes } from './modules/pets/pets.routes';
-import { healthRoutes } from './modules/health/health.routes';
-import { vaccinationRoutes } from './modules/vaccination/vaccination.routes';
-import { pregnancyRoutes } from './modules/pregnancy/pregnancy.routes';
-import { schedulesRoutes } from './modules/schedules/schedules.routes';
-import { matingRoutes } from './modules/mating/mating.routes';
-import { chatRoutes } from './modules/chat/chat.routes';
-import { notificationsRoutes } from './modules/notifications/notifications.routes';
-import { reportsRoutes } from './modules/reports/reports.routes';
-import { tipsRoutes } from './modules/tips/tips.routes';
 
-export async function buildApp() {
-  const app = Fastify({
-    logger: env.NODE_ENV !== 'test',
-  });
-
+export async function registerRoutes(app: FastifyInstance) {
   await app.register(helmet, { contentSecurityPolicy: false });
-  await app.register(cors, {
-    origin: env.CORS_ORIGINS.split(','),
-    credentials: true,
-  });
-  await app.register(rateLimit, {
-    max: env.RATE_LIMIT_MAX,
-    timeWindow: env.RATE_LIMIT_WINDOW,
-  });
+  await app.register(rateLimit, { max: 100, timeWindow: 60000 });
   await app.register(multipart, { limits: { fileSize: 10 * 1024 * 1024 } });
-  await app.register(errorHandler);
-  await app.register(authPlugin);
 
-  app.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
+  try {
+    const errorHandler = await import('./plugins/error-handler');
+    await app.register(errorHandler.default);
+  } catch (e) { console.warn('Error handler plugin skipped:', (e as Error).message); }
+
+  try {
+    const authPlugin = await import('./plugins/auth');
+    await app.register(authPlugin.default);
+  } catch (e) { console.warn('Auth plugin skipped (Firebase may be unavailable):', (e as Error).message); }
 
   await app.register(async (api) => {
-    await api.register(authRoutes, { prefix: '/auth' });
-    await api.register(petsRoutes, { prefix: '/pets' });
-    await api.register(healthRoutes, { prefix: '/health-records' });
-    await api.register(vaccinationRoutes, { prefix: '/vaccinations' });
-    await api.register(pregnancyRoutes, { prefix: '/pregnancy' });
-    await api.register(schedulesRoutes, { prefix: '/schedules' });
-    await api.register(matingRoutes, { prefix: '/mating' });
-    await api.register(chatRoutes, { prefix: '/chat' });
-    await api.register(notificationsRoutes, { prefix: '/notifications' });
-    await api.register(reportsRoutes, { prefix: '/reports' });
-    await api.register(tipsRoutes, { prefix: '/tips' });
+    const routes = [
+      { path: './modules/auth/auth.routes', prefix: '/auth', name: 'authRoutes' },
+      { path: './modules/pets/pets.routes', prefix: '/pets', name: 'petsRoutes' },
+      { path: './modules/health/health.routes', prefix: '/health-records', name: 'healthRoutes' },
+      { path: './modules/vaccination/vaccination.routes', prefix: '/vaccinations', name: 'vaccinationRoutes' },
+      { path: './modules/pregnancy/pregnancy.routes', prefix: '/pregnancy', name: 'pregnancyRoutes' },
+      { path: './modules/schedules/schedules.routes', prefix: '/schedules', name: 'schedulesRoutes' },
+      { path: './modules/mating/mating.routes', prefix: '/mating', name: 'matingRoutes' },
+      { path: './modules/chat/chat.routes', prefix: '/chat', name: 'chatRoutes' },
+      { path: './modules/notifications/notifications.routes', prefix: '/notifications', name: 'notificationsRoutes' },
+      { path: './modules/reports/reports.routes', prefix: '/reports', name: 'reportsRoutes' },
+      { path: './modules/tips/tips.routes', prefix: '/tips', name: 'tipsRoutes' },
+      { path: './modules/admin/admin.routes', prefix: '/admin', name: 'adminRoutes' },
+      { path: './modules/admin-auth/admin-auth.routes', prefix: '/admin-auth', name: 'adminAuthRoutes' },
+      { path: './modules/cron/cron.routes', prefix: '/cron', name: 'cronRoutes' },
+      { path: './modules/verification/verification.routes', prefix: '/verification', name: 'verificationRoutes' },
+    ];
 
-    try {
-      const { adminRoutes } = await import('./modules/admin/admin.routes');
-      await api.register(adminRoutes, { prefix: '/admin' });
-    } catch (e) { console.warn('Admin routes skipped:', (e as Error).message); }
-
-    try {
-      const { adminAuthRoutes } = await import('./modules/admin-auth/admin-auth.routes');
-      await api.register(adminAuthRoutes, { prefix: '/admin-auth' });
-    } catch (e) { console.warn('Admin-auth routes skipped:', (e as Error).message); }
-
-    try {
-      const { cronRoutes } = await import('./modules/cron/cron.routes');
-      await api.register(cronRoutes, { prefix: '/cron' });
-    } catch (e) { console.warn('Cron routes skipped:', (e as Error).message); }
-
-    try {
-      const { verificationRoutes } = await import('./modules/verification/verification.routes');
-      await api.register(verificationRoutes, { prefix: '/verification' });
-    } catch (e) { console.warn('Verification routes skipped:', (e as Error).message); }
+    for (const route of routes) {
+      try {
+        const mod = await import(route.path);
+        const routeFn = mod[route.name] || mod.default;
+        if (routeFn) {
+          await api.register(routeFn, { prefix: route.prefix });
+        }
+      } catch (e) {
+        console.warn(`Route ${route.prefix} skipped:`, (e as Error).message);
+      }
+    }
   }, { prefix: '/api/v1' });
+}
 
+export async function buildApp() {
+  const Fastify = (await import('fastify')).default;
+  const cors = (await import('@fastify/cors')).default;
+  const app = Fastify({ logger: true });
+  await app.register(cors, { origin: true, credentials: true });
+  app.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
+  await registerRoutes(app);
   return app;
 }
