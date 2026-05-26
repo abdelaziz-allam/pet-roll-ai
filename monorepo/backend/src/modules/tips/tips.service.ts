@@ -1,6 +1,6 @@
-import { db } from '../../config/firebase.js';
+import { db } from '../../config/firebase';
 import { FieldValue } from 'firebase-admin/firestore';
-import type { CreateTipInput, UpdateTipInput } from './tips.schema.js';
+import type { CreateTipInput, UpdateTipInput } from './tips.schema';
 
 const TIPS = 'tips';
 
