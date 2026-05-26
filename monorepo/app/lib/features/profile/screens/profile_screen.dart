@@ -1,515 +1,364 @@
 import 'package:flutter/material.dart';
-import '../../../core/services/api_service.dart';
-import '../../../core/services/notification_service.dart';
-import '../../../core/theme/app_theme.dart';
-import '../../../main.dart';
-import '../../pets/screens/pet_detail_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
-class ProfileScreen extends StatefulWidget {
+import '../../../core/router/route_names.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/avatar_widget.dart';
+import '../../auth/providers/auth_provider.dart';
+
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
-  Map<String, dynamic>? _user;
-  List<dynamic> _pets = [];
-  bool _loading = true;
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  bool _pushEnabled = true;
+  TimeOfDay _reminderTime = const TimeOfDay(hour: 9, minute: 0);
+  String _appVersion = '';
 
   @override
   void initState() {
     super.initState();
-    _loadProfile();
+    _loadVersion();
   }
 
-  Future<void> _loadProfile() async {
-    setState(() => _loading = true);
-    try {
-      final api = ApiService();
-      final userData = await api.get('/auth/me');
-      _user = userData is Map<String, dynamic> ? userData : null;
-      final petData = await api.get('/pets?limit=50');
-      _pets = petData is Map ? (petData['data'] ?? []) : (petData is List ? petData : []);
-    } catch (_) {}
-    if (mounted) setState(() => _loading = false);
-  }
-
-  void _showDeleteAccountDialog() {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
-          children: [
-            Icon(Icons.warning_amber_rounded, color: AppTheme.error, size: 28),
-            SizedBox(width: 10),
-            Text('Delete Account'),
-          ],
-        ),
-        content: const Text(
-          'This will permanently delete your account and all associated data including pets, health records, and mating listings. This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              try {
-                await ApiService().delete('/auth/me');
-                ApiService().clearToken();
-                if (mounted) {
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (_) => const SplashLoader()),
-                    (route) => false,
-                  );
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.error),
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.error),
-            child: const Text('Delete', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showDeletePetDialog(dynamic pet) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Delete ${pet['name'] ?? 'Pet'}?'),
-        content: const Text('This will permanently remove this pet and all related records.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              try {
-                await ApiService().delete('/pets/${pet['id']}');
-                _loadProfile();
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Pet deleted'), backgroundColor: AppTheme.success),
-                  );
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.error),
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.error),
-            child: const Text('Delete', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _logout() {
-    ApiService().clearToken();
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const SplashLoader()),
-      (route) => false,
-    );
+  Future<void> _loadVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    if (mounted) {
+      setState(() => _appVersion = '${info.version} (${info.buildNumber})');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final profileAsync = ref.watch(userProfileProvider);
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile', style: TextStyle(fontWeight: FontWeight.w700)),
-        actions: [
-          IconButton(
-            onPressed: _logout,
-            icon: const Icon(Icons.logout, color: AppTheme.textSecondary),
-          ),
-        ],
-      ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.primary))
-          : RefreshIndicator(
-              onRefresh: _loadProfile,
-              child: ListView(
-                padding: const EdgeInsets.all(20),
-                children: [
-                  _buildProfileHeader(),
-                  const SizedBox(height: 24),
-                  _buildSection('My Pets', Icons.pets),
-                  const SizedBox(height: 12),
-                  if (_pets.isEmpty)
-                    _buildEmptyPets()
-                  else
-                    ..._pets.map((pet) => _buildPetTile(pet)),
-                  const SizedBox(height: 24),
-                  _buildSection('Settings', Icons.settings),
-                  const SizedBox(height: 12),
-                  _buildSettingsCard(),
-                  const SizedBox(height: 24),
-                  _buildSection('Danger Zone', Icons.warning_amber_rounded),
-                  const SizedBox(height: 12),
-                  _buildDangerZone(),
-                  const SizedBox(height: 40),
-                ],
-              ),
-            ),
-    );
-  }
-
-  Widget _buildProfileHeader() {
-    final name = _user?['displayName'] ?? _user?['name'] ?? 'User';
-    final email = _user?['email'] ?? '';
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: AppTheme.primaryGradient,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primary.withOpacity(0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                name.isNotEmpty ? name[0].toUpperCase() : 'U',
-                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  email,
-                  style: TextStyle(fontSize: 14, color: Colors.white.withOpacity(0.8)),
-                ),
-                const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    '${_pets.length} pet${_pets.length == 1 ? '' : 's'} registered',
-                    style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w500),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSection(String title, IconData icon) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: AppTheme.textSecondary),
-        const SizedBox(width: 8),
-        Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-      ],
-    );
-  }
-
-  Widget _buildEmptyPets() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: AppTheme.cardShadow,
-      ),
-      child: const Center(
-        child: Text('No pets yet', style: TextStyle(color: AppTheme.textSecondary)),
-      ),
-    );
-  }
-
-  Widget _buildPetTile(dynamic pet) {
-    final name = pet['name'] ?? 'Unnamed';
-    final species = pet['species'] ?? 'dog';
-    final breed = pet['breed'] ?? '';
-
-    return GestureDetector(
-      onTap: () async {
-        final result = await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => PetDetailScreen(pet: Map<String, dynamic>.from(pet))),
-        );
-        if (result == true) _loadProfile();
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: AppTheme.cardShadow,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(child: Text(_speciesEmoji(species), style: const TextStyle(fontSize: 22))),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
+      backgroundColor: AppColors.bgSecondary,
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(child: _buildHeader(profileAsync)),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-                  if (breed.isNotEmpty)
-                    Text('$species · $breed', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                  _SettingsGroup(
+                    title: 'Account',
+                    children: [
+                      _SettingsTile(
+                        icon: Icons.person_rounded,
+                        iconColor: AppColors.brandPrimary,
+                        iconBg: AppColors.brandPrimary.withOpacity(0.1),
+                        title: 'Edit Profile',
+                        onTap: () => context.goNamed(RouteNames.editProfile),
+                      ),
+                      _SettingsTile(
+                        icon: Icons.lock_rounded,
+                        iconColor: AppColors.brandSecondary,
+                        iconBg: AppColors.brandSecondary.withOpacity(0.1),
+                        title: 'Change Password',
+                        onTap: () {},
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  _SettingsGroup(
+                    title: 'Notifications',
+                    children: [
+                      _SettingsSwitch(
+                        icon: Icons.notifications_rounded,
+                        iconColor: AppColors.accentOrange,
+                        iconBg: AppColors.accentOrange.withOpacity(0.1),
+                        title: 'Push Notifications',
+                        value: _pushEnabled,
+                        onChanged: (v) => setState(() => _pushEnabled = v),
+                      ),
+                      _SettingsTile(
+                        icon: Icons.schedule_rounded,
+                        iconColor: AppColors.info,
+                        iconBg: AppColors.info.withOpacity(0.1),
+                        title: 'Reminder Time',
+                        trailing: Text(
+                          _reminderTime.format(context),
+                          style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                        ),
+                        onTap: () async {
+                          final picked = await showTimePicker(
+                            context: context,
+                            initialTime: _reminderTime,
+                          );
+                          if (picked != null) setState(() => _reminderTime = picked);
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  _SettingsGroup(
+                    title: 'App',
+                    children: [
+                      _SettingsTile(
+                        icon: Icons.language_rounded,
+                        iconColor: AppColors.brandTertiary,
+                        iconBg: AppColors.brandTertiary.withOpacity(0.1),
+                        title: 'Language',
+                        trailing: Text(
+                          'English',
+                          style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                        ),
+                        onTap: () {},
+                      ),
+                      _SettingsTile(
+                        icon: Icons.info_rounded,
+                        iconColor: AppColors.textSecondary,
+                        iconBg: AppColors.bgTertiary,
+                        title: 'About',
+                        onTap: () {},
+                      ),
+                      _SettingsTile(
+                        icon: Icons.shield_rounded,
+                        iconColor: AppColors.success,
+                        iconBg: AppColors.success.withOpacity(0.1),
+                        title: 'Privacy Policy',
+                        onTap: () {},
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 28),
+                  AppButton(
+                    label: 'Log Out',
+                    variant: AppButtonVariant.outline,
+                    onPressed: () async {
+                      await ref.read(authControllerProvider.notifier).logout();
+                      if (context.mounted) context.goNamed(RouteNames.login);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: Text(
+                      'Version $_appVersion',
+                      style: AppTypography.caption.copyWith(color: AppColors.textHint),
+                    ),
+                  ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AppTheme.textSecondary, size: 22),
-            const SizedBox(width: 4),
-            IconButton(
-              onPressed: () => _showDeletePetDialog(pet),
-              icon: const Icon(Icons.delete_outline, color: AppTheme.error, size: 20),
-              splashRadius: 20,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(AsyncValue<Map<String, dynamic>?> profileAsync) {
+    return profileAsync.when(
+      data: (profile) {
+        final name = profile?['displayName'] ?? 'User';
+        final email = profile?['email'] ?? '';
+        final avatarUrl = profile?['avatarUrl'] as String?;
+
+        return Container(
+          padding: EdgeInsets.fromLTRB(
+            20, MediaQuery.of(context).padding.top + 20, 20, 32,
+          ),
+          decoration: const BoxDecoration(
+            gradient: AppColors.headerGradient,
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white.withOpacity(0.4), width: 3),
+                ),
+                child: AvatarWidget(imageUrl: avatarUrl, name: name, size: 80),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                name,
+                style: AppTypography.heading2.copyWith(color: Colors.white),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                email,
+                style: AppTypography.bodySmall.copyWith(
+                  color: Colors.white.withOpacity(0.8),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => Container(
+        height: 220,
+        decoration: const BoxDecoration(
+          gradient: AppColors.headerGradient,
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+        ),
+      ),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+}
+
+class _SettingsGroup extends StatelessWidget {
+  final String title;
+  final List<Widget> children;
+
+  const _SettingsGroup({required this.title, required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: AppTypography.bodySmall.copyWith(
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.bgPrimary,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              for (int i = 0; i < children.length; i++) ...[
+                children[i],
+                if (i < children.length - 1)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Divider(height: 1, color: AppColors.borderLight),
+                  ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SettingsTile extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final Color iconBg;
+  final String title;
+  final Widget? trailing;
+  final VoidCallback onTap;
+
+  const _SettingsTile({
+    required this.icon,
+    required this.iconColor,
+    required this.iconBg,
+    required this.title,
+    this.trailing,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: iconBg,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, size: 20, color: iconColor),
             ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                title,
+                style: AppTypography.body.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            trailing ?? const Icon(Icons.chevron_right_rounded, size: 20, color: AppColors.textHint),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildSettingsCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: AppTheme.cardShadow,
-      ),
-      child: Column(
+class _SettingsSwitch extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final Color iconBg;
+  final String title;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const _SettingsSwitch({
+    required this.icon,
+    required this.iconColor,
+    required this.iconBg,
+    required this.title,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
         children: [
-          ListTile(
-            leading: const Icon(Icons.notifications_active, color: AppTheme.primary),
-            title: const Text('Reminder Notifications', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
-            subtitle: const Text('How many reminders before each event', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-            trailing: const Icon(Icons.chevron_right, color: AppTheme.textSecondary, size: 20),
-            onTap: _showNotificationSettings,
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 20, color: iconColor),
           ),
-          Divider(height: 1, color: Colors.grey.shade100),
-          _settingsTile(Icons.language, 'Language', 'English'),
-          Divider(height: 1, color: Colors.grey.shade100),
-          _settingsTile(Icons.info_outline, 'About', 'PET Roll v1.0.0'),
-        ],
-      ),
-    );
-  }
-
-  void _showNotificationSettings() async {
-    int currentCount = await NotificationService().getReminderCount();
-
-    if (!mounted) return;
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setSheetState) => Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Notification Settings', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 8),
-              const Text(
-                'Configure how many reminder notifications you receive before each scheduled event (vet visits, vaccinations, pregnancy due dates).',
-                style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(
+              title,
+              style: AppTypography.body.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w500,
               ),
-              const SizedBox(height: 24),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppTheme.primary.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.notifications_active, color: AppTheme.primary),
-                    const SizedBox(width: 16),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Number of Reminders', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                          SizedBox(height: 2),
-                          Text('Before each scheduled date', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-                        ],
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        _notifCountButton(Icons.remove, () {
-                          if (currentCount > 1) setSheetState(() => currentCount--);
-                        }),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 14),
-                          child: Text('$currentCount', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppTheme.primary)),
-                        ),
-                        _notifCountButton(Icons.add, () {
-                          if (currentCount < 5) setSheetState(() => currentCount++);
-                        }),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Preview:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                    const SizedBox(height: 6),
-                    Text(
-                      _buildReminderPreview(currentCount),
-                      style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    await NotificationService().setReminderCount(currentCount);
-                    Navigator.pop(ctx);
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Reminders set to $currentCount notifications before each event'),
-                          backgroundColor: AppTheme.success,
-                        ),
-                      );
-                    }
-                  },
-                  child: const Text('Save Settings'),
-                ),
-              ),
-              const SizedBox(height: 8),
-            ],
+            ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _notifCountButton(IconData icon, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: AppTheme.primary.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(icon, color: AppTheme.primary, size: 20),
-      ),
-    );
-  }
-
-  String _buildReminderPreview(int count) {
-    if (count == 1) return 'You\'ll get 1 reminder a few days before the event';
-    if (count == 2) return 'You\'ll get reminders spread across the days leading up to the event';
-    if (count == 3) return 'You\'ll get 3 reminders: early, mid, and close to the event';
-    if (count == 4) return 'You\'ll get 4 reminders spread evenly before the event';
-    return 'You\'ll get 5 reminders (maximum) spread before the event';
-  }
-
-  Widget _settingsTile(IconData icon, String title, String subtitle) {
-    return ListTile(
-      leading: Icon(icon, color: AppTheme.primary),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
-      subtitle: Text(subtitle, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-      trailing: const Icon(Icons.chevron_right, color: AppTheme.textSecondary, size: 20),
-      onTap: () {},
-    );
-  }
-
-  Widget _buildDangerZone() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.error.withOpacity(0.2)),
-        boxShadow: AppTheme.cardShadow,
-      ),
-      child: Column(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.logout, color: AppTheme.error),
-            title: const Text('Log Out', style: TextStyle(fontWeight: FontWeight.w500, color: AppTheme.error, fontSize: 14)),
-            onTap: _logout,
-          ),
-          Divider(height: 1, color: Colors.grey.shade100),
-          ListTile(
-            leading: const Icon(Icons.delete_forever, color: AppTheme.error),
-            title: const Text('Delete Account', style: TextStyle(fontWeight: FontWeight.w500, color: AppTheme.error, fontSize: 14)),
-            subtitle: const Text('Permanently remove all data', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-            onTap: _showDeleteAccountDialog,
+          Switch.adaptive(
+            value: value,
+            onChanged: onChanged,
+            activeColor: AppColors.brandPrimary,
           ),
         ],
       ),
     );
-  }
-
-  String _speciesEmoji(String species) {
-    const map = {'dog': '🐕', 'cat': '🐱', 'bird': '🦜', 'horse': '🐴', 'rabbit': '🐰', 'fish': '🐠'};
-    return map[species] ?? '🐾';
   }
 }

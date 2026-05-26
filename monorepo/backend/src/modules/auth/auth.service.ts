@@ -1,121 +1,130 @@
 import jwt from 'jsonwebtoken';
-import { db, FieldValue } from '../../config/firebase';
-import { env } from '../../config/env';
-import { RegisterInput, UpdateProfileInput } from './auth.schema';
+import { db, auth as firebaseAuth } from '../../config/firebase.js';
+import { env } from '../../config/env.js';
+import type { RegisterInput, UpdateProfileInput } from './auth.schema.js';
+import type { User } from '../../types/user.js';
+import { FieldValue } from 'firebase-admin/firestore';
 
-export class AuthService {
-  private usersRef = db.collection('users');
+const USERS = 'users';
 
-  async register(input: RegisterInput, firebaseUid: string, email: string) {
-    const existing = await this.usersRef.doc(firebaseUid).get();
-    if (existing.exists) {
-      const error: any = new Error('User already registered');
-      error.statusCode = 409;
-      throw error;
-    }
-
-    const userData = {
-      email,
-      displayName: input.displayName,
-      phone: input.phone || null,
-      timezone: input.timezone,
-      role: 'user',
-      status: 'active',
-      isVerifiedBreeder: false,
-      fcmTokens: [],
-      settings: { notifications: true, language: 'en', theme: 'light' },
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    };
-
-    await this.usersRef.doc(firebaseUid).set(userData);
-    const tokens = this.generateTokens(firebaseUid, email);
-    return { user: { id: firebaseUid, ...userData }, ...tokens };
+export async function register(input: RegisterInput, firebaseUid: string, email: string) {
+  const existingUser = await db.collection(USERS).doc(firebaseUid).get();
+  if (existingUser.exists) {
+    throw Object.assign(new Error('User already registered'), { statusCode: 409 });
   }
 
-  async login(firebaseUid: string, email: string) {
-    const doc = await this.usersRef.doc(firebaseUid).get();
-    if (!doc.exists) {
-      const error: any = new Error('User not found');
-      error.statusCode = 404;
-      throw error;
-    }
+  const userData: Omit<User, 'id'> = {
+    email,
+    displayName: input.displayName,
+    role: 'user',
+    status: 'active',
+    timezone: input.timezone,
+    settings: {
+      reminderTimeUTC: 8,
+      pushEnabled: true,
+      emailNotifications: true,
+      language: 'en',
+    },
+    fcmTokens: [],
+    isVerifiedBreeder: false,
+    createdAt: FieldValue.serverTimestamp() as any,
+    updatedAt: FieldValue.serverTimestamp() as any,
+  };
 
-    const data = doc.data()!;
-    if (data.status === 'banned') {
-      const error: any = new Error('Account has been banned');
-      error.statusCode = 403;
-      throw error;
-    }
-    if (data.status === 'deleted') {
-      const error: any = new Error('Account has been deleted');
-      error.statusCode = 410;
-      throw error;
-    }
+  await db.collection(USERS).doc(firebaseUid).set(userData);
 
-    await this.usersRef.doc(firebaseUid).update({
-      lastLoginAt: FieldValue.serverTimestamp(),
-    });
+  return generateTokens(firebaseUid, email, 'user');
+}
 
-    const tokens = this.generateTokens(firebaseUid, email);
-    return { user: { id: firebaseUid, ...data }, ...tokens };
+export async function login(firebaseUid: string, email: string) {
+  const userDoc = await db.collection(USERS).doc(firebaseUid).get();
+
+  if (!userDoc.exists) {
+    throw Object.assign(new Error('User not registered. Call /register first.'), { statusCode: 404 });
   }
 
-  async getProfile(uid: string) {
-    const doc = await this.usersRef.doc(uid).get();
-    if (!doc.exists) {
-      const error: any = new Error('User not found');
-      error.statusCode = 404;
-      throw error;
-    }
-    return { id: uid, ...doc.data() };
+  const user = userDoc.data() as User;
+
+  if (user.status === 'banned') {
+    throw Object.assign(new Error('Account has been suspended'), { statusCode: 403 });
   }
 
-  async updateProfile(uid: string, input: UpdateProfileInput) {
-    const updateData: any = { ...input, updatedAt: FieldValue.serverTimestamp() };
+  if (user.status === 'deleted') {
+    throw Object.assign(new Error('Account has been deleted'), { statusCode: 410 });
+  }
 
-    if (input.settings) {
-      Object.entries(input.settings).forEach(([key, value]) => {
+  return generateTokens(firebaseUid, email, user.role);
+}
+
+export async function getProfile(uid: string) {
+  const userDoc = await db.collection(USERS).doc(uid).get();
+  if (!userDoc.exists) {
+    throw Object.assign(new Error('User not found'), { statusCode: 404 });
+  }
+  return { id: userDoc.id, ...userDoc.data() };
+}
+
+export async function updateProfile(uid: string, input: UpdateProfileInput) {
+  const updateData: Record<string, any> = {
+    ...input,
+    updatedAt: FieldValue.serverTimestamp(),
+  };
+
+  if (input.settings) {
+    for (const [key, value] of Object.entries(input.settings)) {
+      if (value !== undefined) {
         updateData[`settings.${key}`] = value;
-      });
-      delete updateData.settings;
+      }
     }
-
-    await this.usersRef.doc(uid).update(updateData);
-    return this.getProfile(uid);
+    delete updateData.settings;
   }
 
-  async deleteAccount(uid: string) {
-    await this.usersRef.doc(uid).update({
-      status: 'deleted',
-      email: FieldValue.delete(),
-      phone: FieldValue.delete(),
-      displayName: 'Deleted User',
-      deletedAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    });
-  }
+  await db.collection(USERS).doc(uid).update(updateData);
+  return getProfile(uid);
+}
 
-  async refreshToken(uid: string) {
-    const doc = await this.usersRef.doc(uid).get();
-    if (!doc.exists) {
-      const error: any = new Error('User not found');
-      error.statusCode = 404;
-      throw error;
-    }
-    const data = doc.data()!;
-    return this.generateTokens(uid, data.email);
-  }
+export async function deleteAccount(uid: string) {
+  await db.collection(USERS).doc(uid).update({
+    status: 'deleted',
+    email: `deleted_${uid}@petfolioo.com`,
+    displayName: 'Deleted User',
+    phone: FieldValue.delete(),
+    photoURL: FieldValue.delete(),
+    fcmTokens: [],
+    updatedAt: FieldValue.serverTimestamp(),
+  });
 
-  generateTokens(uid: string, email: string) {
-    const accessToken = jwt.sign({ uid, email }, env.JWT_SECRET, {
-      expiresIn: env.JWT_EXPIRY as any,
-    });
-    const refreshToken = jwt.sign({ uid, type: 'refresh' }, env.JWT_SECRET, {
-      expiresIn: env.REFRESH_TOKEN_EXPIRY as any,
-    });
-    return { accessToken, refreshToken };
+  // TODO: Queue Cloud Task for full cascade deletion (Phase 2 Addendum #2)
+  // For MVP, mark as deleted and clean up in weekly cron
+
+  try {
+    await firebaseAuth.deleteUser(uid);
+  } catch {
+    // User may already be deleted from Firebase Auth
   }
 }
 
-export const authService = new AuthService();
+export async function refreshToken(uid: string) {
+  const userDoc = await db.collection(USERS).doc(uid).get();
+  if (!userDoc.exists) {
+    throw Object.assign(new Error('User not found'), { statusCode: 404 });
+  }
+  const user = userDoc.data() as User;
+  return generateTokens(uid, user.email, user.role);
+}
+
+function generateTokens(uid: string, email: string, role: string) {
+  const accessToken = jwt.sign(
+    { uid, email, role },
+    env.JWT_SECRET,
+    { expiresIn: env.JWT_EXPIRY } as jwt.SignOptions
+  );
+
+  const refreshToken = jwt.sign(
+    { uid, type: 'refresh' },
+    env.JWT_SECRET,
+    { expiresIn: env.REFRESH_TOKEN_EXPIRY } as jwt.SignOptions
+  );
+
+  return { accessToken, refreshToken, expiresIn: env.JWT_EXPIRY };
+}

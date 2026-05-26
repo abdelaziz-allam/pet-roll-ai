@@ -1,138 +1,75 @@
-import { FastifyInstance } from 'fastify';
-import { matingService } from './mating.service';
-import { createListingSchema, updateListingSchema, sendRequestSchema, respondRequestSchema } from './mating.schema';
-import { requireAuth } from '../../middleware/require-auth';
-import { db } from '../../config/firebase';
+import type { FastifyInstance } from 'fastify';
+import {
+  createListingSchema,
+  updateListingSchema,
+  createMatchRequestSchema,
+  updateMatchRequestSchema,
+  browseListingsQuerySchema,
+} from './mating.schema.js';
+import * as matingService from './mating.service.js';
+import { requireAuth } from '../../middleware/require-auth.js';
 
-export async function matingRoutes(fastify: FastifyInstance) {
-  fastify.addHook('preHandler', requireAuth);
-
-  fastify.post('/listings', async (request, reply) => {
+export async function matingRoutes(app: FastifyInstance) {
+  // POST /listings - create a mating listing
+  app.post('/listings', { preHandler: [requireAuth] }, async (request, reply) => {
     const body = createListingSchema.parse(request.body);
-
-    const petDoc = await db.collection('pets').doc(body.petId).get();
-    if (!petDoc.exists || petDoc.data()!.ownerId !== request.user!.uid) {
-      return reply.code(404).send({ error: 'Pet not found' });
-    }
-    if (!petDoc.data()!.isAvailableForMating) {
-      return reply.code(400).send({ error: 'Pet must be marked as available for mating' });
-    }
-
-    const pregSnap = await db.collection('pregnancies')
-      .where('petId', '==', body.petId)
-      .where('status', '==', 'active')
-      .limit(1)
-      .get();
-    if (!pregSnap.empty) {
-      return reply.code(400).send({ error: 'Cannot create listing for a pregnant pet' });
-    }
-
-    const listing = await matingService.createListing(request.user!.uid, body);
-    return reply.code(201).send(listing);
+    const result = await matingService.createListing(request.user!.uid, body);
+    return reply.status(201).send(result);
   });
 
-  fastify.get('/eligible-pets', async (request, reply) => {
-    const petsSnap = await db.collection('pets')
-      .where('ownerId', '==', request.user!.uid)
-      .where('isAvailableForMating', '==', true)
-      .get();
-
-    const eligible: any[] = [];
-    for (const doc of petsSnap.docs) {
-      const pregSnap = await db.collection('pregnancies')
-        .where('petId', '==', doc.id)
-        .where('status', '==', 'active')
-        .limit(1)
-        .get();
-      if (pregSnap.empty) {
-        eligible.push({ id: doc.id, ...doc.data() });
-      }
-    }
-    return reply.code(200).send(eligible);
+  // GET /listings - browse listings with filters
+  app.get('/listings', { preHandler: [requireAuth] }, async (request, reply) => {
+    const query = browseListingsQuerySchema.parse(request.query);
+    const result = await matingService.browseListings(query, request.user!.uid);
+    return reply.send(result);
   });
 
-  fastify.get('/listings', async (request, reply) => {
-    const { species, breed, city, page = 1, limit = 20 } = request.query as any;
-    const result = await matingService.browseListings({ species, breed, city }, +page, +limit);
-    return reply.code(200).send(result);
-  });
-
-  fastify.get('/listings/smart', async (request, reply) => {
-    const { page = 1, limit = 20 } = request.query as any;
-    const result = await matingService.browseSmartListings(request.user!.uid, +page, +limit);
-    return reply.code(200).send(result);
-  });
-
-  fastify.get('/listings/:id', async (request, reply) => {
+  // GET /listings/:id - get listing detail
+  app.get('/listings/:id', { preHandler: [requireAuth] }, async (request, reply) => {
     const { id } = request.params as { id: string };
-    const listing = await matingService.getListingById(id);
-    return reply.code(200).send(listing);
+    const result = await matingService.getListingById(id);
+    return reply.send(result);
   });
 
-  fastify.get('/pets/:petId/profile', async (request, reply) => {
-    const { petId } = request.params as { petId: string };
-    const profile = await matingService.getPetProfile(petId);
-    return reply.code(200).send(profile);
-  });
-
-  fastify.put('/listings/:id', async (request, reply) => {
+  // PUT /listings/:id - update listing
+  app.put('/listings/:id', { preHandler: [requireAuth] }, async (request, reply) => {
     const { id } = request.params as { id: string };
     const body = updateListingSchema.parse(request.body);
-    const listing = await matingService.updateListing(id, request.user!.uid, body);
-    return reply.code(200).send(listing);
+    const result = await matingService.updateListing(id, request.user!.uid, body);
+    return reply.send(result);
   });
 
-  fastify.delete('/listings/:id', async (request, reply) => {
+  // DELETE /listings/:id - remove listing
+  app.delete('/listings/:id', { preHandler: [requireAuth] }, async (request, reply) => {
     const { id } = request.params as { id: string };
     await matingService.deleteListing(id, request.user!.uid);
-    return reply.code(204).send();
+    return reply.status(204).send();
   });
 
-  fastify.post('/requests', async (request, reply) => {
-    const body = sendRequestSchema.parse(request.body);
-
-    const senderPetDoc = await db.collection('pets').doc(body.petId).get();
-    if (!senderPetDoc.exists || senderPetDoc.data()!.ownerId !== request.user!.uid) {
-      return reply.code(404).send({ error: 'Pet not found' });
-    }
-    if (!senderPetDoc.data()!.isAvailableForMating) {
-      return reply.code(400).send({ error: 'Pet must be marked as available for mating' });
-    }
-
-    const pregSnap = await db.collection('pregnancies')
-      .where('petId', '==', body.petId)
-      .where('status', '==', 'active')
-      .limit(1)
-      .get();
-    if (!pregSnap.empty) {
-      return reply.code(400).send({ error: 'Cannot send request with a pregnant pet' });
-    }
-
-    const result = await matingService.sendRequest(request.user!.uid, body);
-    return reply.code(201).send(result);
+  // POST /requests - send match request
+  app.post('/requests', { preHandler: [requireAuth] }, async (request, reply) => {
+    const body = createMatchRequestSchema.parse(request.body);
+    const result = await matingService.sendMatchRequest(request.user!.uid, body);
+    return reply.status(201).send(result);
   });
 
-  fastify.get('/requests/sent', async (request, reply) => {
+  // GET /requests/sent - my sent requests
+  app.get('/requests/sent', { preHandler: [requireAuth] }, async (request, reply) => {
     const result = await matingService.getSentRequests(request.user!.uid);
-    return reply.code(200).send(result);
+    return reply.send(result);
   });
 
-  fastify.get('/requests/received', async (request, reply) => {
+  // GET /requests/received - requests to me
+  app.get('/requests/received', { preHandler: [requireAuth] }, async (request, reply) => {
     const result = await matingService.getReceivedRequests(request.user!.uid);
-    return reply.code(200).send(result);
+    return reply.send(result);
   });
 
-  fastify.put('/requests/:id', async (request, reply) => {
+  // PUT /requests/:id - accept/reject match request
+  app.put('/requests/:id', { preHandler: [requireAuth] }, async (request, reply) => {
     const { id } = request.params as { id: string };
-    const { status } = respondRequestSchema.parse(request.body);
-    const result = await matingService.respondToRequest(id, request.user!.uid, status);
-    return reply.code(200).send(result);
-  });
-
-  fastify.put('/requests/:id/respond', async (request, reply) => {
-    const { id } = request.params as { id: string };
-    const { status } = respondRequestSchema.parse(request.body);
-    const result = await matingService.respondToRequest(id, request.user!.uid, status);
-    return reply.code(200).send(result);
+    const body = updateMatchRequestSchema.parse(request.body);
+    const result = await matingService.updateMatchRequest(id, request.user!.uid, body);
+    return reply.send(result);
   });
 }

@@ -1,0 +1,97 @@
+name: Deploy Admin Portal
+
+on:
+  push:
+    branches: [main]
+    paths: ['monorepo/admin/**']
+  pull_request:
+    paths: ['monorepo/admin/**']
+
+env:
+  GCP_PROJECT_ID: petroll-production
+  GCP_REGION: europe-north1
+  SERVICE_NAME: petroll-admin
+  REGISTRY: europe-north1-docker.pkg.dev/petroll-production/petroll-docker
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: monorepo/admin/package-lock.json
+
+      - name: Install dependencies
+        working-directory: monorepo/admin
+        run: npm ci
+
+      - name: Lint
+        working-directory: monorepo/admin
+        run: npm run lint
+
+      - name: Type check
+        working-directory: monorepo/admin
+        run: npm run typecheck
+
+      - name: Build
+        working-directory: monorepo/admin
+        run: npm run build
+        env:
+          VITE_API_URL: https://api.petfolioo.com/api/v1
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: github-actions-deploy@petroll-production.iam.gserviceaccount.com
+
+      - uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: petroll-production
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker europe-north1-docker.pkg.dev --quiet
+
+      - name: Build Docker image
+        working-directory: monorepo
+        run: |
+          docker build \
+            -f docker/Dockerfile.admin \
+            -t ${{ env.REGISTRY }}/admin:${{ github.sha }} \
+            -t ${{ env.REGISTRY }}/admin:latest \
+            --build-arg VITE_API_URL=https://api.petfolioo.com/api/v1 \
+            .
+
+      - name: Push to Artifact Registry
+        run: |
+          docker push ${{ env.REGISTRY }}/admin:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/admin:latest
+
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: petroll-admin
+          region: europe-north1
+          image: ${{ env.REGISTRY }}/admin:${{ github.sha }}
+          flags: |
+            --min-instances=0
+            --max-instances=1
+            --memory=256Mi
+            --cpu=1
+            --timeout=60s
+            --allow-unauthenticated

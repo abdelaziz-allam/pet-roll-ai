@@ -1,7 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import {
   Card,
-  Table,
   Button,
   Modal,
   Form,
@@ -9,36 +8,15 @@ import {
   Select,
   Switch,
   Tag,
-  Space,
-  Typography,
-  message,
   Popconfirm,
+  message,
+  Space,
 } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, BulbOutlined } from '@ant-design/icons';
-import { api } from '@/services/api';
-
-const { Title } = Typography;
-const { TextArea } = Input;
-
-interface Tip {
-  id: string;
-  title: string;
-  body: string;
-  category: string;
-  species?: string[];
-  active: boolean;
-}
-
-interface PaginatedTips {
-  data: Tip[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-    hasNext: boolean;
-  };
-}
+import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { TipsService, type Tip, type CreateTipPayload } from '@/services/tips.service';
+import type { PaginatedResponse } from '@/types/common';
+import { ProTable, type ProColumns } from '@ant-design/pro-components';
 
 const CATEGORIES = [
   { label: 'Health', value: 'health', color: 'green' },
@@ -58,44 +36,63 @@ const SPECIES_OPTIONS = [
   { label: 'Reptiles', value: 'reptile' },
 ];
 
-const TipsPage: React.FC = () => {
-  const [tips, setTips] = useState<Tip[]>([]);
-  const [loading, setLoading] = useState(false);
+export default function TipsPage() {
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
   const [categoryFilter, setCategoryFilter] = useState<string | undefined>();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTip, setEditingTip] = useState<Tip | null>(null);
-  const [submitting, setSubmitting] = useState(false);
   const [form] = Form.useForm();
+  const queryClient = useQueryClient();
 
-  const fetchTips = useCallback(async () => {
-    setLoading(true);
-    try {
-      let url = `/tips?page=${page}&limit=20`;
-      if (categoryFilter) url += `&category=${categoryFilter}`;
-      const result = await api.get<PaginatedTips>(url);
-      setTips(result.data);
-      setTotal(result.pagination.total);
-    } catch (err: any) {
-      message.error(err.message || 'Failed to load tips');
-    } finally {
-      setLoading(false);
-    }
-  }, [page, categoryFilter]);
+  const queryParams = new URLSearchParams();
+  queryParams.set('page', String(page));
+  queryParams.set('limit', String(pageSize));
+  if (categoryFilter) queryParams.set('category', categoryFilter);
 
-  useEffect(() => {
-    fetchTips();
-  }, [fetchTips]);
+  const { data, isLoading } = useQuery<PaginatedResponse<Tip>>({
+    queryKey: ['tips', page, pageSize, categoryFilter],
+    queryFn: () => TipsService.getAll({ page, limit: pageSize, category: categoryFilter }),
+  });
 
-  const openCreate = () => {
+  const createMutation = useMutation({
+    mutationFn: (payload: CreateTipPayload) => TipsService.create(payload),
+    onSuccess: () => {
+      message.success('Tip created');
+      queryClient.invalidateQueries({ queryKey: ['tips'] });
+      closeModal();
+    },
+    onError: () => message.error('Failed to create tip'),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: Partial<CreateTipPayload> }) =>
+      TipsService.update(id, payload),
+    onSuccess: () => {
+      message.success('Tip updated');
+      queryClient.invalidateQueries({ queryKey: ['tips'] });
+      closeModal();
+    },
+    onError: () => message.error('Failed to update tip'),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => TipsService.delete(id),
+    onSuccess: () => {
+      message.success('Tip deleted');
+      queryClient.invalidateQueries({ queryKey: ['tips'] });
+    },
+    onError: () => message.error('Failed to delete tip'),
+  });
+
+  function openCreate() {
     setEditingTip(null);
     form.resetFields();
     form.setFieldsValue({ active: true, category: 'general' });
     setModalOpen(true);
-  };
+  }
 
-  const openEdit = (tip: Tip) => {
+  function openEdit(tip: Tip) {
     setEditingTip(tip);
     form.setFieldsValue({
       title: tip.title,
@@ -105,95 +102,78 @@ const TipsPage: React.FC = () => {
       active: tip.active,
     });
     setModalOpen(true);
-  };
+  }
 
-  const closeModal = () => {
+  function closeModal() {
     setModalOpen(false);
     setEditingTip(null);
     form.resetFields();
-  };
+  }
 
-  const handleSubmit = async () => {
-    try {
-      const values = await form.validateFields();
-      setSubmitting(true);
-
+  function handleSubmit() {
+    form.validateFields().then((values) => {
       if (editingTip) {
-        await api.put(`/tips/${editingTip.id}`, values);
-        message.success('Tip updated');
+        updateMutation.mutate({ id: editingTip.id, payload: values });
       } else {
-        await api.post('/tips', values);
-        message.success('Tip created');
+        createMutation.mutate(values);
       }
+    });
+  }
 
-      closeModal();
-      fetchTips();
-    } catch (err: any) {
-      if (err.message) message.error(err.message);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      await api.delete(`/tips/${id}`);
-      message.success('Tip deleted');
-      fetchTips();
-    } catch (err: any) {
-      message.error(err.message || 'Failed to delete');
-    }
-  };
-
-  const columns = [
+  const columns: ProColumns<Tip>[] = [
     {
       title: 'Title',
       dataIndex: 'title',
-      key: 'title',
       ellipsis: true,
-      width: 180,
+      width: 200,
     },
     {
-      title: 'Tip Content',
+      title: 'Body',
       dataIndex: 'body',
-      key: 'body',
       ellipsis: true,
     },
     {
       title: 'Category',
       dataIndex: 'category',
-      key: 'category',
       width: 120,
-      render: (cat: string) => {
-        const found = CATEGORIES.find((c) => c.value === cat);
-        return <Tag color={found?.color}>{found?.label || cat}</Tag>;
+      render: (_, record) => {
+        const cat = CATEGORIES.find((c) => c.value === record.category);
+        return <Tag color={cat?.color}>{cat?.label || record.category}</Tag>;
       },
     },
     {
       title: 'Species',
       dataIndex: 'species',
-      key: 'species',
-      width: 140,
-      render: (species: string[] | undefined) =>
-        species?.length ? species.join(', ') : <Tag>All</Tag>,
+      width: 150,
+      render: (_, record) =>
+        record.species?.length ? record.species.join(', ') : <Tag>All</Tag>,
     },
     {
       title: 'Active',
       dataIndex: 'active',
-      key: 'active',
       width: 80,
-      render: (active: boolean) => (
-        <Tag color={active ? 'green' : 'default'}>{active ? 'Yes' : 'No'}</Tag>
+      render: (_, record) => (
+        <Tag color={record.active ? 'green' : 'default'}>
+          {record.active ? 'Yes' : 'No'}
+        </Tag>
       ),
     },
     {
       title: 'Actions',
       key: 'actions',
-      width: 100,
-      render: (_: any, record: Tip) => (
+      width: 120,
+      render: (_, record) => (
         <Space>
-          <Button type="text" size="small" icon={<EditOutlined />} onClick={() => openEdit(record)} />
-          <Popconfirm title="Delete this tip?" onConfirm={() => handleDelete(record.id)}>
+          <Button
+            type="text"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => openEdit(record)}
+          />
+          <Popconfirm
+            title="Delete this tip?"
+            onConfirm={() => deleteMutation.mutate(record.id)}
+          >
             <Button type="text" size="small" danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </Space>
@@ -202,12 +182,9 @@ const TipsPage: React.FC = () => {
   ];
 
   return (
-    <Space direction="vertical" size={16} style={{ width: '100%' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Space>
-          <BulbOutlined style={{ fontSize: 20, color: '#F1379D' }} />
-          <Title level={4} style={{ margin: 0 }}>Daily Tips</Title>
-        </Space>
+    <Card
+      title="Daily Tips Management"
+      extra={
         <Space>
           <Select
             placeholder="Filter by category"
@@ -220,53 +197,71 @@ const TipsPage: React.FC = () => {
             Add Tip
           </Button>
         </Space>
-      </div>
-
-      <Card>
-        <Table
-          columns={columns}
-          dataSource={tips}
-          loading={loading}
-          rowKey="id"
-          pagination={{
-            current: page,
-            pageSize: 20,
-            total,
-            onChange: (p) => setPage(p),
-            showTotal: (t) => `${t} tips`,
-          }}
-        />
-      </Card>
+      }
+    >
+      <ProTable<Tip>
+        columns={columns}
+        dataSource={data?.data || []}
+        loading={isLoading}
+        rowKey="id"
+        search={false}
+        toolBarRender={false}
+        pagination={{
+          current: page,
+          pageSize,
+          total: data?.pagination.total || 0,
+          onChange: (p, ps) => { setPage(p); setPageSize(ps); },
+          showSizeChanger: true,
+          showTotal: (total) => `${total} tips`,
+        }}
+      />
 
       <Modal
         title={editingTip ? 'Edit Tip' : 'Create Tip'}
         open={modalOpen}
         onOk={handleSubmit}
         onCancel={closeModal}
-        confirmLoading={submitting}
+        confirmLoading={createMutation.isPending || updateMutation.isPending}
         okText={editingTip ? 'Update' : 'Create'}
-        width={560}
+        width={600}
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
-          <Form.Item name="title" label="Title" rules={[{ required: true, min: 2, max: 100 }]}>
+          <Form.Item
+            name="title"
+            label="Title"
+            rules={[{ required: true, min: 2, max: 100 }]}
+          >
             <Input placeholder="e.g. Grooming Benefits" />
           </Form.Item>
-          <Form.Item name="body" label="Tip Content" rules={[{ required: true, min: 5, max: 500 }]}>
-            <TextArea rows={3} placeholder="The tip shown to users on their dashboard..." />
+
+          <Form.Item
+            name="body"
+            label="Tip Content"
+            rules={[{ required: true, min: 5, max: 500 }]}
+          >
+            <Input.TextArea rows={3} placeholder="The tip shown to users..." />
           </Form.Item>
-          <Form.Item name="category" label="Category" rules={[{ required: true }]}>
+
+          <Form.Item
+            name="category"
+            label="Category"
+            rules={[{ required: true }]}
+          >
             <Select options={CATEGORIES} />
           </Form.Item>
-          <Form.Item name="species" label="Target Species (leave empty for all)">
+
+          <Form.Item
+            name="species"
+            label="Target Species (leave empty for all)"
+          >
             <Select mode="multiple" options={SPECIES_OPTIONS} placeholder="All species" />
           </Form.Item>
+
           <Form.Item name="active" label="Active" valuePropName="checked">
             <Switch />
           </Form.Item>
         </Form>
       </Modal>
-    </Space>
+    </Card>
   );
-};
-
-export default TipsPage;
+}

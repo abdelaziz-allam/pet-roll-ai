@@ -1,41 +1,48 @@
-import { FastifyInstance } from 'fastify';
-import { schedulesService } from './schedules.service';
-import { createScheduleSchema, updateScheduleSchema } from './schedules.schema';
-import { requireAuth } from '../../middleware/require-auth';
+import type { FastifyInstance } from 'fastify';
+import {
+  createScheduleSchema,
+  updateScheduleSchema,
+  logCompletionSchema,
+} from './schedules.schema.js';
+import * as schedulesService from './schedules.service.js';
+import { requireAuth } from '../../middleware/require-auth.js';
 
-export async function schedulesRoutes(fastify: FastifyInstance) {
-  fastify.addHook('preHandler', requireAuth);
-
-  fastify.post('/pets/:petId/schedules', async (request, reply) => {
+export async function schedulesRoutes(app: FastifyInstance) {
+  // Create schedule
+  app.post('/pets/:petId/schedules', { preHandler: [requireAuth] }, async (request, reply) => {
     const { petId } = request.params as { petId: string };
-    const body = createScheduleSchema.parse(request.body);
-    const schedule = await schedulesService.createSchedule(petId, request.user!.uid, body);
-    return reply.code(201).send(schedule);
+    const body = createScheduleSchema.parse({ ...request.body as object, petId });
+    const result = await schedulesService.createSchedule(request.user!.uid, body);
+    return reply.status(201).send(result);
   });
 
-  fastify.get('/pets/:petId/schedules', async (request, reply) => {
+  // List active schedules for pet
+  app.get('/pets/:petId/schedules', { preHandler: [requireAuth] }, async (request, reply) => {
     const { petId } = request.params as { petId: string };
-    const { page = 1, limit = 20 } = request.query as any;
-    const result = await schedulesService.getSchedules(petId, request.user!.uid, +page, +limit);
-    return reply.code(200).send(result);
+    const result = await schedulesService.getSchedules(petId, request.user!.uid);
+    return reply.send(result);
   });
 
-  fastify.put('/pets/:petId/schedules/:scheduleId', async (request, reply) => {
-    const { scheduleId } = request.params as { petId: string; scheduleId: string };
+  // Update schedule
+  app.put('/pets/:petId/schedules/:id', { preHandler: [requireAuth] }, async (request, reply) => {
+    const { id } = request.params as { petId: string; id: string };
     const body = updateScheduleSchema.parse(request.body);
-    const schedule = await schedulesService.updateSchedule(scheduleId, request.user!.uid, body);
-    return reply.code(200).send(schedule);
+    const result = await schedulesService.updateSchedule(id, request.user!.uid, body);
+    return reply.send(result);
   });
 
-  fastify.delete('/pets/:petId/schedules/:scheduleId', async (request, reply) => {
-    const { scheduleId } = request.params as { petId: string; scheduleId: string };
-    await schedulesService.deleteSchedule(scheduleId, request.user!.uid);
-    return reply.code(204).send();
+  // Delete schedule
+  app.delete('/pets/:petId/schedules/:id', { preHandler: [requireAuth] }, async (request, reply) => {
+    const { id } = request.params as { petId: string; id: string };
+    await schedulesService.deleteSchedule(id, request.user!.uid);
+    return reply.status(204).send();
   });
 
-  fastify.post('/pets/:petId/schedules/:scheduleId/log', async (request, reply) => {
-    const { scheduleId } = request.params as { petId: string; scheduleId: string };
-    const result = await schedulesService.logCompletion(scheduleId, request.user!.uid);
-    return reply.code(200).send(result);
+  // Log completion
+  app.post('/pets/:petId/schedules/:id/log', { preHandler: [requireAuth] }, async (request, reply) => {
+    const { id } = request.params as { petId: string; id: string };
+    const body = logCompletionSchema.parse(request.body);
+    const result = await schedulesService.logCompletion(id, request.user!.uid, body);
+    return reply.status(201).send(result);
   });
 }

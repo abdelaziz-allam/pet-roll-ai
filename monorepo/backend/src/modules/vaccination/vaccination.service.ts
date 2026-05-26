@@ -1,91 +1,112 @@
-import { db, FieldValue } from '../../config/firebase';
+import { db } from '../../config/firebase.js';
+import { FieldValue } from 'firebase-admin/firestore';
+import type { CreateVaccinationInput, UpdateVaccinationInput } from './vaccination.schema.js';
 
-export class VaccinationService {
-  private vacRef = db.collection('vaccinations');
-  private petsRef = db.collection('pets');
+const VACCINATIONS = 'vaccinations';
+const VACCINE_TEMPLATES = 'vaccine_templates';
+const PETS = 'pets';
 
-  async verifyPetOwnership(petId: string, ownerId: string) {
-    const pet = await this.petsRef.doc(petId).get();
-    if (!pet.exists || pet.data()!.ownerId !== ownerId) {
-      const error: any = new Error('Pet not found');
-      error.statusCode = 404;
-      throw error;
-    }
-  }
-
-  async logVaccination(petId: string, ownerId: string, input: any) {
-    await this.verifyPetOwnership(petId, ownerId);
-    const normalized = {
-      ...input,
-      name: input.name || input.vaccineName,
-      vaccineName: input.vaccineName || input.name,
-      dateAdministered: input.dateAdministered || input.administeredDate,
-      administeredDate: input.administeredDate || input.dateAdministered,
-      veterinarian: input.veterinarian || input.vetName,
-    };
-    const data = {
-      ...normalized,
-      petId,
-      ownerId,
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    };
-    const doc = await this.vacRef.add(data);
-    return { id: doc.id, ...data };
-  }
-
-  async getVaccinations(petId: string, ownerId: string, page = 1, limit = 20) {
-    await this.verifyPetOwnership(petId, ownerId);
-
-    const countSnap = await this.vacRef.where('petId', '==', petId).count().get();
-    const total = countSnap.data().count;
-    const offset = (page - 1) * limit;
-
-    const snapshot = await this.vacRef
-      .where('petId', '==', petId)
-      .orderBy('createdAt', 'desc')
-      .offset(offset)
-      .limit(limit)
-      .get();
-
-    const records = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    return { data: records, total, page, limit, totalPages: Math.ceil(total / limit) };
-  }
-
-  async getUpcoming(petId: string, ownerId: string) {
-    await this.verifyPetOwnership(petId, ownerId);
-    const now = new Date().toISOString();
-    const snapshot = await this.vacRef
-      .where('petId', '==', petId)
-      .where('nextDueDate', '>=', now)
-      .orderBy('nextDueDate', 'asc')
-      .limit(10)
-      .get();
-
-    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  }
-
-  async updateVaccination(vacId: string, ownerId: string, input: any) {
-    const doc = await this.vacRef.doc(vacId).get();
-    if (!doc.exists || doc.data()!.ownerId !== ownerId) {
-      const error: any = new Error('Vaccination record not found');
-      error.statusCode = 404;
-      throw error;
-    }
-    await this.vacRef.doc(vacId).update({ ...input, updatedAt: FieldValue.serverTimestamp() });
-    const updated = await this.vacRef.doc(vacId).get();
-    return { id: updated.id, ...updated.data() };
-  }
-
-  async deleteVaccination(vacId: string, ownerId: string) {
-    const doc = await this.vacRef.doc(vacId).get();
-    if (!doc.exists || doc.data()!.ownerId !== ownerId) {
-      const error: any = new Error('Vaccination record not found');
-      error.statusCode = 404;
-      throw error;
-    }
-    await this.vacRef.doc(vacId).delete();
+async function verifyPetOwnership(petId: string, ownerId: string) {
+  const petDoc = await db.collection(PETS).doc(petId).get();
+  if (!petDoc.exists || petDoc.data()?.ownerId !== ownerId) {
+    throw Object.assign(new Error('Pet not found or access denied'), { statusCode: 404 });
   }
 }
 
-export const vaccinationService = new VaccinationService();
+async function calculateNextDueDate(vaccineId: string, dateAdministered: string): Promise<string | null> {
+  const templateDoc = await db.collection(VACCINE_TEMPLATES).doc(vaccineId).get();
+  if (!templateDoc.exists) {
+    return null;
+  }
+
+  const template = templateDoc.data();
+  if (!template?.intervalDays) {
+    return null;
+  }
+
+  const administered = new Date(dateAdministered);
+  administered.setDate(administered.getDate() + template.intervalDays);
+  return administered.toISOString();
+}
+
+export async function logVaccination(ownerId: string, input: CreateVaccinationInput) {
+  await verifyPetOwnership(input.petId, ownerId);
+
+  const nextDueDate = await calculateNextDueDate(input.vaccineId, input.dateAdministered);
+
+  const vaccinationData = {
+    ...input,
+    ownerId,
+    nextDueDate,
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+  };
+
+  const docRef = await db.collection(VACCINATIONS).add(vaccinationData);
+  return { id: docRef.id, ...vaccinationData };
+}
+
+export async function getVaccinations(petId: string, ownerId: string) {
+  await verifyPetOwnership(petId, ownerId);
+
+  const snapshot = await db
+    .collection(VACCINATIONS)
+    .where('petId', '==', petId)
+    .where('ownerId', '==', ownerId)
+    .orderBy('dateAdministered', 'desc')
+    .get();
+
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+}
+
+export async function getUpcoming(ownerId: string) {
+  const now = new Date();
+  const thirtyDaysFromNow = new Date();
+  thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+
+  const snapshot = await db
+    .collection(VACCINATIONS)
+    .where('ownerId', '==', ownerId)
+    .where('nextDueDate', '!=', null)
+    .where('nextDueDate', '<=', thirtyDaysFromNow.toISOString())
+    .orderBy('nextDueDate', 'asc')
+    .get();
+
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    const isOverdue = data.nextDueDate < now.toISOString();
+    return { id: doc.id, ...data, isOverdue };
+  });
+}
+
+export async function updateVaccination(id: string, ownerId: string, input: UpdateVaccinationInput) {
+  const doc = await db.collection(VACCINATIONS).doc(id).get();
+  if (!doc.exists || doc.data()?.ownerId !== ownerId) {
+    throw Object.assign(new Error('Vaccination record not found'), { statusCode: 404 });
+  }
+
+  const updateData: Record<string, any> = {
+    ...input,
+    updatedAt: FieldValue.serverTimestamp(),
+  };
+
+  // Recalculate nextDueDate if dateAdministered or vaccineId changed
+  if (input.dateAdministered || input.vaccineId) {
+    const currentData = doc.data()!;
+    const vaccineId = input.vaccineId || currentData.vaccineId;
+    const dateAdministered = input.dateAdministered || currentData.dateAdministered;
+    updateData.nextDueDate = await calculateNextDueDate(vaccineId, dateAdministered);
+  }
+
+  await db.collection(VACCINATIONS).doc(id).update(updateData);
+  return { id, ...doc.data(), ...updateData };
+}
+
+export async function deleteVaccination(id: string, ownerId: string) {
+  const doc = await db.collection(VACCINATIONS).doc(id).get();
+  if (!doc.exists || doc.data()?.ownerId !== ownerId) {
+    throw Object.assign(new Error('Vaccination record not found'), { statusCode: 404 });
+  }
+
+  await db.collection(VACCINATIONS).doc(id).delete();
+}

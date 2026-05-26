@@ -1,20 +1,27 @@
 import { z } from 'zod';
 
 export const createHealthRecordSchema = z.object({
-  type: z.enum(['checkup', 'illness', 'injury', 'surgery', 'dental', 'other']),
-  date: z.string(),
-  title: z.string().min(1).max(100),
-  description: z.string().max(1000).optional(),
-  veterinarian: z.string().optional(),
-  clinic: z.string().optional(),
-  weight: z.number().positive().optional(),
-  temperature: z.number().optional(),
-  notes: z.string().max(500).optional(),
-  nextVisitDate: z.string().optional(),
-  attachments: z.array(z.string().url()).optional(),
+  petId: z.string().min(1),
+  type: z.enum(['vet_visit', 'surgery', 'diagnosis', 'medication', 'injury', 'test_result', 'other']),
+  title: z.string().min(2).max(200),
+  description: z.string().optional(),
+  date: z.string().datetime(),
+  vetName: z.string().optional(),
+  vetClinic: z.string().optional(),
+  cost: z.number().positive().optional(),
+  currency: z.string().length(3).optional(),
 });
 
-export const updateHealthRecordSchema = createHealthRecordSchema.partial();
+export const updateHealthRecordSchema = z.object({
+  type: z.enum(['vet_visit', 'surgery', 'diagnosis', 'medication', 'injury', 'test_result', 'other']).optional(),
+  title: z.string().min(2).max(200).optional(),
+  description: z.string().optional(),
+  date: z.string().datetime().optional(),
+  vetName: z.string().optional(),
+  vetClinic: z.string().optional(),
+  cost: z.number().positive().optional(),
+  currency: z.string().length(3).optional(),
+});
 
 export type CreateHealthRecordInput = z.infer<typeof createHealthRecordSchema>;
 export type UpdateHealthRecordInput = z.infer<typeof updateHealthRecordSchema>;

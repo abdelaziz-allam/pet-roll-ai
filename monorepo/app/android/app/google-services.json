@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "834040996278",
+    "project_id": "petroll-production",
+    "storage_bucket": "petroll-production.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:834040996278:android:848d61d98de614e4672117",
+        "android_client_info": {
+          "package_name": "com.petroll.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "834040996278-0lmec5vdgu349d8fktcog17qmd2ae3tt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRO-P9OJOH75N-w_DsUU-9bOEJ-roaO_4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "834040996278-0lmec5vdgu349d8fktcog17qmd2ae3tt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:834040996278:android:3ebc1f496cba3b28672117",
+        "android_client_info": {
+          "package_name": "com.petroll.pet_roll"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "834040996278-0lmec5vdgu349d8fktcog17qmd2ae3tt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRO-P9OJOH75N-w_DsUU-9bOEJ-roaO_4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "834040996278-0lmec5vdgu349d8fktcog17qmd2ae3tt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

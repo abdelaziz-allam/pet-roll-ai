@@ -1,0 +1,77 @@
+name: Flutter Build & Test
+
+on:
+  push:
+    branches: [main, develop]
+    paths: ['monorepo/app/**']
+  pull_request:
+    paths: ['monorepo/app/**']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.x'
+          channel: 'stable'
+
+      - name: Install dependencies
+        working-directory: monorepo/app
+        run: flutter pub get
+
+      - name: Analyze
+        working-directory: monorepo/app
+        run: flutter analyze
+
+      - name: Run tests
+        working-directory: monorepo/app
+        run: flutter test
+
+  build-android:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.x'
+          channel: 'stable'
+
+      - name: Install dependencies
+        working-directory: monorepo/app
+        run: flutter pub get
+
+      - name: Build APK
+        working-directory: monorepo/app
+        run: flutter build apk --release --dart-define=ENV=production
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: petroll-release-apk
+          path: monorepo/app/build/app/outputs/flutter-apk/app-release.apk
+
+  build-ios:
+    needs: test
+    runs-on: macos-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.x'
+          channel: 'stable'
+
+      - name: Install dependencies
+        working-directory: monorepo/app
+        run: flutter pub get
+
+      - name: Build iOS (no codesign)
+        working-directory: monorepo/app
+        run: flutter build ios --release --no-codesign
