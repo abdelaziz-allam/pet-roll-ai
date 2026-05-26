@@ -6,11 +6,12 @@ export function formatDateTime(date: string | Date): string {
   return new Date(date).toLocaleString();
 }
 
-export function formatRelativeTime(date: string | Date): string {
+export function relativeTime(date: string | Date): string {
   const now = Date.now();
   const then = new Date(date).getTime();
   const diff = now - then;
   const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return 'just now';
   if (minutes < 60) return `${minutes}m ago`;
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours}h ago`;
@@ -19,5 +20,9 @@ export function formatRelativeTime(date: string | Date): string {
 }
 
 export function timeAgo(date: string | Date): string {
-  return formatRelativeTime(date);
+  return relativeTime(date);
+}
+
+export function formatRelativeTime(date: string | Date): string {
+  return relativeTime(date);
 }
