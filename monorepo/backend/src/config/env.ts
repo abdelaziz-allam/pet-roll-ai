@@ -21,7 +21,7 @@ const envSchema = z.object({
 
   FCM_SERVER_KEY: z.string().optional(),
 
-  ALLOWED_ORIGINS: z.string().default('http://localhost:3001,http://localhost:3002,https://petfolioo.com,https://admin.petfolioo.com'),
+  CORS_ORIGINS: z.string().default('http://localhost:3001,http://localhost:3002,https://petfolioo.com,https://admin.petfolioo.com'),
 
   RATE_LIMIT_MAX: z.coerce.number().default(100),
   RATE_LIMIT_WINDOW: z.coerce.number().default(60000),

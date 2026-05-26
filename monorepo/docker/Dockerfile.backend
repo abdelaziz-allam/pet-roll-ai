@@ -7,8 +7,8 @@ RUN npm ci
 
 COPY backend/tsconfig.json ./
 COPY backend/src ./src
-RUN npx tsc --noEmitOnError false --skipLibCheck true || true
-RUN test -d dist && test -f dist/server.js || (echo "TypeScript build did not produce dist/server.js" && exit 1)
+RUN npx tsc || true
+RUN test -f dist/server.js || (echo "Build failed: dist/server.js not found" && exit 1)
 
 FROM node:20-alpine AS runner
 
