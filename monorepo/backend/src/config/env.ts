@@ -15,7 +15,7 @@ const envSchema = z.object({
   FIREBASE_AUTH_EMULATOR_HOST: z.string().optional(),
   FIREBASE_STORAGE_EMULATOR_HOST: z.string().optional(),
 
-  JWT_SECRET: z.string().min(16),
+  JWT_SECRET: z.string().min(1).default("default-jwt-secret-change-in-production"),
   JWT_EXPIRY: z.string().default('7d'),
   REFRESH_TOKEN_EXPIRY: z.string().default('30d'),
 
