@@ -3,9 +3,9 @@ name: Flutter Build & Test
 on:
   push:
     branches: [main, develop]
-    paths: ["monorepo/app/**", ".github/workflows/flutter-build.yml"]
+    paths: ["monorepo/app/**", ".github/workflows/mobile-ci.yml"]
   pull_request:
-    paths: ["monorepo/app/**", ".github/workflows/flutter-build.yml"]
+    paths: ["monorepo/app/**", ".github/workflows/mobile-ci.yml"]
 
   workflow_dispatch:
 
