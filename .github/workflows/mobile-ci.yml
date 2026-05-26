@@ -67,13 +67,13 @@ jobs:
         working-directory: monorepo/app
         run: |
           flutter build apk --release \
-            --dart-define=API_BASE_URL=${{ secrets.API_URL || 'https://petroll-api-834040996278.europe-north1.run.app/api/v1' }}
+            --dart-define=API_BASE_URL=${{ secrets.API_URL || 'https://api.petfolioo.com/api/v1' }}
 
       - name: Build AAB
         working-directory: monorepo/app
         run: |
           flutter build appbundle --release \
-            --dart-define=API_BASE_URL=${{ secrets.API_URL || 'https://petroll-api-834040996278.europe-north1.run.app/api/v1' }}
+            --dart-define=API_BASE_URL=${{ secrets.API_URL || 'https://api.petfolioo.com/api/v1' }}
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

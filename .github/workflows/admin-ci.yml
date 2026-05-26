@@ -69,8 +69,7 @@ jobs:
           IMAGE=${{ env.REGISTRY }}/admin:${{ github.sha }}
           IMAGE_LATEST=${{ env.REGISTRY }}/admin:latest
 
-          API_URL=$(gcloud run services describe petroll-api --region ${{ env.REGION }} --format='value(status.url)')
-          API_URL="${API_URL}/api/v1"
+          API_URL="https://api.petfolioo.com/api/v1"
           echo "Building admin with API_URL=${API_URL}"
 
           docker build \
