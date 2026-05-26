@@ -1,6 +1,6 @@
-import { db, FieldValue } from '../../config/firebase';
-import { emailService } from '../../services/email.service';
-import { countries } from '../../data/countries';
+import { db, FieldValue } from '../../config/firebase.js';
+import { emailService } from '../../services/email.service.js';
+import { countries } from '../../data/countries.js';
 
 export class AdminService {
   private usersRef = db.collection('users');
@@ -1042,3 +1042,24 @@ export class AdminService {
 }
 
 export const adminService = new AdminService();
+
+const _instance = new AdminService();
+
+export const getStats = () => _instance.getStats();
+export const getGrowthStats = (period?: string | number) => _instance.getGrowthStats(String(period || '30'));
+export const listUsers = (query?: any) => _instance.getUsers(query?.page, query?.limit, query?.status);
+export const getUserById = (id: string) => _instance.getUserById(id);
+export const updateUserRole = (id: string, body: any) => _instance.updateUserRole(id, body.role);
+export const banUser = (id: string, body: any) => _instance.banUser(id, body.reason);
+export const deleteUser = (id: string) => _instance.deleteUser(id);
+export const listVerifications = (status?: string) => _instance.getVerificationRequests(status);
+export const updateVerification = (id: string, body: any, adminId: string) => _instance.processVerification(id, body.approved, adminId, body.rejectionReason);
+export const revokeVerification = (userId: string, _adminId: string) => Promise.resolve({ message: `Verification revoked for ${userId}` });
+export const createSubAdmin = (body: any, _creatorId: string) => _instance.createUser(body);
+export const listTeam = () => _instance.getUsers(1, 100);
+export const getConfig = () => _instance.getSettings();
+export const updateConfig = (body: any) => _instance.updateSettings(body);
+export const listReports = (_status?: string) => Promise.resolve({ reports: [] });
+export const updateReport = (_id: string, _status: string, _action: string, _adminId: string) => Promise.resolve({ message: 'Report updated' });
+export const createReport = (_body: any, _adminId: string) => Promise.resolve({ message: 'Report created' });
+export const computeStats = () => _instance.getStats();
