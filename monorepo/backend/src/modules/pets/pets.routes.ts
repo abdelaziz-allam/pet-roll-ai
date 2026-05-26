@@ -124,6 +124,60 @@ export async function petsRoutes(fastify: FastifyInstance) {
     return reply.code(200).send(result);
   });
 
+  // --- Dashboard Summary ---
+  fastify.get('/:petId/summary', async (request, reply) => {
+    const { petId } = request.params as { petId: string };
+    const ownerId = request.user!.uid;
+
+    const petDoc = await db.collection('pets').doc(petId).get();
+    if (!petDoc.exists || petDoc.data()!.ownerId !== ownerId) {
+      return reply.code(404).send({ error: 'Pet not found' });
+    }
+    const petData = petDoc.data()!;
+
+    const now = new Date().toISOString();
+
+    const vacSnap = await db.collection('vaccinations')
+      .where('petId', '==', petId)
+      .get();
+    const vaccinations = vacSnap.docs.map((d) => d.data());
+    const overdueVax = vaccinations.filter((v: any) => v.nextDueDate && v.nextDueDate < now);
+    let vaccineStatus: string;
+    if (vaccinations.length === 0) {
+      vaccineStatus = 'No records';
+    } else if (overdueVax.length > 0) {
+      vaccineStatus = `${overdueVax.length} overdue`;
+    } else {
+      vaccineStatus = 'Up to date';
+    }
+
+    const healthSnap = await db.collection('health_records')
+      .where('petId', '==', petId)
+      .get();
+    const healthRecords = healthSnap.docs.map((d) => d.data());
+    const futureCheckups = healthRecords
+      .filter((r: any) => r.nextVisitDate && r.nextVisitDate >= now)
+      .sort((a: any, b: any) => (a.nextVisitDate || '').localeCompare(b.nextVisitDate || ''));
+    const nextCheckup = futureCheckups.length > 0
+      ? futureCheckups[0].nextVisitDate
+      : null;
+
+    const latestWeight = petData.weight
+      || healthRecords
+          .filter((r: any) => r.weight)
+          .sort((a: any, b: any) => (b.date || '').localeCompare(a.date || ''))
+          .map((r: any) => r.weight)[0]
+      || null;
+
+    return reply.code(200).send({
+      vaccineStatus,
+      nextCheckup,
+      weight: latestWeight,
+      totalVaccinations: vaccinations.length,
+      totalHealthRecords: healthRecords.length,
+    });
+  });
+
   // --- Health Certification ---
 
   fastify.post('/:petId/health-certification', async (request, reply) => {
