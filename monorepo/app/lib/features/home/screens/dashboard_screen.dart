@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/router/route_names.dart';
+import '../../../core/widgets/birthday_celebration.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../../../core/widgets/avatar_widget.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -23,52 +24,56 @@ class DashboardScreen extends ConsumerWidget {
     final userProfile = ref.watch(userProfileProvider);
     final userPets = ref.watch(userPetsProvider);
     final selectedPetId = ref.watch(selectedPetProvider);
+    final hasBirthdayPet = userPets.valueOrNull?.any((p) => p.isBirthdayToday) ?? false;
 
-    return Scaffold(
-      backgroundColor: AppColors.bgSecondary,
-      body: RefreshIndicator(
-        color: AppColors.brandPrimary,
-        onRefresh: () async {
-          ref.invalidate(userPetsProvider);
-          ref.invalidate(userProfileProvider);
-          ref.invalidate(dailyTipProvider);
-          ref.invalidate(petSummaryProvider);
-        },
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            SliverToBoxAdapter(child: _HeaderSection(userProfile: userProfile)),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                child: _PetCarousel(
-                  petsAsync: userPets,
-                  selectedPetId: selectedPetId,
-                  onPetSelected: (petId) {
-                    ref.read(selectedPetProvider.notifier).state = petId;
-                  },
+    return BirthdayCelebration(
+      showCelebration: hasBirthdayPet,
+      child: Scaffold(
+        backgroundColor: AppColors.bgSecondary,
+        body: RefreshIndicator(
+          color: AppColors.brandPrimary,
+          onRefresh: () async {
+            ref.invalidate(userPetsProvider);
+            ref.invalidate(userProfileProvider);
+            ref.invalidate(dailyTipProvider);
+            ref.invalidate(petSummaryProvider);
+          },
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(child: _HeaderSection(userProfile: userProfile)),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                  child: _PetCarousel(
+                    petsAsync: userPets,
+                    selectedPetId: selectedPetId,
+                    onPetSelected: (petId) {
+                      ref.read(selectedPetProvider.notifier).state = petId;
+                    },
+                  ),
                 ),
               ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
-                child: _QuickActionsSection(),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
+                  child: _QuickActionsSection(),
+                ),
               ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
-                child: _StatsOverview(),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
+                  child: _StatsOverview(),
+                ),
               ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 28, 20, 100),
-                child: _TipsSection(),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 100),
+                  child: _TipsSection(),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -267,40 +272,55 @@ class _PetAvatarCard extends StatelessWidget {
           color: isSelected ? AppColors.brandPrimary.withOpacity(0.08) : AppColors.bgPrimary,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? AppColors.brandPrimary : AppColors.borderLight,
-            width: isSelected ? 2 : 1,
+            color: pet.isBirthdayToday
+                ? const Color(0xFFFF6B6B)
+                : isSelected
+                    ? AppColors.brandPrimary
+                    : AppColors.borderLight,
+            width: (isSelected || pet.isBirthdayToday) ? 2 : 1,
           ),
           boxShadow: isSelected
               ? [BoxShadow(color: AppColors.shadowPrimary, blurRadius: 12, offset: const Offset(0, 4))]
               : [BoxShadow(color: AppColors.shadowLight, blurRadius: 8, offset: const Offset(0, 2))],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Stack(
+          clipBehavior: Clip.none,
           children: [
-            Container(
-              padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: isSelected
-                    ? Border.all(color: AppColors.brandPrimary, width: 2)
-                    : null,
-              ),
-              child: AvatarWidget(
-                imageUrl: pet.primaryPhotoUrl,
-                name: pet.name,
-                size: 44,
-              ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: isSelected
+                        ? Border.all(color: AppColors.brandPrimary, width: 2)
+                        : null,
+                  ),
+                  child: AvatarWidget(
+                    imageUrl: pet.primaryPhotoUrl,
+                    name: pet.name,
+                    size: 44,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  pet.name,
+                  style: AppTypography.caption.copyWith(
+                    color: isSelected ? AppColors.brandPrimary : AppColors.textPrimary,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              pet.name,
-              style: AppTypography.caption.copyWith(
-                color: isSelected ? AppColors.brandPrimary : AppColors.textPrimary,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            if (pet.isBirthdayToday)
+              const Positioned(
+                top: -4,
+                right: -4,
+                child: Text('🎂', style: TextStyle(fontSize: 16)),
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
           ],
         ),
       ),

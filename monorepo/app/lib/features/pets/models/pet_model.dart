@@ -162,4 +162,16 @@ class PetModel {
   }
 
   String? get primaryPhotoUrl => photos.isNotEmpty ? photos.first.url : null;
+
+  bool get isBirthdayToday {
+    if (dateOfBirth == null) return false;
+    final now = DateTime.now();
+    return dateOfBirth!.month == now.month && dateOfBirth!.day == now.day;
+  }
+
+  String get formattedDateOfBirth {
+    if (dateOfBirth == null) return 'Not set';
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${dateOfBirth!.day} ${months[dateOfBirth!.month - 1]} ${dateOfBirth!.year}';
+  }
 }

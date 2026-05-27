@@ -31,15 +31,23 @@ class BirthdayNotificationService {
 
     await _plugin.initialize(initSettings);
 
-    await _plugin
+    final androidPlugin = _plugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(const AndroidNotificationChannel(
-          'pet_birthday',
-          'Pet Birthdays',
-          description: 'Birthday notifications for your pets',
-          importance: Importance.high,
-        ));
+            AndroidFlutterLocalNotificationsPlugin>();
+
+    await androidPlugin?.createNotificationChannel(const AndroidNotificationChannel(
+      'pet_birthday',
+      'Pet Birthdays',
+      description: 'Birthday notifications for your pets',
+      importance: Importance.high,
+    ));
+
+    await androidPlugin?.createNotificationChannel(const AndroidNotificationChannel(
+      'vaccination_reminder',
+      'Vaccination Reminders',
+      description: 'Reminders for upcoming vaccination doses',
+      importance: Importance.high,
+    ));
 
     _initialized = true;
   }
@@ -123,5 +131,58 @@ class BirthdayNotificationService {
         );
       }
     }
+  }
+
+  Future<void> scheduleVaccinationReminder({
+    required String vaccinationId,
+    required int doseNumber,
+    required String vaccineName,
+    required DateTime doseDate,
+  }) async {
+    await init();
+
+    final now = tz.TZDateTime.now(tz.local);
+    final scheduledDate = tz.TZDateTime(
+      tz.local,
+      doseDate.year,
+      doseDate.month,
+      doseDate.day,
+      9,
+    );
+
+    if (scheduledDate.isBefore(now)) return;
+
+    final id = ('$vaccinationId-dose$doseNumber').hashCode.abs() % 100000;
+
+    await _plugin.zonedSchedule(
+      id,
+      'Vaccination Reminder: $vaccineName',
+      'Dose $doseNumber is due today. Don\'t forget to visit your vet!',
+      scheduledDate,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'vaccination_reminder',
+          'Vaccination Reminders',
+          channelDescription: 'Reminders for upcoming vaccination doses',
+          importance: Importance.high,
+          priority: Priority.high,
+          icon: '@mipmap/ic_launcher',
+        ),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+      ),
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+    );
+  }
+
+  Future<void> cancelVaccinationReminder(String vaccinationId, int doseNumber) async {
+    await init();
+    final id = ('$vaccinationId-dose$doseNumber').hashCode.abs() % 100000;
+    await _plugin.cancel(id);
   }
 }

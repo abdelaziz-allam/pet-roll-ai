@@ -56,7 +56,7 @@ class _PetDetailContent extends ConsumerWidget {
                 child: Column(
                   children: [
                     Transform.translate(
-                      offset: const Offset(0, -40),
+                      offset: const Offset(0, -20),
                       child: _InfoCard(pet: pet),
                     ),
                     _ManageSection(petId: pet.id),

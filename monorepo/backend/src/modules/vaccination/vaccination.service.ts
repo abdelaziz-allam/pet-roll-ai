@@ -88,6 +88,36 @@ export async function updateVaccination(id: string, ownerId: string, input: Upda
     throw Object.assign(new Error('Vaccination record not found'), { statusCode: 404 });
   }
 
+  const currentData = doc.data()!;
+
+  // Enforce: cannot mark vaccination as completed unless all doses are completed
+  if (input.status === 'completed') {
+    const doses = input.doses ?? currentData.doses ?? [];
+    if (doses.length === 0) {
+      throw Object.assign(
+        new Error('Cannot mark vaccination as completed: no doses defined'),
+        { statusCode: 400 }
+      );
+    }
+    const allCompleted = doses.every((d: any) => d.status === 'completed');
+    if (!allCompleted) {
+      throw Object.assign(
+        new Error('Cannot mark vaccination as completed: all doses must be completed first'),
+        { statusCode: 400 }
+      );
+    }
+  }
+
+  // Auto-set status to completed when all doses become completed
+  if (input.doses && input.doses.length > 0 && !input.status) {
+    const allCompleted = input.doses.every((d) => d.status === 'completed');
+    if (allCompleted) {
+      (input as any).status = 'completed';
+    } else {
+      (input as any).status = 'active';
+    }
+  }
+
   const updateData: Record<string, any> = {
     ...input,
     updatedAt: FieldValue.serverTimestamp(),
@@ -95,7 +125,6 @@ export async function updateVaccination(id: string, ownerId: string, input: Upda
 
   // Recalculate nextDueDate if dateAdministered or vaccineId changed
   if (input.dateAdministered || input.vaccineId) {
-    const currentData = doc.data()!;
     const vaccineId = input.vaccineId || currentData.vaccineId;
     const dateAdministered = input.dateAdministered || currentData.dateAdministered;
     if (vaccineId) {
@@ -104,7 +133,7 @@ export async function updateVaccination(id: string, ownerId: string, input: Upda
   }
 
   await db.collection(VACCINATIONS).doc(id).update(updateData);
-  return { id, ...doc.data(), ...updateData };
+  return { id, ...currentData, ...updateData };
 }
 
 export async function deleteVaccination(id: string, ownerId: string) {

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 
 import '../services/auth_service.dart';
+import '../../pets/providers/pet_provider.dart';
 
 final authStateProvider = StreamProvider<fb.User?>((ref) {
   return fb.FirebaseAuth.instance.authStateChanges();
@@ -68,6 +69,8 @@ class AuthController extends StateNotifier<AuthState> {
         email: email,
         password: password,
       );
+      _ref.invalidate(userPetsProvider);
+      _ref.invalidate(userProfileProvider);
       state = state.copyWith(isLoading: false);
       return true;
     } catch (e) {
@@ -80,6 +83,8 @@ class AuthController extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       await _ref.read(authServiceProvider).loginWithGoogle();
+      _ref.invalidate(userPetsProvider);
+      _ref.invalidate(userProfileProvider);
       state = state.copyWith(isLoading: false);
       return true;
     } catch (e) {
