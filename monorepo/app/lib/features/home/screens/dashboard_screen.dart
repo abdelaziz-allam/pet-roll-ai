@@ -226,7 +226,13 @@ class _PetCarousel extends StatelessWidget {
                   return _PetAvatarCard(
                     pet: pet,
                     isSelected: isSelected,
-                    onTap: () => onPetSelected(pet.id),
+                    onTap: () {
+                      onPetSelected(pet.id);
+                      context.pushNamed(
+                        RouteNames.petDetail,
+                        pathParameters: {'petId': pet.id},
+                      );
+                    },
                   );
                 },
               ),

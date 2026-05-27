@@ -19,6 +19,20 @@ export async function petsRoutes(app: FastifyInstance) {
     return reply.send(pets);
   });
 
+  // Get species list
+  app.get('/species', { preHandler: [requireAuth] }, async (_request, reply) => {
+    const species = [
+      'dog', 'cat', 'bird', 'rabbit', 'horse', 'hamster', 'guinea pig',
+      'fish', 'turtle', 'snake', 'lizard', 'parrot', 'ferret', 'chinchilla',
+      'hedgehog', 'frog', 'hermit crab', 'gerbil', 'mouse', 'rat',
+      'sugar glider', 'axolotl', 'chameleon', 'gecko', 'iguana',
+      'cockatiel', 'canary', 'dove', 'pigeon', 'duck', 'chicken',
+      'goat', 'sheep', 'pig', 'cow', 'donkey', 'alpaca', 'llama',
+      'other',
+    ];
+    return reply.send(species);
+  });
+
   // Get breeds (search/list from breeds collection)
   app.get('/breeds', { preHandler: [requireAuth] }, async (request, reply) => {
     const { species, search } = request.query as { species?: string; search?: string };

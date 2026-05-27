@@ -1,5 +1,11 @@
 import { z } from 'zod';
 
+const petPhotoSchema = z.object({
+  url: z.string(),
+  path: z.string(),
+  uploadedAt: z.string(),
+});
+
 export const createPetSchema = z.object({
   name: z.string().min(2).max(50),
   species: z.string().min(1),
@@ -16,7 +22,9 @@ export const createPetSchema = z.object({
   notes: z.string().optional(),
 });
 
-export const updatePetSchema = createPetSchema.partial();
+export const updatePetSchema = createPetSchema.partial().extend({
+  photos: z.array(petPhotoSchema).max(50).optional(),
+});
 
 export type CreatePetInput = z.infer<typeof createPetSchema>;
 export type UpdatePetInput = z.infer<typeof updatePetSchema>;
