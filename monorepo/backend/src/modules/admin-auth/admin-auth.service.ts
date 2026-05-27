@@ -78,7 +78,7 @@ export class AdminAuthService {
       lastLoginAt: FieldValue.serverTimestamp(),
     });
 
-    const tokens = this.generateTokens(doc.id, adminUser.email, 'admin');
+    const tokens = this.generateTokens(doc.id, adminUser.email, adminUser.role);
     const { passwordHash, salt, ...safeUser } = adminUser;
     return { user: { id: doc.id, ...safeUser }, ...tokens };
   }
@@ -119,7 +119,7 @@ export class AdminAuthService {
       lastLoginAt: FieldValue.serverTimestamp(),
     });
 
-    const tokens = this.generateTokens(doc.id, adminUser.email, 'admin');
+    const tokens = this.generateTokens(doc.id, adminUser.email, adminUser.role);
     const { passwordHash, salt, ...safeUser } = adminUser;
     return { user: { id: doc.id, ...safeUser }, ...tokens };
   }
@@ -241,7 +241,7 @@ export class AdminAuthService {
       throw error;
     }
     const data = doc.data()!;
-    return this.generateTokens(uid, data.email, 'admin');
+    return this.generateTokens(uid, data.email, data.role);
   }
 
   // --- Admin User Management ---
@@ -403,9 +403,9 @@ export class AdminAuthService {
     return { message: 'Super admin seeded: admin@petfolioo.com', seeded: true };
   }
 
-  private generateTokens(uid: string, email: string, type: string) {
+  private generateTokens(uid: string, email: string, role: string) {
     const accessToken = jwt.sign(
-      { uid, email, type: 'admin', userType: type },
+      { uid, email, type: 'admin', role },
       env.JWT_SECRET,
       { expiresIn: env.JWT_EXPIRY as any }
     );
