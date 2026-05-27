@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { ZodError } from 'zod';
 
-export async function errorHandler(app: FastifyInstance) {
+export default async function errorHandler(app: FastifyInstance) {
   app.setErrorHandler((error, request, reply) => {
     app.log.error(error);
 

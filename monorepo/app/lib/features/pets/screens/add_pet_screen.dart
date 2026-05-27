@@ -10,6 +10,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/loading_indicator.dart';
+import '../../notifications/services/birthday_notification_service.dart';
 import '../providers/pet_provider.dart';
 import '../services/pet_service.dart';
 
@@ -99,7 +100,9 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
       };
 
       if (_selectedBreedId != null) data['breedId'] = _selectedBreedId;
-      if (_dateOfBirth != null) data['dateOfBirth'] = _dateOfBirth!.toIso8601String();
+      if (_dateOfBirth != null) {
+        data['dateOfBirth'] = '${_dateOfBirth!.year.toString().padLeft(4, '0')}-${_dateOfBirth!.month.toString().padLeft(2, '0')}-${_dateOfBirth!.day.toString().padLeft(2, '0')}';
+      }
       if (_weightController.text.isNotEmpty) {
         data['weight'] = double.tryParse(_weightController.text);
         data['weightUnit'] = _weightUnit;
@@ -110,6 +113,15 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
 
       for (final photo in _photos) {
         await petService.uploadPhoto(pet.id, photo.path);
+      }
+
+      if (_dateOfBirth != null) {
+        final birthdayService = ref.read(birthdayNotificationServiceProvider);
+        await birthdayService.scheduleBirthdayNotification(
+          petId: pet.id,
+          petName: _nameController.text.trim(),
+          dateOfBirth: _dateOfBirth!,
+        );
       }
 
       ref.invalidate(userPetsProvider);

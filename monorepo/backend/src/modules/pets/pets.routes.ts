@@ -79,7 +79,13 @@ export async function petsRoutes(app: FastifyInstance) {
   // Upload pet photo
   app.post('/:petId/photos', { preHandler: [requireAuth] }, async (request, reply) => {
     const { petId } = request.params as { petId: string };
-    const data = await request.file();
+
+    let data;
+    try {
+      data = await request.file();
+    } catch (err: any) {
+      return reply.status(400).send({ message: 'Failed to parse file upload: ' + err.message });
+    }
 
     if (!data) {
       return reply.status(400).send({ message: 'No file uploaded' });
@@ -102,9 +108,10 @@ export async function petsRoutes(app: FastifyInstance) {
     const result = await uploadImage(buffer, `pets/${petId}`, data.mimetype, {
       ownerId: request.user!.uid,
     });
-    const photo = await petsService.addPetPhoto(petId, request.user!.uid, result.url, result.path);
+    await petsService.addPetPhoto(petId, request.user!.uid, result.url, result.path);
 
-    return reply.status(201).send(photo);
+    const updatedPet = await petsService.getPetById(petId, request.user!.uid);
+    return reply.status(201).send(updatedPet);
   });
 
   // Remove pet photo

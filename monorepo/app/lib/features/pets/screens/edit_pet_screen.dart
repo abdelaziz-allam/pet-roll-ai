@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
@@ -9,6 +10,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../../../core/widgets/error_view.dart';
+import '../../notifications/services/birthday_notification_service.dart';
 import '../models/pet_model.dart';
 import '../providers/pet_provider.dart';
 import '../services/pet_service.dart';
@@ -31,6 +33,7 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
 
   String _selectedSpecies = 'dog';
   String _selectedGender = 'male';
+  DateTime? _dateOfBirth;
   bool _isNeutered = false;
   bool _isAvailableForMating = false;
   bool _isSaving = false;
@@ -69,6 +72,7 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
     _weightController.text = pet.weight?.toString() ?? '';
     _selectedSpecies = pet.species;
     _selectedGender = pet.gender;
+    _dateOfBirth = pet.dateOfBirth;
     _isNeutered = pet.isNeutered;
     _isAvailableForMating = pet.isAvailableForMating;
     _photos = List.from(pet.photos);
@@ -126,6 +130,49 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
                     controller: _breedController,
                     label: 'Breed',
                     hint: 'Enter breed',
+                  ),
+                  const SizedBox(height: 20),
+                  Text('Date of Birth', style: AppTypography.label.copyWith(color: AppColors.textPrimary)),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: _dateOfBirth ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime.now(),
+                      );
+                      if (date != null) setState(() => _dateOfBirth = date);
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: AppColors.bgPrimary,
+                        border: Border.all(color: AppColors.borderLight),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.cake_rounded, size: 20, color: _dateOfBirth != null ? AppColors.brandPrimary : AppColors.textHint),
+                          const SizedBox(width: 12),
+                          Text(
+                            _dateOfBirth != null
+                                ? DateFormat('dd MMM yyyy').format(_dateOfBirth!)
+                                : 'Select date of birth',
+                            style: AppTypography.body.copyWith(
+                              color: _dateOfBirth != null ? AppColors.textPrimary : AppColors.textHint,
+                            ),
+                          ),
+                          const Spacer(),
+                          if (_dateOfBirth != null)
+                            GestureDetector(
+                              onTap: () => setState(() => _dateOfBirth = null),
+                              child: const Icon(Icons.clear_rounded, size: 18, color: AppColors.textSecondary),
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 20),
                   Text('Gender', style: AppTypography.label.copyWith(color: AppColors.textPrimary)),
@@ -552,13 +599,16 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
         'isAvailableForMating': _isAvailableForMating,
       };
 
+      if (_dateOfBirth != null) {
+        data['dateOfBirth'] = '${_dateOfBirth!.year.toString().padLeft(4, '0')}-${_dateOfBirth!.month.toString().padLeft(2, '0')}-${_dateOfBirth!.day.toString().padLeft(2, '0')}';
+      }
+
       final weightText = _weightController.text.trim();
       if (weightText.isNotEmpty) {
         data['weight'] = double.tryParse(weightText);
         data['weightUnit'] = 'kg';
       }
 
-      // Reorder photos so primary is first
       if (_photos.isNotEmpty && _primaryPhotoIndex > 0) {
         final reordered = <PetPhoto>[_photos[_primaryPhotoIndex]];
         for (var i = 0; i < _photos.length; i++) {
@@ -568,6 +618,16 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
       }
 
       await ref.read(petServiceProvider).updatePet(widget.petId, data);
+
+      if (_dateOfBirth != null) {
+        final birthdayService = ref.read(birthdayNotificationServiceProvider);
+        await birthdayService.scheduleBirthdayNotification(
+          petId: widget.petId,
+          petName: _nameController.text.trim(),
+          dateOfBirth: _dateOfBirth!,
+        );
+      }
+
       ref.invalidate(petDetailProvider(widget.petId));
       ref.invalidate(userPetsProvider);
 
