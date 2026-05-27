@@ -3,7 +3,7 @@ import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Spin } from 'antd';
 import { useAuth } from '@/hooks/useAuth';
 
-const LoginPage = React.lazy(() => import('@/pages/dashboard/DashboardPage').then(m => ({ default: m.default })));
+const LoginPage = React.lazy(() => import('@/pages/auth/LoginPage'));
 const DashboardPage = React.lazy(() => import('@/pages/dashboard/DashboardPage'));
 const UsersListPage = React.lazy(() => import('@/pages/users/UsersListPage'));
 const UserDetailPage = React.lazy(() => import('@/pages/users/UserDetailPage'));
@@ -51,7 +51,7 @@ export function AppRoutes() {
     <Suspense fallback={<Loading />}>
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/login" element={<DashboardPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route
           element={
             <ProtectedRoute>

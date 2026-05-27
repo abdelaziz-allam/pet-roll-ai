@@ -1,6 +1,4 @@
 import { create } from 'zustand';
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { auth } from '@/config/firebase';
 import { api } from '@/config/api';
 import type { AdminRole } from '@/config/permissions';
 
@@ -26,27 +24,25 @@ export const useAuth = create<AuthState>((set) => ({
   isLoading: true,
 
   login: async (email: string, password: string) => {
-    const credential = await signInWithEmailAndPassword(auth, email, password);
-    const idToken = await credential.user.getIdToken();
-
-    const { data } = await api.post('/admin/auth/verify', { token: idToken });
+    const { data } = await api.post('/admin-auth/login', { email, password });
 
     const adminUser: AdminUser = {
-      uid: data.user.id || credential.user.uid,
+      uid: data.user.id,
       email: data.user.email,
-      displayName: data.user.displayName || credential.user.displayName || '',
+      displayName: data.user.displayName || '',
       role: data.user.role,
     };
 
-    localStorage.setItem('token', data.accessToken || idToken);
+    localStorage.setItem('token', data.accessToken);
+    localStorage.setItem('refreshToken', data.refreshToken);
     localStorage.setItem('user', JSON.stringify(adminUser));
 
     set({ user: adminUser, isAuthenticated: true, isLoading: false });
   },
 
   logout: async () => {
-    await signOut(auth);
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     set({ user: null, isAuthenticated: false, isLoading: false });
     window.location.href = '/login';
@@ -62,7 +58,7 @@ export const useAuth = create<AuthState>((set) => ({
     }
 
     try {
-      const { data } = await api.get('/auth/me');
+      const { data } = await api.get('/admin-auth/me');
       const adminUser: AdminUser = {
         uid: data.id,
         email: data.email,
@@ -73,6 +69,7 @@ export const useAuth = create<AuthState>((set) => ({
       set({ user: adminUser, isAuthenticated: true, isLoading: false });
     } catch {
       localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
       set({ user: null, isAuthenticated: false, isLoading: false });
     }
