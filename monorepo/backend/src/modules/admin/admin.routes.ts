@@ -28,8 +28,10 @@ export async function adminRoutes(app: FastifyInstance) {
 
   // GET /stats/growth - growth chart data (support+)
   app.get('/stats/growth', { preHandler: [requireAuth, requireMinRole('support')] }, async (request, reply) => {
-    const { days } = request.query as { days?: string };
-    const stats = await adminService.getGrowthStats(days ? parseInt(days, 10) : 30);
+    const { period, days } = request.query as { period?: string; days?: string };
+    // Accept ?period=30d (frontend) or ?days=30 (legacy)
+    const raw = period?.replace('d', '') ?? days ?? '30';
+    const stats = await adminService.getGrowthStats(raw);
     return reply.send(stats);
   });
 
