@@ -6,7 +6,7 @@ import { getStorage, type Storage } from 'firebase-admin/storage';
 let app: App;
 
 const projectId = process.env.FIREBASE_PROJECT_ID || process.env.GCP_PROJECT_ID || 'petroll-production';
-const storageBucket = process.env.FIREBASE_STORAGE_BUCKET || 'petroll-production.firebasestorage.app';
+const storageBucket = process.env.FIREBASE_STORAGE_BUCKET || 'petroll-production-storage';
 
 if (getApps().length === 0) {
   app = initializeApp({
