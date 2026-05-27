@@ -92,8 +92,13 @@ export async function addAttachment(recordId: string, ownerId: string, url: stri
     throw Object.assign(new Error('Health record not found'), { statusCode: 404 });
   }
 
+  const currentAttachments = doc.data()?.attachments || [];
+  if (currentAttachments.length >= 5) {
+    throw Object.assign(new Error('Maximum 5 attachments per record'), { statusCode: 400 });
+  }
+
   await db.collection(HEALTH_RECORDS).doc(recordId).update({
-    attachments: FieldValue.arrayUnion([url]),
+    attachments: FieldValue.arrayUnion(url),
     updatedAt: FieldValue.serverTimestamp(),
   });
 
