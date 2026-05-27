@@ -6,7 +6,7 @@ export default defineConfig({
   retries: 1,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:4001',
+    baseURL: 'http://localhost:5002',
     headless: true,
     screenshot: 'only-on-failure',
     video: 'off',
@@ -18,8 +18,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev -- --port 4001',
-    url: 'http://localhost:4001',
+    command: 'npm run dev -- --port 5002',
+    url: 'http://localhost:5002',
     reuseExistingServer: true,
     timeout: 30000,
   },
