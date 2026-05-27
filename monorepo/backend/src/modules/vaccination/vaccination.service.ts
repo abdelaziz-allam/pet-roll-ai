@@ -32,7 +32,10 @@ async function calculateNextDueDate(vaccineId: string, dateAdministered: string)
 export async function logVaccination(ownerId: string, input: CreateVaccinationInput) {
   await verifyPetOwnership(input.petId, ownerId);
 
-  const nextDueDate = await calculateNextDueDate(input.vaccineId, input.dateAdministered);
+  let nextDueDate: string | null = input.nextDueDate ?? null;
+  if (!nextDueDate && input.vaccineId) {
+    nextDueDate = await calculateNextDueDate(input.vaccineId, input.dateAdministered);
+  }
 
   const vaccinationData = {
     ...input,
@@ -95,7 +98,9 @@ export async function updateVaccination(id: string, ownerId: string, input: Upda
     const currentData = doc.data()!;
     const vaccineId = input.vaccineId || currentData.vaccineId;
     const dateAdministered = input.dateAdministered || currentData.dateAdministered;
-    updateData.nextDueDate = await calculateNextDueDate(vaccineId, dateAdministered);
+    if (vaccineId) {
+      updateData.nextDueDate = await calculateNextDueDate(vaccineId, dateAdministered);
+    }
   }
 
   await db.collection(VACCINATIONS).doc(id).update(updateData);
