@@ -10,8 +10,8 @@ final dioProvider = Provider<Dio>((ref) {
     baseUrl: AppConstants.apiBaseUrl,
     connectTimeout: AppConstants.connectionTimeout,
     receiveTimeout: AppConstants.receiveTimeout,
+    contentType: 'application/json',
     headers: {
-      'Content-Type': 'application/json',
       'Accept': 'application/json',
     },
   ));
@@ -73,7 +73,6 @@ class ApiClient {
     return _dio.post<T>(
       path,
       data: data,
-      options: Options(contentType: 'multipart/form-data'),
     );
   }
 }
