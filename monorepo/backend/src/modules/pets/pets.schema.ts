@@ -12,6 +12,7 @@ export const createPetSchema = z.object({
   color: z.string().optional(),
   microchipId: z.string().optional(),
   isNeutered: z.boolean().default(false),
+  isAvailableForMating: z.boolean().default(false),
   notes: z.string().optional(),
 });
 
