@@ -1,8 +1,6 @@
-import { db } from '../../config/firebase.js';
-import { FieldValue } from 'firebase-admin/firestore';
-import { emailService } from '../../services/email.service.js';
-import { countries } from '../../data/countries.js';
-import { resolveTimezoneCountrySync } from '../../utils/timezone-country.js';
+import { db, FieldValue } from '../../config/firebase';
+import { emailService } from '../../services/email.service';
+import { countries } from '../../data/countries';
 
 export class AdminService {
   private usersRef = db.collection('users');
@@ -10,99 +8,28 @@ export class AdminService {
   private categoriesRef = db.collection('pet_categories');
 
   async getStats() {
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const [usersCount, petsCount, listingsCount, pendingVerif, prevUsersSnap, prevPetsSnap] = await Promise.all([
+    const [usersCount, petsCount, listingsCount] = await Promise.all([
       this.usersRef.count().get(),
       db.collection('pets').count().get(),
       db.collection('mating_listings').where('status', '==', 'active').count().get(),
-      db.collection('verifications').where('status', '==', 'pending').count().get(),
-      this.usersRef.where('createdAt', '<', thirtyDaysAgo).count().get(),
-      db.collection('pets').where('createdAt', '<', thirtyDaysAgo).count().get(),
     ]);
-    const totalUsers = usersCount.data().count;
-    const totalPets = petsCount.data().count;
-    const prevUsers = prevUsersSnap.data().count;
-    const prevPets = prevPetsSnap.data().count;
     return {
-      totalUsers,
-      totalPets,
+      totalUsers: usersCount.data().count,
+      totalPets: petsCount.data().count,
       activeListings: listingsCount.data().count,
-      pendingVerifications: pendingVerif.data().count,
-      notificationsSentToday: 0,
-      userGrowthPercent: prevUsers > 0 ? ((totalUsers - prevUsers) / prevUsers) : 0,
-      petGrowthPercent: prevPets > 0 ? ((totalPets - prevPets) / prevPets) : 0,
     };
   }
 
   async getGrowthStats(period: string) {
-    const daysBack = period === '7' ? 7 : period === '90' ? 90 : 30;
     const now = new Date();
-    const points: { date: string; users: number; pets: number }[] = [];
+    const daysBack = period === 'week' ? 7 : period === 'month' ? 30 : 90;
+    const since = new Date(now.getTime() - daysBack * 24 * 60 * 60 * 1000);
 
-    for (let i = daysBack - 1; i >= 0; i--) {
-      const dayStart = new Date(now);
-      dayStart.setDate(now.getDate() - i);
-      dayStart.setHours(0, 0, 0, 0);
-      const dayEnd = new Date(dayStart);
-      dayEnd.setHours(23, 59, 59, 999);
+    const snapshot = await this.usersRef
+      .where('createdAt', '>=', since)
+      .get();
 
-      const [usersSnap, petsSnap] = await Promise.all([
-        this.usersRef.where('createdAt', '>=', dayStart).where('createdAt', '<=', dayEnd).count().get(),
-        this.petsRef.where('createdAt', '>=', dayStart).where('createdAt', '<=', dayEnd).count().get(),
-      ]);
-
-      points.push({
-        date: dayStart.toISOString().slice(0, 10),
-        users: usersSnap.data().count,
-        pets: petsSnap.data().count,
-      });
-    }
-
-    return points;
-  }
-
-  async getSystemHealth() {
-    try {
-      await this.usersRef.limit(1).get();
-      const lastCron = await db.collection('cron_logs').orderBy('createdAt', 'desc').limit(1).get();
-      const lastCronRun = lastCron.empty
-        ? null
-        : lastCron.docs[0].data().createdAt?.toDate?.()?.toISOString?.() ?? null;
-      return { api: 'healthy', firestore: 'healthy', fcm: 'healthy', lastCronRun };
-    } catch {
-      return { api: 'healthy', firestore: 'down', fcm: 'healthy', lastCronRun: null };
-    }
-  }
-
-  async getRecentActivity(limit = 20) {
-    const [recentUsers, recentPets] = await Promise.all([
-      this.usersRef.orderBy('createdAt', 'desc').limit(Math.ceil(limit / 2)).get(),
-      this.petsRef.orderBy('createdAt', 'desc').limit(Math.floor(limit / 2)).get(),
-    ]);
-
-    const toIso = (ts: any): string => {
-      if (!ts) return new Date().toISOString();
-      if (typeof ts.toDate === 'function') return ts.toDate().toISOString();
-      return new Date(ts).toISOString();
-    };
-
-    const activity = [
-      ...recentUsers.docs.map((doc) => ({
-        id: doc.id,
-        type: 'user_registered' as const,
-        description: `New user joined: ${doc.data().displayName || doc.data().email || 'Unknown'}`,
-        timestamp: toIso(doc.data().createdAt),
-      })),
-      ...recentPets.docs.map((doc) => ({
-        id: doc.id,
-        type: 'pet_created' as const,
-        description: `New pet added: ${doc.data().name || 'Unknown'}`,
-        timestamp: toIso(doc.data().createdAt),
-      })),
-    ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-     .slice(0, limit);
-
-    return activity;
+    return { newUsers: snapshot.size, period };
   }
 
   async getUsers(page = 1, limit = 20, status?: string) {
@@ -135,8 +62,7 @@ export class AdminService {
     return { id: doc.id, ...doc.data() };
   }
 
-  async createUser(data: { displayName: string; email: string; role?: string; phone?: string; timezone?: string; country?: string; city?: string }) {
-    const synced = resolveTimezoneCountrySync(data.timezone, data.country);
+  async createUser(data: { displayName: string; email: string; role?: string; phone?: string; timezone?: string }) {
     const ref = await this.usersRef.add({
       displayName: data.displayName,
       email: data.email,
@@ -145,23 +71,15 @@ export class AdminService {
       isVerifiedBreeder: false,
       petsCount: 0,
       phone: data.phone || null,
-      timezone: synced.timezone || data.timezone || null,
-      country: synced.country || data.country || null,
-      city: data.city || null,
+      timezone: data.timezone || null,
       createdAt: new Date().toISOString(),
     });
-    return { id: ref.id, ...data, timezone: synced.timezone || data.timezone, country: synced.country || data.country, role: data.role || 'user', status: 'active', isVerifiedBreeder: false, petsCount: 0 };
+    return { id: ref.id, ...data, role: data.role || 'user', status: 'active', isVerifiedBreeder: false, petsCount: 0 };
   }
 
-  async updateUser(userId: string, data: { displayName?: string; phone?: string; timezone?: string; country?: string; city?: string }) {
+  async updateUser(userId: string, data: { displayName?: string; phone?: string; timezone?: string }) {
     await this.getUserById(userId);
-    const updateData: any = { ...data, updatedAt: FieldValue.serverTimestamp() };
-    if (data.timezone || data.country) {
-      const synced = resolveTimezoneCountrySync(data.timezone, data.country);
-      if (synced.timezone) updateData.timezone = synced.timezone;
-      if (synced.country) updateData.country = synced.country;
-    }
-    await this.usersRef.doc(userId).update(updateData);
+    await this.usersRef.doc(userId).update({ ...data, updatedAt: FieldValue.serverTimestamp() });
     return this.getUserById(userId);
   }
 
@@ -1026,7 +944,7 @@ export class AdminService {
   private defaultSettings = {
     general: {
       appName: 'PET Roll',
-      supportEmail: 'support@petfolioo.com',
+      supportEmail: 'support@petroll.com',
       defaultLanguage: 'en',
       maintenanceMode: false,
     },
@@ -1124,27 +1042,3 @@ export class AdminService {
 }
 
 export const adminService = new AdminService();
-
-const _instance = new AdminService();
-
-export const getStats = () => _instance.getStats();
-export const getGrowthStats = (period?: string | number) => _instance.getGrowthStats(String(period || '30'));
-export const listUsers = (query?: any) => _instance.getUsers(query?.page, query?.limit, query?.status);
-export const getUserById = (id: string) => _instance.getUserById(id);
-export const updateUser = (id: string, body: any) => _instance.updateUser(id, body);
-export const updateUserRole = (id: string, body: any) => _instance.updateUserRole(id, body.role);
-export const banUser = (id: string, body: any) => _instance.banUser(id, body.reason);
-export const deleteUser = (id: string) => _instance.deleteUser(id);
-export const listVerifications = (status?: string) => _instance.getVerificationRequests(status);
-export const updateVerification = (id: string, body: any, adminId: string) => _instance.processVerification(id, body.approved, adminId, body.rejectionReason);
-export const revokeVerification = (userId: string, _adminId: string) => Promise.resolve({ message: `Verification revoked for ${userId}` });
-export const createSubAdmin = (body: any, _creatorId: string) => _instance.createUser(body);
-export const listTeam = () => _instance.getUsers(1, 100);
-export const getConfig = () => _instance.getSettings();
-export const updateConfig = (body: any) => _instance.updateSettings(body);
-export const listReports = (_status?: string) => Promise.resolve({ reports: [] });
-export const updateReport = (_id: string, _status: string, _action: string, _adminId: string) => Promise.resolve({ message: 'Report updated' });
-export const createReport = (_body: any, _adminId: string) => Promise.resolve({ message: 'Report created' });
-export const computeStats = () => _instance.getStats();
-export const getSystemHealth = () => _instance.getSystemHealth();
-export const getRecentActivity = (limit?: number) => _instance.getRecentActivity(limit);

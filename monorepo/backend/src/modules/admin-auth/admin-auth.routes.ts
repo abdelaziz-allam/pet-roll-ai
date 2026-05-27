@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { adminAuthService } from './admin-auth.service.js';
+import { adminAuthService } from './admin-auth.service';
 import {
   adminLoginSchema,
   adminForgotPasswordSchema,
@@ -9,9 +9,9 @@ import {
   updateAdminUserSchema,
   ADMIN_PAGES,
   PAGE_ACTIONS,
-} from './admin-auth.schema.js';
-import { requireAdminAuth } from '../../middleware/require-admin-auth.js';
-import { requireAdminPermission } from '../../middleware/require-admin-permission.js';
+} from './admin-auth.schema';
+import { requireAdminAuth } from '../../middleware/require-admin-auth';
+import { requireAdminPermission } from '../../middleware/require-admin-permission';
 
 export async function adminAuthRoutes(fastify: FastifyInstance) {
   // --- Public routes (no auth required) ---

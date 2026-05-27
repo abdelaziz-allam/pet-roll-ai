@@ -1,32 +1,17 @@
-import Fastify from 'fastify';
-import cors from '@fastify/cors';
-
-const port = Number(process.env.PORT) || 8080;
+import 'dotenv/config';
+import { buildApp } from './app';
+import { env } from './config/env';
 
 async function start() {
-  const app = Fastify({ logger: true });
-
-  await app.register(cors, { origin: true, credentials: true });
-
-  app.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
+  const app = await buildApp();
 
   try {
-    const { registerRoutes } = await import('./app');
-    await registerRoutes(app);
-    console.log('All application routes registered');
+    await app.listen({ port: env.PORT, host: '0.0.0.0' });
+    console.log(`Server running on port ${env.PORT} in ${env.NODE_ENV} mode`);
   } catch (err) {
-    console.error('Failed to load application routes (health endpoint still works):', err);
-    app.get('/api/v1/status', async () => ({
-      status: 'degraded',
-      error: 'Application failed to initialize',
-    }));
+    app.log.error(err);
+    process.exit(1);
   }
-
-  await app.listen({ port, host: '0.0.0.0' });
-  console.log(`PET Roll API listening on port ${port}`);
 }
 
-start().catch((err) => {
-  console.error('Fatal startup error:', err);
-  process.exit(1);
-});
+start();

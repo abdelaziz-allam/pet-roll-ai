@@ -1,107 +1,71 @@
-import { db } from '../../config/firebase.js';
-import { FieldValue } from 'firebase-admin/firestore';
-import { paginate, getOffset } from '../../utils/pagination.js';
-import type { PaginationQuery } from '../../types/common.js';
-import type { CreateHealthRecordInput, UpdateHealthRecordInput } from './health.schema.js';
+import { db, FieldValue } from '../../config/firebase';
 
-const HEALTH_RECORDS = 'health_records';
-const PETS = 'pets';
+export class HealthService {
+  private recordsRef = db.collection('health_records');
+  private petsRef = db.collection('pets');
 
-async function verifyPetOwnership(petId: string, ownerId: string) {
-  const petDoc = await db.collection(PETS).doc(petId).get();
-  if (!petDoc.exists || petDoc.data()?.ownerId !== ownerId) {
-    throw Object.assign(new Error('Pet not found or access denied'), { statusCode: 404 });
+  async verifyPetOwnership(petId: string, ownerId: string) {
+    const pet = await this.petsRef.doc(petId).get();
+    if (!pet.exists || pet.data()!.ownerId !== ownerId) {
+      const error: any = new Error('Pet not found');
+      error.statusCode = 404;
+      throw error;
+    }
+    return pet;
+  }
+
+  async createRecord(petId: string, ownerId: string, input: any) {
+    await this.verifyPetOwnership(petId, ownerId);
+    const data = {
+      ...input,
+      petId,
+      ownerId,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+    const doc = await this.recordsRef.add(data);
+    return { id: doc.id, ...data };
+  }
+
+  async getRecords(petId: string, ownerId: string, page = 1, limit = 20) {
+    await this.verifyPetOwnership(petId, ownerId);
+
+    const countSnap = await this.recordsRef.where('petId', '==', petId).count().get();
+    const total = countSnap.data().count;
+    const offset = (page - 1) * limit;
+
+    const snapshot = await this.recordsRef
+      .where('petId', '==', petId)
+      .orderBy('date', 'desc')
+      .offset(offset)
+      .limit(limit)
+      .get();
+
+    const records = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    return { data: records, total, page, limit, totalPages: Math.ceil(total / limit) };
+  }
+
+  async getRecordById(recordId: string, ownerId: string) {
+    const doc = await this.recordsRef.doc(recordId).get();
+    if (!doc.exists || doc.data()!.ownerId !== ownerId) {
+      const error: any = new Error('Record not found');
+      error.statusCode = 404;
+      throw error;
+    }
+    return { id: doc.id, ...doc.data() };
+  }
+
+  async updateRecord(recordId: string, ownerId: string, input: any) {
+    await this.getRecordById(recordId, ownerId);
+    const updateData = { ...input, updatedAt: FieldValue.serverTimestamp() };
+    await this.recordsRef.doc(recordId).update(updateData);
+    return this.getRecordById(recordId, ownerId);
+  }
+
+  async deleteRecord(recordId: string, ownerId: string) {
+    await this.getRecordById(recordId, ownerId);
+    await this.recordsRef.doc(recordId).delete();
   }
 }
 
-export async function createRecord(ownerId: string, input: CreateHealthRecordInput) {
-  await verifyPetOwnership(input.petId, ownerId);
-
-  const recordData = {
-    ...input,
-    ownerId,
-    createdAt: FieldValue.serverTimestamp(),
-    updatedAt: FieldValue.serverTimestamp(),
-  };
-
-  const docRef = await db.collection(HEALTH_RECORDS).add(recordData);
-  return { id: docRef.id, ...recordData };
-}
-
-export async function getRecords(petId: string, ownerId: string, pagination: PaginationQuery) {
-  await verifyPetOwnership(petId, ownerId);
-
-  const countSnapshot = await db
-    .collection(HEALTH_RECORDS)
-    .where('petId', '==', petId)
-    .where('ownerId', '==', ownerId)
-    .count()
-    .get();
-
-  const total = countSnapshot.data().count;
-  const offset = getOffset(pagination);
-
-  const snapshot = await db
-    .collection(HEALTH_RECORDS)
-    .where('petId', '==', petId)
-    .where('ownerId', '==', ownerId)
-    .orderBy('date', 'desc')
-    .offset(offset)
-    .limit(pagination.limit)
-    .get();
-
-  const records = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  return paginate(records, total, pagination);
-}
-
-export async function getRecordById(recordId: string, ownerId: string) {
-  const doc = await db.collection(HEALTH_RECORDS).doc(recordId).get();
-  if (!doc.exists || doc.data()?.ownerId !== ownerId) {
-    throw Object.assign(new Error('Health record not found'), { statusCode: 404 });
-  }
-  return { id: doc.id, ...doc.data() };
-}
-
-export async function updateRecord(recordId: string, ownerId: string, input: UpdateHealthRecordInput) {
-  const doc = await db.collection(HEALTH_RECORDS).doc(recordId).get();
-  if (!doc.exists || doc.data()?.ownerId !== ownerId) {
-    throw Object.assign(new Error('Health record not found'), { statusCode: 404 });
-  }
-
-  const updateData = {
-    ...input,
-    updatedAt: FieldValue.serverTimestamp(),
-  };
-
-  await db.collection(HEALTH_RECORDS).doc(recordId).update(updateData);
-  return { id: recordId, ...doc.data(), ...updateData };
-}
-
-export async function deleteRecord(recordId: string, ownerId: string) {
-  const doc = await db.collection(HEALTH_RECORDS).doc(recordId).get();
-  if (!doc.exists || doc.data()?.ownerId !== ownerId) {
-    throw Object.assign(new Error('Health record not found'), { statusCode: 404 });
-  }
-
-  await db.collection(HEALTH_RECORDS).doc(recordId).delete();
-}
-
-export async function addAttachment(recordId: string, ownerId: string, url: string) {
-  const doc = await db.collection(HEALTH_RECORDS).doc(recordId).get();
-  if (!doc.exists || doc.data()?.ownerId !== ownerId) {
-    throw Object.assign(new Error('Health record not found'), { statusCode: 404 });
-  }
-
-  const currentAttachments = doc.data()?.attachments || [];
-  if (currentAttachments.length >= 5) {
-    throw Object.assign(new Error('Maximum 5 attachments per record'), { statusCode: 400 });
-  }
-
-  await db.collection(HEALTH_RECORDS).doc(recordId).update({
-    attachments: FieldValue.arrayUnion(url),
-    updatedAt: FieldValue.serverTimestamp(),
-  });
-
-  const updated = await db.collection(HEALTH_RECORDS).doc(recordId).get();
-  return { id: recordId, ...updated.data() };
-}
+export const healthService = new HealthService();

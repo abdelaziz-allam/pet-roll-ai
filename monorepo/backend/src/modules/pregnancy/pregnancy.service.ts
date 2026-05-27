@@ -1,208 +1,135 @@
-import { db } from '../../config/firebase.js';
-import { FieldValue } from 'firebase-admin/firestore';
-import { addDays, toISODate } from '../../utils/date-helpers.js';
-import type { CreatePregnancyInput, UpdatePregnancyInput, AddWeightInput } from './pregnancy.schema.js';
+import { db, FieldValue } from '../../config/firebase';
 
-const PREGNANCIES = 'pregnancies';
-const PETS = 'pets';
-const PREGNANCY_MILESTONES = 'pregnancy_milestones';
+export class PregnancyService {
+  private pregRef = db.collection('pregnancies');
+  private petsRef = db.collection('pets');
 
-export async function startTracking(ownerId: string, input: CreatePregnancyInput) {
-  // Verify pet ownership
-  const petDoc = await db.collection(PETS).doc(input.petId).get();
-  if (!petDoc.exists) {
-    throw Object.assign(new Error('Pet not found'), { statusCode: 404 });
-  }
-  const pet = petDoc.data()!;
-  if (pet.ownerId !== ownerId) {
-    throw Object.assign(new Error('Not authorized to manage this pet'), { statusCode: 403 });
-  }
-
-  // Check for existing active pregnancy
-  const existingSnap = await db.collection(PREGNANCIES)
-    .where('petId', '==', input.petId)
-    .where('status', '==', 'active')
-    .limit(1)
-    .get();
-  if (!existingSnap.empty) {
-    throw Object.assign(new Error('Pet already has an active pregnancy'), { statusCode: 409 });
-  }
-
-  // Get gestation milestones based on species
-  const species = pet.species || 'dog';
-  const milestonesSnap = await db.collection(PREGNANCY_MILESTONES)
-    .where('species', '==', species)
-    .orderBy('dayOffset', 'asc')
-    .get();
-
-  const breedingDate = new Date(input.breedingDate);
-
-  // Calculate expected due date from seed data or use species defaults
-  let gestationDays = species === 'cat' ? 65 : 63; // defaults
-  const milestonesDocs = milestonesSnap.docs;
-  if (milestonesDocs.length > 0) {
-    const lastMilestone = milestonesDocs[milestonesDocs.length - 1]!.data();
-    if (lastMilestone.gestationDays) {
-      gestationDays = lastMilestone.gestationDays;
+  async verifyPetOwnership(petId: string, ownerId: string) {
+    const pet = await this.petsRef.doc(petId).get();
+    if (!pet.exists || pet.data()!.ownerId !== ownerId) {
+      const error: any = new Error('Pet not found');
+      error.statusCode = 404;
+      throw error;
     }
+    return pet.data()!;
   }
 
-  const expectedDueDate = toISODate(addDays(breedingDate, gestationDays));
+  async startTracking(petId: string, ownerId: string, input: any) {
+    const petData = await this.verifyPetOwnership(petId, ownerId);
 
-  // Generate milestones
-  const milestones = milestonesDocs.map((doc) => {
-    const data = doc.data();
-    return {
-      id: doc.id,
-      title: data.title,
-      description: data.description || '',
-      dayOffset: data.dayOffset,
-      expectedDate: toISODate(addDays(breedingDate, data.dayOffset)),
-      completed: false,
-      completedAt: null,
+    const activeSnap = await this.pregRef
+      .where('petId', '==', petId)
+      .where('status', '==', 'active')
+      .get();
+
+    if (!activeSnap.empty) {
+      const error: any = new Error('Pet already has an active pregnancy');
+      error.statusCode = 409;
+      throw error;
+    }
+
+    const matingDateStr = input.matingDate || input.startDate;
+    const matingDate = new Date(matingDateStr);
+    const gestationDays = petData.species === 'dog' ? 63 : 65;
+    const calculatedDueDate = new Date(matingDate.getTime() + gestationDays * 24 * 60 * 60 * 1000);
+    const expectedDueDate = input.expectedDueDate || calculatedDueDate.toISOString().split('T')[0];
+
+    const data = {
+      petId,
+      ownerId,
+      matingDate: matingDateStr,
+      startDate: matingDateStr,
+      expectedDueDate,
+      status: input.status || 'active',
+      mateInfo: input.mateInfo || null,
+      fatherInfo: input.fatherInfo || null,
+      weightLog: [],
+      milestones: [],
+      notes: input.notes || null,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     };
-  });
 
-  const pregnancyData = {
-    petId: input.petId,
-    ownerId,
-    breedingDate: input.breedingDate,
-    expectedDueDate,
-    gestationDays,
-    status: 'active',
-    notes: input.notes || '',
-    milestones,
-    weightLog: [],
-    actualDeliveryDate: null,
-    numberOfOffspring: null,
-    createdAt: FieldValue.serverTimestamp(),
-    updatedAt: FieldValue.serverTimestamp(),
-  };
+    const doc = await this.pregRef.add(data);
+    return { id: doc.id, ...data };
+  }
 
-  const docRef = await db.collection(PREGNANCIES).add(pregnancyData);
+  async getAll(petId: string, ownerId: string, page = 1, limit = 20) {
+    await this.verifyPetOwnership(petId, ownerId);
+    const countSnap = await this.pregRef.where('petId', '==', petId).count().get();
+    const total = countSnap.data().count;
+    const offset = (page - 1) * limit;
 
-  return { id: docRef.id, ...pregnancyData };
+    const snapshot = await this.pregRef
+      .where('petId', '==', petId)
+      .orderBy('createdAt', 'desc')
+      .offset(offset)
+      .limit(limit)
+      .get();
+
+    const records = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    return { data: records, total, page, limit, totalPages: Math.ceil(total / limit) };
+  }
+
+  async getActive(petId: string, ownerId: string) {
+    await this.verifyPetOwnership(petId, ownerId);
+    const snapshot = await this.pregRef
+      .where('petId', '==', petId)
+      .where('status', '==', 'active')
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) {
+      return null;
+    }
+    const doc = snapshot.docs[0];
+    return { id: doc.id, ...doc.data() };
+  }
+
+  async getById(pregId: string, ownerId: string) {
+    const doc = await this.pregRef.doc(pregId).get();
+    if (!doc.exists || doc.data()!.ownerId !== ownerId) {
+      const error: any = new Error('Pregnancy record not found');
+      error.statusCode = 404;
+      throw error;
+    }
+    return { id: doc.id, ...doc.data() };
+  }
+
+  async update(pregId: string, ownerId: string, input: any) {
+    await this.getById(pregId, ownerId);
+    await this.pregRef.doc(pregId).update({ ...input, updatedAt: FieldValue.serverTimestamp() });
+    return this.getById(pregId, ownerId);
+  }
+
+  async addWeight(pregId: string, ownerId: string, weight: number) {
+    await this.getById(pregId, ownerId);
+    await this.pregRef.doc(pregId).update({
+      weightLog: FieldValue.arrayUnion({ weight, date: new Date().toISOString(), }),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+    return this.getById(pregId, ownerId);
+  }
+
+  async getMilestones(pregId: string, ownerId: string) {
+    const preg = await this.getById(pregId, ownerId) as any;
+    return preg.milestones || [];
+  }
+
+  async completeMilestone(pregId: string, milestoneId: string, ownerId: string) {
+    const preg = await this.getById(pregId, ownerId) as any;
+    const milestones = preg.milestones || [];
+    const idx = milestones.findIndex((m: any) => m.id === milestoneId);
+    if (idx === -1) {
+      const error: any = new Error('Milestone not found');
+      error.statusCode = 404;
+      throw error;
+    }
+    milestones[idx].completed = true;
+    milestones[idx].completedAt = new Date().toISOString();
+    await this.pregRef.doc(pregId).update({ milestones, updatedAt: FieldValue.serverTimestamp() });
+    return milestones[idx];
+  }
 }
 
-export async function getActivePregnancy(petId: string, ownerId: string) {
-  // Verify pet ownership
-  const petDoc = await db.collection(PETS).doc(petId).get();
-  if (!petDoc.exists) {
-    throw Object.assign(new Error('Pet not found'), { statusCode: 404 });
-  }
-  if (petDoc.data()!.ownerId !== ownerId) {
-    throw Object.assign(new Error('Not authorized to access this pet'), { statusCode: 403 });
-  }
-
-  const snap = await db.collection(PREGNANCIES)
-    .where('petId', '==', petId)
-    .where('status', '==', 'active')
-    .limit(1)
-    .get();
-
-  if (snap.empty) {
-    throw Object.assign(new Error('No active pregnancy found'), { statusCode: 404 });
-  }
-
-  const doc = snap.docs[0]!;
-  return { id: doc.id, ...doc.data() };
-}
-
-export async function getPregnancyById(id: string, ownerId: string) {
-  const doc = await db.collection(PREGNANCIES).doc(id).get();
-  if (!doc.exists) {
-    throw Object.assign(new Error('Pregnancy not found'), { statusCode: 404 });
-  }
-  const data = doc.data()!;
-  if (data.ownerId !== ownerId) {
-    throw Object.assign(new Error('Not authorized to access this pregnancy'), { statusCode: 403 });
-  }
-  return { id: doc.id, ...data };
-}
-
-export async function updatePregnancy(id: string, ownerId: string, input: UpdatePregnancyInput) {
-  const doc = await db.collection(PREGNANCIES).doc(id).get();
-  if (!doc.exists) {
-    throw Object.assign(new Error('Pregnancy not found'), { statusCode: 404 });
-  }
-  const data = doc.data()!;
-  if (data.ownerId !== ownerId) {
-    throw Object.assign(new Error('Not authorized to update this pregnancy'), { statusCode: 403 });
-  }
-
-  const updateData: Record<string, any> = {
-    ...input,
-    updatedAt: FieldValue.serverTimestamp(),
-  };
-
-  await db.collection(PREGNANCIES).doc(id).update(updateData);
-
-  const updated = await db.collection(PREGNANCIES).doc(id).get();
-  return { id: updated.id, ...updated.data() };
-}
-
-export async function getMilestones(pregnancyId: string, ownerId: string) {
-  const doc = await db.collection(PREGNANCIES).doc(pregnancyId).get();
-  if (!doc.exists) {
-    throw Object.assign(new Error('Pregnancy not found'), { statusCode: 404 });
-  }
-  const data = doc.data()!;
-  if (data.ownerId !== ownerId) {
-    throw Object.assign(new Error('Not authorized to access this pregnancy'), { statusCode: 403 });
-  }
-
-  return data.milestones || [];
-}
-
-export async function completeMilestone(pregnancyId: string, milestoneId: string, ownerId: string) {
-  const doc = await db.collection(PREGNANCIES).doc(pregnancyId).get();
-  if (!doc.exists) {
-    throw Object.assign(new Error('Pregnancy not found'), { statusCode: 404 });
-  }
-  const data = doc.data()!;
-  if (data.ownerId !== ownerId) {
-    throw Object.assign(new Error('Not authorized to update this pregnancy'), { statusCode: 403 });
-  }
-
-  const milestones = data.milestones || [];
-  const milestoneIndex = milestones.findIndex((m: any) => m.id === milestoneId);
-  if (milestoneIndex === -1) {
-    throw Object.assign(new Error('Milestone not found'), { statusCode: 404 });
-  }
-
-  milestones[milestoneIndex].completed = true;
-  milestones[milestoneIndex].completedAt = new Date().toISOString();
-
-  await db.collection(PREGNANCIES).doc(pregnancyId).update({
-    milestones,
-    updatedAt: FieldValue.serverTimestamp(),
-  });
-
-  return milestones[milestoneIndex];
-}
-
-export async function addWeight(pregnancyId: string, ownerId: string, input: AddWeightInput) {
-  const doc = await db.collection(PREGNANCIES).doc(pregnancyId).get();
-  if (!doc.exists) {
-    throw Object.assign(new Error('Pregnancy not found'), { statusCode: 404 });
-  }
-  const data = doc.data()!;
-  if (data.ownerId !== ownerId) {
-    throw Object.assign(new Error('Not authorized to update this pregnancy'), { statusCode: 403 });
-  }
-
-  const weightEntry = {
-    date: input.date,
-    weight: input.weight,
-    unit: input.unit,
-    notes: input.notes || '',
-    recordedAt: new Date().toISOString(),
-  };
-
-  await db.collection(PREGNANCIES).doc(pregnancyId).update({
-    weightLog: FieldValue.arrayUnion(weightEntry),
-    updatedAt: FieldValue.serverTimestamp(),
-  });
-
-  return weightEntry;
-}
+export const pregnancyService = new PregnancyService();

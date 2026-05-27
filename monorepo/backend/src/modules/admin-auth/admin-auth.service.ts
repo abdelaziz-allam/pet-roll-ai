@@ -1,8 +1,7 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import { db } from '../../config/firebase.js';
-import { FieldValue } from 'firebase-admin/firestore';
-import { env } from '../../config/env.js';
+import { db, FieldValue } from '../../config/firebase';
+import { env } from '../../config/env';
 import {
   AdminLoginInput,
   AdminForgotPasswordInput,
@@ -12,7 +11,7 @@ import {
   UpdateAdminUserInput,
   AdminPermissions,
   PAGE_ACTIONS,
-} from './admin-auth.schema.js';
+} from './admin-auth.schema';
 
 function hashPassword(password: string, salt: string): string {
   return crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha512').toString('hex');
@@ -78,7 +77,7 @@ export class AdminAuthService {
       lastLoginAt: FieldValue.serverTimestamp(),
     });
 
-    const tokens = this.generateTokens(doc.id, adminUser.email, adminUser.role);
+    const tokens = this.generateTokens(doc.id, adminUser.email, 'admin');
     const { passwordHash, salt, ...safeUser } = adminUser;
     return { user: { id: doc.id, ...safeUser }, ...tokens };
   }
@@ -119,7 +118,7 @@ export class AdminAuthService {
       lastLoginAt: FieldValue.serverTimestamp(),
     });
 
-    const tokens = this.generateTokens(doc.id, adminUser.email, adminUser.role);
+    const tokens = this.generateTokens(doc.id, adminUser.email, 'admin');
     const { passwordHash, salt, ...safeUser } = adminUser;
     return { user: { id: doc.id, ...safeUser }, ...tokens };
   }
@@ -241,7 +240,7 @@ export class AdminAuthService {
       throw error;
     }
     const data = doc.data()!;
-    return this.generateTokens(uid, data.email, data.role);
+    return this.generateTokens(uid, data.email, 'admin');
   }
 
   // --- Admin User Management ---
@@ -368,7 +367,7 @@ export class AdminAuthService {
   }
 
   async seedSuperAdmin() {
-    const defaultPassword = 'P@tF0lioo@2612210106022312';
+    const defaultPassword = 'P@tR0ll@2612210106022312';
     const existing = await this.adminUsersRef
       .where('role', '==', 'super_admin')
       .limit(1)
@@ -386,7 +385,7 @@ export class AdminAuthService {
     const passwordHash = hashPassword(defaultPassword, salt);
 
     const adminData = {
-      email: 'admin@petfolioo.com',
+      email: 'admin@petroll.com',
       displayName: 'Super Admin',
       role: 'super_admin',
       status: 'active',
@@ -400,12 +399,12 @@ export class AdminAuthService {
     };
 
     await this.adminUsersRef.add(adminData);
-    return { message: 'Super admin seeded: admin@petfolioo.com', seeded: true };
+    return { message: 'Super admin seeded: admin@petroll.com', seeded: true };
   }
 
-  private generateTokens(uid: string, email: string, role: string) {
+  private generateTokens(uid: string, email: string, type: string) {
     const accessToken = jwt.sign(
-      { uid, email, type: 'admin', role },
+      { uid, email, type: 'admin', userType: type },
       env.JWT_SECRET,
       { expiresIn: env.JWT_EXPIRY as any }
     );
