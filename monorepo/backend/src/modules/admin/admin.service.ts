@@ -1,4 +1,5 @@
-import { db, FieldValue } from '../../config/firebase.js';
+import { db } from '../../config/firebase.js';
+import { FieldValue } from 'firebase-admin/firestore';
 import { emailService } from '../../services/email.service.js';
 import { countries } from '../../data/countries.js';
 import { resolveTimezoneCountrySync } from '../../utils/timezone-country.js';

@@ -1,7 +1,8 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import { db, FieldValue } from '../../config/firebase';
-import { env } from '../../config/env';
+import { db } from '../../config/firebase.js';
+import { FieldValue } from 'firebase-admin/firestore';
+import { env } from '../../config/env.js';
 import {
   AdminLoginInput,
   AdminForgotPasswordInput,
@@ -11,7 +12,7 @@ import {
   UpdateAdminUserInput,
   AdminPermissions,
   PAGE_ACTIONS,
-} from './admin-auth.schema';
+} from './admin-auth.schema.js';
 
 function hashPassword(password: string, salt: string): string {
   return crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha512').toString('hex');
