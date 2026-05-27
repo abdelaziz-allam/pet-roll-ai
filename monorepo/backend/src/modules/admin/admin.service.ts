@@ -1,6 +1,7 @@
 import { db, FieldValue } from '../../config/firebase.js';
 import { emailService } from '../../services/email.service.js';
 import { countries } from '../../data/countries.js';
+import { resolveTimezoneCountrySync } from '../../utils/timezone-country.js';
 
 export class AdminService {
   private usersRef = db.collection('users');
@@ -62,7 +63,8 @@ export class AdminService {
     return { id: doc.id, ...doc.data() };
   }
 
-  async createUser(data: { displayName: string; email: string; role?: string; phone?: string; timezone?: string }) {
+  async createUser(data: { displayName: string; email: string; role?: string; phone?: string; timezone?: string; country?: string; city?: string }) {
+    const synced = resolveTimezoneCountrySync(data.timezone, data.country);
     const ref = await this.usersRef.add({
       displayName: data.displayName,
       email: data.email,
@@ -71,15 +73,23 @@ export class AdminService {
       isVerifiedBreeder: false,
       petsCount: 0,
       phone: data.phone || null,
-      timezone: data.timezone || null,
+      timezone: synced.timezone || data.timezone || null,
+      country: synced.country || data.country || null,
+      city: data.city || null,
       createdAt: new Date().toISOString(),
     });
-    return { id: ref.id, ...data, role: data.role || 'user', status: 'active', isVerifiedBreeder: false, petsCount: 0 };
+    return { id: ref.id, ...data, timezone: synced.timezone || data.timezone, country: synced.country || data.country, role: data.role || 'user', status: 'active', isVerifiedBreeder: false, petsCount: 0 };
   }
 
-  async updateUser(userId: string, data: { displayName?: string; phone?: string; timezone?: string }) {
+  async updateUser(userId: string, data: { displayName?: string; phone?: string; timezone?: string; country?: string; city?: string }) {
     await this.getUserById(userId);
-    await this.usersRef.doc(userId).update({ ...data, updatedAt: FieldValue.serverTimestamp() });
+    const updateData: any = { ...data, updatedAt: FieldValue.serverTimestamp() };
+    if (data.timezone || data.country) {
+      const synced = resolveTimezoneCountrySync(data.timezone, data.country);
+      if (synced.timezone) updateData.timezone = synced.timezone;
+      if (synced.country) updateData.country = synced.country;
+    }
+    await this.usersRef.doc(userId).update(updateData);
     return this.getUserById(userId);
   }
 

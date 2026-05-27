@@ -7,6 +7,8 @@ export interface User {
   role: AdminRole;
   status: string;
   timezone: string;
+  country?: string;
+  city?: string;
   settings: Record<string, unknown>;
   fcmTokens: string[];
   isVerifiedBreeder: boolean;

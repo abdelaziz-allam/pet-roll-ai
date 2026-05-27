@@ -161,6 +161,8 @@ export default function UserDetailPage() {
                 )}
               </Descriptions.Item>
               <Descriptions.Item label="Timezone">{user.timezone || 'N/A'}</Descriptions.Item>
+              <Descriptions.Item label="Country">{user.country || 'N/A'}</Descriptions.Item>
+              <Descriptions.Item label="City">{user.city || 'N/A'}</Descriptions.Item>
               <Descriptions.Item label="Joined">{formatDate(user.createdAt)}</Descriptions.Item>
               <Descriptions.Item label="Last Updated">{relativeTime(user.updatedAt)}</Descriptions.Item>
             </Descriptions>

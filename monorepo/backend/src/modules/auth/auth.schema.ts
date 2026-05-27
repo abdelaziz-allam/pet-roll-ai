@@ -14,6 +14,8 @@ export const updateProfileSchema = z.object({
   displayName: z.string().min(2).max(100).optional(),
   phone: z.string().optional(),
   timezone: z.string().optional(),
+  country: z.string().optional(),
+  city: z.string().optional(),
   settings: z.object({
     reminderTimeUTC: z.number().min(0).max(23).optional(),
     pushEnabled: z.boolean().optional(),

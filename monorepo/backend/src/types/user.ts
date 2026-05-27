@@ -7,6 +7,8 @@ export interface User {
   role: 'user' | 'breeder' | 'super_admin' | 'admin' | 'moderator' | 'support' | 'viewer';
   status: 'active' | 'banned' | 'deleted';
   timezone: string;
+  country?: string;
+  city?: string;
   settings: UserSettings;
   fcmTokens: string[];
   isVerifiedBreeder: boolean;
