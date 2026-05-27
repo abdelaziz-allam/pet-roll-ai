@@ -90,21 +90,12 @@ export async function updateVaccination(id: string, ownerId: string, input: Upda
 
   const currentData = doc.data()!;
 
-  // Enforce: cannot mark vaccination as completed unless all doses are completed
+  // When marking vaccination as completed, auto-complete all remaining doses
   if (input.status === 'completed') {
     const doses = input.doses ?? currentData.doses ?? [];
-    if (doses.length === 0) {
-      throw Object.assign(
-        new Error('Cannot mark vaccination as completed: no doses defined'),
-        { statusCode: 400 }
-      );
-    }
-    const allCompleted = doses.every((d: any) => d.status === 'completed');
-    if (!allCompleted) {
-      throw Object.assign(
-        new Error('Cannot mark vaccination as completed: all doses must be completed first'),
-        { statusCode: 400 }
-      );
+    if (doses.length > 0) {
+      const completedDoses = doses.map((d: any) => ({ ...d, status: 'completed' }));
+      (input as any).doses = completedDoses;
     }
   }
 
