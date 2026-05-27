@@ -1,311 +1,377 @@
-import { db } from '../../config/firebase.js';
-import { FieldValue } from 'firebase-admin/firestore';
-import { sendPushNotification, createNotificationRecord } from '../../utils/push-sender.js';
-import type {
-  CreateListingInput,
-  UpdateListingInput,
-  CreateMatchRequestInput,
-  UpdateMatchRequestInput,
-  BrowseListingsQuery,
-} from './mating.schema.js';
+import { db, FieldValue } from '../../config/firebase';
+import { emailService } from '../../services/email.service';
 
-const MATING_LISTINGS = 'mating_listings';
-const MATCH_REQUESTS = 'match_requests';
+export class MatingService {
+  private listingsRef = db.collection('mating_listings');
+  private requestsRef = db.collection('mating_requests');
+  private petsRef = db.collection('pets');
 
-export async function createListing(ownerId: string, input: CreateListingInput) {
-  const petDoc = await db.collection('pets').doc(input.petId).get();
-  if (!petDoc.exists) {
-    throw Object.assign(new Error('Pet not found'), { statusCode: 404 });
-  }
-
-  const pet = petDoc.data()!;
-  if (pet.ownerId !== ownerId) {
-    throw Object.assign(new Error('You do not own this pet'), { statusCode: 403 });
-  }
-
-  if (!pet.isAvailableForMating) {
-    throw Object.assign(new Error('Pet is not marked as available for mating'), { statusCode: 400 });
-  }
-
-  const ownerDoc = await db.collection('users').doc(ownerId).get();
-  const owner = ownerDoc.data()!;
-
-  const listingData = {
-    petId: input.petId,
-    ownerId,
-    description: input.description || null,
-    location: input.location,
-    preferences: input.preferences || null,
-    status: 'active',
-    pet: {
-      breed: pet.breed || null,
-      species: pet.species,
-      name: pet.name,
-      photoURL: pet.photoURL || null,
-    },
-    ownerName: owner.displayName,
-    isVerifiedBreeder: owner.isVerifiedBreeder || false,
-    createdAt: FieldValue.serverTimestamp(),
-    updatedAt: FieldValue.serverTimestamp(),
-  };
-
-  const ref = await db.collection(MATING_LISTINGS).add(listingData);
-  return { id: ref.id, ...listingData };
-}
-
-export async function browseListings(query: BrowseListingsQuery, currentUserId: string) {
-  let ref: FirebaseFirestore.Query = db
-    .collection(MATING_LISTINGS)
-    .where('status', '==', 'active')
-    .where('ownerId', '!=', currentUserId)
-    .orderBy('ownerId')
-    .orderBy('createdAt', 'desc');
-
-  if (query.species) {
-    ref = ref.where('pet.species', '==', query.species);
-  }
-  if (query.breed) {
-    ref = ref.where('pet.breed', '==', query.breed);
-  }
-  if (query.city) {
-    ref = ref.where('location.city', '==', query.city);
-  }
-  if (query.country) {
-    ref = ref.where('location.country', '==', query.country);
-  }
-
-  const countSnapshot = await ref.count().get();
-  const total = countSnapshot.data().count;
-
-  const offset = (query.page - 1) * query.limit;
-  const snapshot = await ref.offset(offset).limit(query.limit).get();
-
-  const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-
-  const totalPages = Math.ceil(total / query.limit);
-  return {
-    data,
-    pagination: {
-      page: query.page,
-      limit: query.limit,
-      total,
-      totalPages,
-      hasNext: query.page < totalPages,
-    },
-  };
-}
-
-export async function getListingById(id: string) {
-  const doc = await db.collection(MATING_LISTINGS).doc(id).get();
-  if (!doc.exists) {
-    throw Object.assign(new Error('Listing not found'), { statusCode: 404 });
-  }
-  return { id: doc.id, ...doc.data() };
-}
-
-export async function updateListing(id: string, ownerId: string, input: UpdateListingInput) {
-  const doc = await db.collection(MATING_LISTINGS).doc(id).get();
-  if (!doc.exists) {
-    throw Object.assign(new Error('Listing not found'), { statusCode: 404 });
-  }
-
-  const listing = doc.data()!;
-  if (listing.ownerId !== ownerId) {
-    throw Object.assign(new Error('You do not own this listing'), { statusCode: 403 });
-  }
-
-  const updateData: Record<string, any> = {
-    ...input,
-    updatedAt: FieldValue.serverTimestamp(),
-  };
-
-  await db.collection(MATING_LISTINGS).doc(id).update(updateData);
-  return getListingById(id);
-}
-
-export async function deleteListing(id: string, ownerId: string) {
-  const doc = await db.collection(MATING_LISTINGS).doc(id).get();
-  if (!doc.exists) {
-    throw Object.assign(new Error('Listing not found'), { statusCode: 404 });
-  }
-
-  const listing = doc.data()!;
-  if (listing.ownerId !== ownerId) {
-    throw Object.assign(new Error('You do not own this listing'), { statusCode: 403 });
-  }
-
-  await db.collection(MATING_LISTINGS).doc(id).update({
-    status: 'removed',
-    updatedAt: FieldValue.serverTimestamp(),
-  });
-}
-
-export async function sendMatchRequest(senderId: string, input: CreateMatchRequestInput) {
-  const listing = await getListingById(input.listingId);
-
-  if ((listing as any).ownerId === senderId) {
-    throw Object.assign(new Error('Cannot send a match request to your own listing'), { statusCode: 400 });
-  }
-
-  // Check for duplicate pending request
-  const existing = await db
-    .collection(MATCH_REQUESTS)
-    .where('senderId', '==', senderId)
-    .where('listingId', '==', input.listingId)
-    .where('status', '==', 'pending')
-    .limit(1)
-    .get();
-
-  if (!existing.empty) {
-    throw Object.assign(new Error('You already have a pending request for this listing'), { statusCode: 409 });
-  }
-
-  const requestData = {
-    listingId: input.listingId,
-    senderId,
-    receiverId: (listing as any).ownerId,
-    message: input.message || null,
-    status: 'pending',
-    createdAt: FieldValue.serverTimestamp(),
-    updatedAt: FieldValue.serverTimestamp(),
-  };
-
-  const ref = await db.collection(MATCH_REQUESTS).add(requestData);
-
-  // Send push notification to listing owner
-  const senderDoc = await db.collection('users').doc(senderId).get();
-  const senderName = senderDoc.data()?.displayName || 'Someone';
-
-  await sendPushNotification({
-    userId: (listing as any).ownerId,
-    title: 'New Mating Request',
-    body: `${senderName} is interested in mating with your pet`,
-    data: { type: 'match_request', requestId: ref.id },
-  });
-
-  await createNotificationRecord(
-    (listing as any).ownerId,
-    'match_request_received',
-    'New Mating Request',
-    `${senderName} is interested in mating with your pet`,
-    { requestId: ref.id, listingId: input.listingId },
-  );
-
-  return { id: ref.id, ...requestData };
-}
-
-export async function getSentRequests(userId: string) {
-  const snapshot = await db
-    .collection(MATCH_REQUESTS)
-    .where('senderId', '==', userId)
-    .get();
-
-  const requests = await Promise.all(
-    snapshot.docs.map(async (doc) => {
-      const data = doc.data();
-      let listing = null;
-      try {
-        listing = await getListingById(data.listingId);
-      } catch {
-        // listing may have been removed
-      }
-      return { id: doc.id, ...data, listing };
-    }),
-  );
-
-  requests.sort((a: any, b: any) => {
-    const aTime = a.createdAt?.toMillis?.() ?? 0;
-    const bTime = b.createdAt?.toMillis?.() ?? 0;
-    return bTime - aTime;
-  });
-
-  return requests;
-}
-
-export async function getReceivedRequests(userId: string) {
-  const snapshot = await db
-    .collection(MATCH_REQUESTS)
-    .where('receiverId', '==', userId)
-    .get();
-
-  const results = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  results.sort((a: any, b: any) => {
-    const aTime = a.createdAt?.toMillis?.() ?? 0;
-    const bTime = b.createdAt?.toMillis?.() ?? 0;
-    return bTime - aTime;
-  });
-
-  return results;
-}
-
-export async function updateMatchRequest(
-  requestId: string,
-  receiverId: string,
-  input: UpdateMatchRequestInput,
-) {
-  const doc = await db.collection(MATCH_REQUESTS).doc(requestId).get();
-  if (!doc.exists) {
-    throw Object.assign(new Error('Match request not found'), { statusCode: 404 });
-  }
-
-  const request = doc.data()!;
-  if (request.receiverId !== receiverId) {
-    throw Object.assign(new Error('You are not the receiver of this request'), { statusCode: 403 });
-  }
-
-  if (request.status !== 'pending') {
-    throw Object.assign(new Error('This request has already been processed'), { statusCode: 400 });
-  }
-
-  // If accepted, use a batch to atomically update request + create chat room
-  if (input.status === 'accepted') {
-    const batch = db.batch();
-
-    batch.update(db.collection(MATCH_REQUESTS).doc(requestId), {
-      status: input.status,
-      updatedAt: FieldValue.serverTimestamp(),
-    });
-
-    const chatRoomRef = db.collection('chat_rooms').doc();
-    batch.set(chatRoomRef, {
-      participants: [request.senderId, receiverId],
-      listingId: request.listingId,
-      matchRequestId: requestId,
+  async createListing(ownerId: string, input: any) {
+    const data = {
+      ...input,
+      ownerId,
+      status: 'active',
+      viewCount: 0,
       createdAt: FieldValue.serverTimestamp(),
-    });
-
-    await batch.commit();
-  } else {
-    await db.collection(MATCH_REQUESTS).doc(requestId).update({
-      status: input.status,
       updatedAt: FieldValue.serverTimestamp(),
-    });
+    };
+    const doc = await this.listingsRef.add(data);
+    return { id: doc.id, ...data };
   }
 
-  // Send notification to the sender
-  const receiverDoc = await db.collection('users').doc(receiverId).get();
-  const receiverName = receiverDoc.data()?.displayName || 'The owner';
+  async getPetProfile(petId: string) {
+    const doc = await this.petsRef.doc(petId).get();
+    if (!doc.exists) {
+      const error: any = new Error('Pet not found');
+      error.statusCode = 404;
+      throw error;
+    }
+    const data = doc.data()!;
+    const ownerDoc = await db.collection('users').doc(data.ownerId).get();
+    const owner = ownerDoc.exists
+      ? { displayName: ownerDoc.data()!.displayName, avatar: ownerDoc.data()!.avatar || null }
+      : { displayName: 'Unknown', avatar: null };
 
-  const title = input.status === 'accepted' ? 'Match Request Accepted!' : 'Match Request Declined';
-  const body =
-    input.status === 'accepted'
-      ? `${receiverName} accepted your mating request. You can now chat!`
-      : `${receiverName} declined your mating request.`;
+    const healthSnap = await db.collection('health_records')
+      .where('petId', '==', petId)
+      .orderBy('date', 'desc')
+      .limit(5)
+      .get();
+    const healthRecords = healthSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
-  await sendPushNotification({
-    userId: request.senderId,
-    title,
-    body,
-    data: { type: 'match_request_update', requestId, status: input.status },
-  });
+    const vaccSnap = await db.collection('vaccinations')
+      .where('petId', '==', petId)
+      .orderBy('date', 'desc')
+      .limit(10)
+      .get();
+    const vaccinations = vaccSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
-  await createNotificationRecord(
-    request.senderId,
-    `match_request_${input.status}`,
-    title,
-    body,
-    { requestId, listingId: request.listingId },
-  );
+    return {
+      id: doc.id,
+      name: data.name,
+      species: data.species,
+      breed: data.breed,
+      gender: data.gender,
+      dateOfBirth: data.dateOfBirth,
+      weight: data.weight || null,
+      color: data.color || null,
+      isNeutered: data.isNeutered || false,
+      isAvailableForMating: data.isAvailableForMating || false,
+      notes: data.notes || null,
+      photos: data.photos || [],
+      location: data.location || null,
+      owner,
+      healthRecords,
+      vaccinations,
+    };
+  }
 
-  return { id: requestId, ...request, status: input.status };
+  async browseListings(filters: any, page = 1, limit = 20) {
+    let query: any = this.listingsRef.where('status', '==', 'active');
+
+    if (filters.species) {
+      query = query.where('species', '==', filters.species);
+    }
+    if (filters.city && filters.city.trim() !== '') {
+      query = query.where('location.city', '==', filters.city);
+    }
+
+    const countSnap = await query.count().get();
+    const total = countSnap.data().count;
+    const offset = (page - 1) * limit;
+
+    const snapshot = await query
+      .orderBy('createdAt', 'desc')
+      .offset(offset)
+      .limit(limit)
+      .get();
+
+    let listings = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+    if (filters.breed) {
+      const breedLower = filters.breed.toLowerCase();
+      listings = listings.sort((a: any, b: any) => {
+        const aBreed = (a.breed || '').toLowerCase();
+        const bBreed = (b.breed || '').toLowerCase();
+        const aExact = aBreed === breedLower ? 1 : 0;
+        const bExact = bBreed === breedLower ? 1 : 0;
+        if (aExact !== bExact) return bExact - aExact;
+        const aPartial = aBreed.includes(breedLower) || breedLower.includes(aBreed) ? 1 : 0;
+        const bPartial = bBreed.includes(breedLower) || breedLower.includes(bBreed) ? 1 : 0;
+        return bPartial - aPartial;
+      });
+    }
+
+    return { data: listings, total, page, limit, totalPages: Math.ceil(total / limit) };
+  }
+
+  async browseSmartListings(userId: string, page = 1, limit = 20) {
+    const userPetsSnap = await this.petsRef
+      .where('ownerId', '==', userId)
+      .where('isAvailableForMating', '==', true)
+      .get();
+
+    let userPet: any;
+
+    if (userPetsSnap.empty) {
+      const allPetsSnap = await this.petsRef
+        .where('ownerId', '==', userId)
+        .limit(1)
+        .get();
+      if (allPetsSnap.empty) {
+        return { data: [], total: 0, page, limit, totalPages: 0, filters_applied: {} };
+      }
+      userPet = allPetsSnap.docs[0].data();
+    } else {
+      userPet = userPetsSnap.docs[0].data();
+    }
+
+    const city = userPet.location?.city;
+    const species = userPet.species;
+    const breed = userPet.breed;
+
+    let result = await this.browseListings({ species, city, breed }, page, limit);
+    let filtered = (result.data as any[]).filter((l: any) => l.ownerId !== userId);
+
+    if (filtered.length === 0 && city) {
+      result = await this.browseListings({ species, breed }, page, limit);
+      filtered = (result.data as any[]).filter((l: any) => l.ownerId !== userId);
+    }
+
+    if (filtered.length === 0) {
+      result = await this.browseListings({ species }, page, limit);
+      filtered = (result.data as any[]).filter((l: any) => l.ownerId !== userId);
+    }
+
+    return {
+      ...result,
+      data: filtered,
+      total: filtered.length,
+      filters_applied: { city: city || null, species: species || null, breed: breed || null },
+    };
+  }
+
+  async getListingById(listingId: string) {
+    const doc = await this.listingsRef.doc(listingId).get();
+    if (!doc.exists) {
+      const error: any = new Error('Listing not found');
+      error.statusCode = 404;
+      throw error;
+    }
+    await this.listingsRef.doc(listingId).update({
+      viewCount: FieldValue.increment(1),
+    });
+    return { id: doc.id, ...doc.data() };
+  }
+
+  async updateListing(listingId: string, ownerId: string, input: any) {
+    const doc = await this.listingsRef.doc(listingId).get();
+    if (!doc.exists || doc.data()!.ownerId !== ownerId) {
+      const error: any = new Error('Listing not found');
+      error.statusCode = 404;
+      throw error;
+    }
+    await this.listingsRef.doc(listingId).update({ ...input, updatedAt: FieldValue.serverTimestamp() });
+    const updated = await this.listingsRef.doc(listingId).get();
+    return { id: updated.id, ...updated.data() };
+  }
+
+  async deleteListing(listingId: string, ownerId: string) {
+    const doc = await this.listingsRef.doc(listingId).get();
+    if (!doc.exists || doc.data()!.ownerId !== ownerId) {
+      const error: any = new Error('Listing not found');
+      error.statusCode = 404;
+      throw error;
+    }
+    await this.listingsRef.doc(listingId).delete();
+  }
+
+  async sendRequest(senderId: string, input: any) {
+    const listing = await this.listingsRef.doc(input.listingId).get();
+    if (!listing.exists) {
+      const error: any = new Error('Listing not found');
+      error.statusCode = 404;
+      throw error;
+    }
+    if (listing.data()!.ownerId === senderId) {
+      const error: any = new Error('Cannot request your own listing');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const data = {
+      listingId: input.listingId,
+      senderId,
+      receiverId: listing.data()!.ownerId,
+      petId: input.petId,
+      message: input.message || null,
+      status: 'pending',
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+    const doc = await this.requestsRef.add(data);
+    return { id: doc.id, ...data };
+  }
+
+  async getSentRequests(senderId: string) {
+    const snapshot = await this.requestsRef
+      .where('senderId', '==', senderId)
+      .orderBy('createdAt', 'desc')
+      .get();
+    const requests = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    return this.enrichRequests(requests);
+  }
+
+  async getReceivedRequests(receiverId: string) {
+    const snapshot = await this.requestsRef
+      .where('receiverId', '==', receiverId)
+      .orderBy('createdAt', 'desc')
+      .get();
+    const requests = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    return this.enrichRequests(requests);
+  }
+
+  private async enrichRequests(requests: any[]) {
+    return Promise.all(requests.map(async (req) => {
+      const enriched: any = { ...req };
+
+      if (req.listingId) {
+        const listingDoc = await this.listingsRef.doc(req.listingId).get();
+        if (listingDoc.exists) {
+          const listing = listingDoc.data()!;
+          enriched.listing = {
+            id: listingDoc.id,
+            petName: listing.petName || listing.name || null,
+            species: listing.species || null,
+            breed: listing.breed || null,
+            location: listing.location || null,
+            photos: listing.photos || [],
+            petId: listing.petId || null,
+          };
+        }
+      }
+
+      if (req.petId) {
+        const petDoc = await this.petsRef.doc(req.petId).get();
+        if (petDoc.exists) {
+          const pet = petDoc.data()!;
+          enriched.pet = {
+            id: petDoc.id,
+            name: pet.name,
+            species: pet.species,
+            breed: pet.breed,
+            photos: pet.photos || [],
+          };
+        }
+      }
+
+      if (req.senderId) {
+        const senderDoc = await db.collection('users').doc(req.senderId).get();
+        if (senderDoc.exists) {
+          const sender = senderDoc.data()!;
+          enriched.sender = {
+            displayName: sender.displayName || null,
+            avatar: sender.avatar || null,
+          };
+        }
+      }
+
+      if (req.receiverId) {
+        const receiverDoc = await db.collection('users').doc(req.receiverId).get();
+        if (receiverDoc.exists) {
+          const receiver = receiverDoc.data()!;
+          enriched.receiver = {
+            displayName: receiver.displayName || null,
+            avatar: receiver.avatar || null,
+          };
+        }
+      }
+
+      return enriched;
+    }));
+  }
+
+  async respondToRequest(requestId: string, receiverId: string, status: 'accepted' | 'rejected') {
+    const doc = await this.requestsRef.doc(requestId).get();
+    if (!doc.exists || doc.data()!.receiverId !== receiverId) {
+      const error: any = new Error('Request not found');
+      error.statusCode = 404;
+      throw error;
+    }
+    if (doc.data()!.status !== 'pending') {
+      const error: any = new Error('Request already responded');
+      error.statusCode = 400;
+      throw error;
+    }
+    await this.requestsRef.doc(requestId).update({
+      status,
+      respondedAt: new Date().toISOString(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+    const updated = await this.requestsRef.doc(requestId).get();
+    const result = { id: updated.id, ...updated.data() };
+
+    if (status === 'accepted') {
+      this.sendWeddingCard(doc.data()!).catch(() => {});
+    }
+
+    return result;
+  }
+
+  private async sendWeddingCard(requestData: any) {
+    try {
+      const [senderDoc, receiverDoc, listingDoc] = await Promise.all([
+        db.collection('users').doc(requestData.senderId).get(),
+        db.collection('users').doc(requestData.receiverId).get(),
+        this.listingsRef.doc(requestData.listingId).get(),
+      ]);
+
+      const sender = senderDoc.exists ? senderDoc.data()! : {};
+      const receiver = receiverDoc.exists ? receiverDoc.data()! : {};
+      const listing = listingDoc.exists ? listingDoc.data()! : {};
+
+      let senderPet: any = {};
+      let receiverPet: any = {};
+      if (requestData.petId) {
+        const petDoc = await db.collection('pets').doc(requestData.petId).get();
+        if (petDoc.exists) senderPet = petDoc.data()!;
+      }
+      if (listing.petId) {
+        const petDoc = await db.collection('pets').doc(listing.petId).get();
+        if (petDoc.exists) receiverPet = petDoc.data()!;
+      }
+
+      const getPhotoUrl = (pet: any) => {
+        if (pet.photos && pet.photos.length > 0) {
+          const p = pet.photos[0];
+          return typeof p === 'string' ? p : p.url;
+        }
+        return undefined;
+      };
+
+      const location = listing.location
+        ? `${listing.location.city || ''}${listing.location.city && listing.location.country ? ', ' : ''}${listing.location.country || ''}`
+        : undefined;
+
+      await emailService.sendMatchWeddingCard({
+        senderName: sender.displayName || 'Pet Parent',
+        senderEmail: sender.email || '',
+        senderPetName: senderPet.name || 'Your Pet',
+        senderPetBreed: senderPet.breed || listing.breed || '',
+        senderPetPhoto: getPhotoUrl(senderPet),
+        receiverName: receiver.displayName || 'Pet Parent',
+        receiverEmail: receiver.email || '',
+        receiverPetName: receiverPet.name || listing.petName || 'Their Pet',
+        receiverPetBreed: receiverPet.breed || listing.breed || '',
+        receiverPetPhoto: getPhotoUrl(receiverPet),
+        species: listing.species || '',
+        location: location || undefined,
+        matchDate: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+      });
+    } catch (err) {
+      console.error('[MATING] Failed to send wedding card:', err);
+    }
+  }
 }
+
+export const matingService = new MatingService();

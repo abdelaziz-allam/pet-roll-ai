@@ -1,29 +1,22 @@
 import { z } from 'zod';
 
 export const registerSchema = z.object({
-  firebaseToken: z.string().min(1),
-  displayName: z.string().min(2).max(100),
+  displayName: z.string().min(2).max(50),
+  phone: z.string().optional(),
   timezone: z.string().default('UTC'),
 });
 
-export const loginSchema = z.object({
-  firebaseToken: z.string().min(1),
-});
-
 export const updateProfileSchema = z.object({
-  displayName: z.string().min(2).max(100).optional(),
+  displayName: z.string().min(2).max(50).optional(),
   phone: z.string().optional(),
   timezone: z.string().optional(),
-  country: z.string().optional(),
-  city: z.string().optional(),
+  avatar: z.string().url().optional(),
   settings: z.object({
-    reminderTimeUTC: z.number().min(0).max(23).optional(),
-    pushEnabled: z.boolean().optional(),
-    emailNotifications: z.boolean().optional(),
+    notifications: z.boolean().optional(),
     language: z.string().optional(),
+    theme: z.enum(['light', 'dark']).optional(),
   }).optional(),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
-export type LoginInput = z.infer<typeof loginSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

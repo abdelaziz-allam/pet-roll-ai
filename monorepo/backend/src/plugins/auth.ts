@@ -1,49 +1,46 @@
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyInstance, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 import jwt from 'jsonwebtoken';
-import { auth } from '../config/firebase.js';
-import { env } from '../config/env.js';
-
-export interface UserPayload {
-  uid: string;
-  email: string;
-  role: string;
-}
+import { env } from '../config/env';
+import { db } from '../config/firebase';
 
 declare module 'fastify' {
   interface FastifyRequest {
-    user?: UserPayload;
+    user: {
+      uid: string;
+      email: string;
+      role: string;
+    } | null;
   }
 }
 
-async function authPlugin(app: FastifyInstance) {
-  app.decorateRequest('user', undefined);
+async function authPlugin(fastify: FastifyInstance) {
+  fastify.decorateRequest('user', null);
 
-  app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply) => {
-    const header = request.headers.authorization;
-    if (!header?.startsWith('Bearer ')) {
-      return reply.status(401).send({
-        statusCode: 401,
-        error: 'Unauthorized',
-        message: 'Missing or invalid authorization header',
-      });
+  fastify.addHook('onRequest', async (request: FastifyRequest) => {
+    const authHeader = request.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) {
+      request.user = null;
+      return;
     }
 
-    const token = header.slice(7);
+    const token = authHeader.slice(7);
     try {
-      const decoded = jwt.verify(token, env.JWT_SECRET) as UserPayload;
-      request.user = decoded;
+      const decoded = jwt.verify(token, env.JWT_SECRET) as { uid: string; email: string };
+      const userDoc = await db.collection('users').doc(decoded.uid).get();
+      if (!userDoc.exists) {
+        request.user = null;
+        return;
+      }
+      const userData = userDoc.data()!;
+      request.user = {
+        uid: decoded.uid,
+        email: decoded.email,
+        role: userData.role || 'user',
+      };
     } catch {
-      return reply.status(401).send({
-        statusCode: 401,
-        error: 'Unauthorized',
-        message: 'Invalid or expired token',
-      });
+      request.user = null;
     }
-  });
-
-  app.decorate('verifyFirebaseToken', async (idToken: string) => {
-    return auth.verifyIdToken(idToken);
   });
 }
 

@@ -1,30 +1,26 @@
 import { z } from 'zod';
 
-const petPhotoSchema = z.object({
-  url: z.string(),
-  path: z.string(),
-  uploadedAt: z.string(),
-});
+export const locationSchema = z.object({
+  country: z.string().optional(),
+  city: z.string().optional(),
+}).optional();
 
 export const createPetSchema = z.object({
-  name: z.string().min(2).max(50),
-  species: z.string().min(1),
-  breed: z.string().optional(),
-  breedId: z.string().optional(),
-  gender: z.enum(['male', 'female']),
-  dateOfBirth: z.string().transform((val) => val.split('T')[0]),
+  name: z.string().min(1).max(50),
+  species: z.string().min(1).max(50),
+  breed: z.string().min(1).max(100),
+  gender: z.enum(['male', 'female', 'other']),
+  dateOfBirth: z.string(),
   weight: z.number().positive().optional(),
-  weightUnit: z.enum(['kg', 'lbs']).default('kg'),
   color: z.string().optional(),
   microchipId: z.string().optional(),
   isNeutered: z.boolean().default(false),
   isAvailableForMating: z.boolean().default(false),
-  notes: z.string().optional(),
+  notes: z.string().max(500).optional(),
+  location: locationSchema,
 });
 
-export const updatePetSchema = createPetSchema.partial().extend({
-  photos: z.array(petPhotoSchema).max(50).optional(),
-});
+export const updatePetSchema = createPetSchema.partial();
 
 export type CreatePetInput = z.infer<typeof createPetSchema>;
 export type UpdatePetInput = z.infer<typeof updatePetSchema>;

@@ -1,127 +1,153 @@
-import type { FastifyInstance } from 'fastify';
-import { createPetSchema, updatePetSchema } from './pets.schema.js';
-import * as petsService from './pets.service.js';
-import { requireAuth } from '../../middleware/require-auth.js';
-import { uploadImage, MAX_FILE_SIZE, ALLOWED_MIME_TYPES } from '../../utils/image-upload.js';
-import { db } from '../../config/firebase.js';
+import { FastifyInstance } from 'fastify';
+import { petsService } from './pets.service';
+import { createPetSchema, updatePetSchema } from './pets.schema';
+import { requireAuth } from '../../middleware/require-auth';
+import { db, storage } from '../../config/firebase';
+import { env } from '../../config/env';
+import { adminService } from '../admin/admin.service';
+import { healthCertificationService } from './health-certification.service';
 
-export async function petsRoutes(app: FastifyInstance) {
-  // Create pet
-  app.post('/', { preHandler: [requireAuth] }, async (request, reply) => {
+export async function petsRoutes(fastify: FastifyInstance) {
+  fastify.addHook('preHandler', requireAuth);
+
+  fastify.post('/', async (request, reply) => {
     const body = createPetSchema.parse(request.body);
     const pet = await petsService.createPet(request.user!.uid, body);
-    return reply.status(201).send(pet);
+    return reply.code(201).send(pet);
   });
 
-  // List user's pets
-  app.get('/', { preHandler: [requireAuth] }, async (request, reply) => {
-    const pets = await petsService.getUserPets(request.user!.uid);
-    return reply.send(pets);
+  fastify.get('/', async (request, reply) => {
+    const { page = 1, limit = 20 } = request.query as any;
+    const result = await petsService.getUserPets(request.user!.uid, +page, +limit);
+    return reply.code(200).send(result);
   });
 
-  // Get species list
-  app.get('/species', { preHandler: [requireAuth] }, async (_request, reply) => {
-    const species = [
-      'dog', 'cat', 'bird', 'rabbit', 'horse', 'hamster', 'guinea pig',
-      'fish', 'turtle', 'snake', 'lizard', 'parrot', 'ferret', 'chinchilla',
-      'hedgehog', 'frog', 'hermit crab', 'gerbil', 'mouse', 'rat',
-      'sugar glider', 'axolotl', 'chameleon', 'gecko', 'iguana',
-      'cockatiel', 'canary', 'dove', 'pigeon', 'duck', 'chicken',
-      'goat', 'sheep', 'pig', 'cow', 'donkey', 'alpaca', 'llama',
-      'other',
-    ];
-    return reply.send(species);
-  });
-
-  // Get breeds (search/list from breeds collection)
-  app.get('/breeds', { preHandler: [requireAuth] }, async (request, reply) => {
+  fastify.get('/breeds', async (request, reply) => {
     const { species, search } = request.query as { species?: string; search?: string };
-
-    let query: FirebaseFirestore.Query = db.collection('breeds');
+    let query: any = db.collection('breeds');
 
     if (species) {
       query = query.where('species', '==', species);
     }
 
-    const snapshot = await query.orderBy('name').get();
+    const snapshot = await query.get();
     let breeds = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
     if (search) {
-      const searchLower = search.toLowerCase();
-      breeds = breeds.filter((b: any) => b.name.toLowerCase().includes(searchLower));
+      const term = search.toLowerCase();
+      breeds = breeds.filter((b: any) => b.name.toLowerCase().includes(term));
     }
 
-    return reply.send(breeds);
+    return reply.code(200).send(breeds);
   });
 
-  // Get single pet
-  app.get('/:petId', { preHandler: [requireAuth] }, async (request, reply) => {
+  fastify.get('/:petId', async (request, reply) => {
     const { petId } = request.params as { petId: string };
     const pet = await petsService.getPetById(petId, request.user!.uid);
-    return reply.send(pet);
+    return reply.code(200).send(pet);
   });
 
-  // Update pet
-  app.put('/:petId', { preHandler: [requireAuth] }, async (request, reply) => {
+  fastify.put('/:petId', async (request, reply) => {
     const { petId } = request.params as { petId: string };
     const body = updatePetSchema.parse(request.body);
     const pet = await petsService.updatePet(petId, request.user!.uid, body);
-    return reply.send(pet);
+    return reply.code(200).send(pet);
   });
 
-  // Delete pet
-  app.delete('/:petId', { preHandler: [requireAuth] }, async (request, reply) => {
+  fastify.delete('/:petId', async (request, reply) => {
     const { petId } = request.params as { petId: string };
     await petsService.deletePet(petId, request.user!.uid);
-    return reply.status(204).send();
+    return reply.code(204).send();
   });
 
-  // Upload pet photo
-  app.post('/:petId/photos', { preHandler: [requireAuth] }, async (request, reply) => {
+  fastify.post('/:petId/photos', async (request, reply) => {
     const { petId } = request.params as { petId: string };
-
-    let data;
-    try {
-      data = await request.file();
-    } catch (err: any) {
-      return reply.status(400).send({ message: 'Failed to parse file upload: ' + err.message });
-    }
-
-    if (!data) {
-      return reply.status(400).send({ message: 'No file uploaded' });
-    }
-
-    if (!ALLOWED_MIME_TYPES.includes(data.mimetype)) {
-      return reply.status(400).send({
-        message: `Invalid file type. Allowed: ${ALLOWED_MIME_TYPES.join(', ')}`,
-      });
-    }
-
-    const buffer = await data.toBuffer();
-
-    if (buffer.length > MAX_FILE_SIZE) {
-      return reply.status(400).send({
-        message: `File too large. Maximum size: ${MAX_FILE_SIZE / 1024 / 1024}MB`,
-      });
-    }
-
-    const result = await uploadImage(buffer, `pets/${petId}`, data.mimetype, {
-      ownerId: request.user!.uid,
-    });
-    await petsService.addPetPhoto(petId, request.user!.uid, result.url, result.path);
-
-    const updatedPet = await petsService.getPetById(petId, request.user!.uid);
-    return reply.status(201).send(updatedPet);
+    const { url, path } = request.body as { url: string; path: string };
+    const pet = await petsService.addPetPhoto(petId, request.user!.uid, url, path);
+    return reply.code(200).send(pet);
   });
 
-  // Remove pet photo
-  app.delete('/:petId/photos/:photoId', { preHandler: [requireAuth] }, async (request, reply) => {
+  fastify.post('/:petId/photos/upload', async (request, reply) => {
+    const { petId } = request.params as { petId: string };
+    const ownerId = request.user!.uid;
+
+    const data = await request.file();
+    if (!data) {
+      return reply.code(400).send({ error: 'No file uploaded' });
+    }
+
+    const timestamp = Date.now();
+    const filename = data.filename;
+    const storagePath = `pets/${ownerId}/${petId}/${timestamp}_${filename}`;
+
+    if (env.USE_MEMORY_STORE) {
+      const fakeUrl = `https://storage.example.com/${storagePath}`;
+      return reply.code(200).send({ url: fakeUrl, path: storagePath });
+    }
+
+    const bucket = storage.bucket(env.GCS_BUCKET);
+    const file = bucket.file(storagePath);
+
+    const stream = file.createWriteStream({
+      metadata: {
+        contentType: data.mimetype,
+      },
+      resumable: false,
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      data.file.pipe(stream);
+      stream.on('error', reject);
+      stream.on('finish', resolve);
+    });
+
+    await file.makePublic();
+
+    const publicUrl = `https://storage.googleapis.com/${env.GCS_BUCKET}/${storagePath}`;
+    return reply.code(200).send({ url: publicUrl, path: storagePath });
+  });
+
+  fastify.delete('/:petId/photos/:photoId', async (request, reply) => {
     const { petId, photoId } = request.params as { petId: string; photoId: string };
+    await petsService.removePetPhoto(petId, request.user!.uid, decodeURIComponent(photoId));
+    return reply.code(204).send();
+  });
 
-    // photoId is the encoded storage path
-    const path = decodeURIComponent(photoId);
-    await petsService.removePetPhoto(petId, request.user!.uid, path);
+  fastify.get('/locations/countries', async (_request, reply) => {
+    const result = await adminService.getCountries();
+    return reply.code(200).send(result);
+  });
 
-    return reply.status(204).send();
+  fastify.get('/locations/cities', async (request, reply) => {
+    const { country } = request.query as { country?: string };
+    const result = await adminService.getCities(country);
+    return reply.code(200).send(result);
+  });
+
+  // --- Health Certification ---
+
+  fastify.post('/:petId/health-certification', async (request, reply) => {
+    const { petId } = request.params as { petId: string };
+    const body = request.body as {
+      vetName: string;
+      vetClinic: string;
+      certDate: string;
+      expiryDate?: string;
+      notes?: string;
+      documents: Array<{ url: string; name: string }>;
+    };
+    const result = await healthCertificationService.submitCertification(request.user!.uid, petId, body);
+    return reply.code(201).send(result);
+  });
+
+  fastify.get('/health-certifications', async (request, reply) => {
+    const result = await healthCertificationService.getMyCertifications(request.user!.uid);
+    return reply.code(200).send(result);
+  });
+
+  fastify.get('/:petId/health-certification', async (request, reply) => {
+    const { petId } = request.params as { petId: string };
+    const result = await healthCertificationService.getPetCertification(petId);
+    return reply.code(200).send(result);
   });
 }

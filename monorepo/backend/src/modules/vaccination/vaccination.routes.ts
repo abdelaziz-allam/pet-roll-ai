@@ -1,37 +1,41 @@
-import type { FastifyInstance } from 'fastify';
-import { createVaccinationSchema, updateVaccinationSchema } from './vaccination.schema.js';
-import * as vaccinationService from './vaccination.service.js';
-import { requireAuth } from '../../middleware/require-auth.js';
+import { FastifyInstance } from 'fastify';
+import { vaccinationService } from './vaccination.service';
+import { logVaccinationSchema, updateVaccinationSchema } from './vaccination.schema';
+import { requireAuth } from '../../middleware/require-auth';
 
-export async function vaccinationRoutes(app: FastifyInstance) {
-  app.post('/pets/:petId/vaccinations', { preHandler: [requireAuth] }, async (request, reply) => {
+export async function vaccinationRoutes(fastify: FastifyInstance) {
+  fastify.addHook('preHandler', requireAuth);
+
+  fastify.post('/pets/:petId/vaccinations', async (request, reply) => {
     const { petId } = request.params as { petId: string };
-    const body = createVaccinationSchema.parse({ ...(request.body as object), petId });
-    const record = await vaccinationService.logVaccination(request.user!.uid, body);
-    return reply.status(201).send(record);
+    const body = logVaccinationSchema.parse(request.body);
+    const record = await vaccinationService.logVaccination(petId, request.user!.uid, body);
+    return reply.code(201).send(record);
   });
 
-  app.get('/pets/:petId/vaccinations', { preHandler: [requireAuth] }, async (request, reply) => {
+  fastify.get('/pets/:petId/vaccinations', async (request, reply) => {
     const { petId } = request.params as { petId: string };
-    const records = await vaccinationService.getVaccinations(petId, request.user!.uid);
-    return reply.send(records);
+    const { page = 1, limit = 20 } = request.query as any;
+    const result = await vaccinationService.getVaccinations(petId, request.user!.uid, +page, +limit);
+    return reply.code(200).send(result);
   });
 
-  app.get('/pets/:petId/vaccinations/upcoming', { preHandler: [requireAuth] }, async (request, reply) => {
-    const upcoming = await vaccinationService.getUpcoming(request.user!.uid);
-    return reply.send(upcoming);
+  fastify.get('/pets/:petId/vaccinations/upcoming', async (request, reply) => {
+    const { petId } = request.params as { petId: string };
+    const result = await vaccinationService.getUpcoming(petId, request.user!.uid);
+    return reply.code(200).send(result);
   });
 
-  app.put('/pets/:petId/vaccinations/:id', { preHandler: [requireAuth] }, async (request, reply) => {
-    const { id } = request.params as { petId: string; id: string };
+  fastify.put('/pets/:petId/vaccinations/:vacId', async (request, reply) => {
+    const { vacId } = request.params as { petId: string; vacId: string };
     const body = updateVaccinationSchema.parse(request.body);
-    const record = await vaccinationService.updateVaccination(id, request.user!.uid, body);
-    return reply.send(record);
+    const record = await vaccinationService.updateVaccination(vacId, request.user!.uid, body);
+    return reply.code(200).send(record);
   });
 
-  app.delete('/pets/:petId/vaccinations/:id', { preHandler: [requireAuth] }, async (request, reply) => {
-    const { id } = request.params as { petId: string; id: string };
-    await vaccinationService.deleteVaccination(id, request.user!.uid);
-    return reply.status(204).send();
+  fastify.delete('/pets/:petId/vaccinations/:vacId', async (request, reply) => {
+    const { vacId } = request.params as { petId: string; vacId: string };
+    await vaccinationService.deleteVaccination(vacId, request.user!.uid);
+    return reply.code(204).send();
   });
 }
