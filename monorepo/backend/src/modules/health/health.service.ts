@@ -85,3 +85,18 @@ export async function deleteRecord(recordId: string, ownerId: string) {
 
   await db.collection(HEALTH_RECORDS).doc(recordId).delete();
 }
+
+export async function addAttachment(recordId: string, ownerId: string, url: string) {
+  const doc = await db.collection(HEALTH_RECORDS).doc(recordId).get();
+  if (!doc.exists || doc.data()?.ownerId !== ownerId) {
+    throw Object.assign(new Error('Health record not found'), { statusCode: 404 });
+  }
+
+  await db.collection(HEALTH_RECORDS).doc(recordId).update({
+    attachments: FieldValue.arrayUnion([url]),
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+
+  const updated = await db.collection(HEALTH_RECORDS).doc(recordId).get();
+  return { id: recordId, ...updated.data() };
+}

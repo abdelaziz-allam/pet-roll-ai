@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -65,6 +67,24 @@ class HealthService {
   Future<void> deleteRecord(String petId, String recordId) async {
     try {
       await _api.delete('/pets/$petId/health/$recordId');
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  Future<HealthRecord> uploadAttachment(String petId, String recordId, File file) async {
+    try {
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          file.path,
+          filename: file.path.split('/').last,
+        ),
+      });
+      final response = await _api.upload(
+        '/pets/$petId/health/$recordId/attachments',
+        data: formData,
+      );
+      return HealthRecord.fromJson(response.data);
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }

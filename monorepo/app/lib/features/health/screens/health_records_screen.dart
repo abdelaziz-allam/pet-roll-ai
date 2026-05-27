@@ -75,13 +75,16 @@ class _HealthRecordsScreenState extends ConsumerState<HealthRecordsScreen> {
       appBar: AppBar(
         title: Text('Health Records', style: AppTypography.heading2),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.brandPrimary,
-        onPressed: () => context.pushNamed(
-          RouteNames.addHealthRecord,
-          pathParameters: {'petId': widget.petId},
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 80),
+        child: FloatingActionButton(
+          backgroundColor: AppColors.brandPrimary,
+          onPressed: () => context.pushNamed(
+            RouteNames.addHealthRecord,
+            pathParameters: {'petId': widget.petId},
+          ),
+          child: const Icon(Icons.add, color: Colors.white),
         ),
-        child: const Icon(Icons.add, color: Colors.white),
       ),
       body: Column(
         children: [
@@ -124,28 +127,72 @@ class _HealthRecordsScreenState extends ConsumerState<HealthRecordsScreen> {
   Widget _buildFilterChips() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          FilterChip(
-            label: Text('All', style: AppTypography.bodySmall),
-            selected: _selectedFilter == null,
-            selectedColor: AppColors.brandPrimary.withOpacity(0.2),
-            onSelected: (_) => setState(() => _selectedFilter = null),
+          _buildChip(
+            label: 'All',
+            isSelected: _selectedFilter == null,
+            color: AppColors.brandPrimary,
+            onTap: () => setState(() => _selectedFilter = null),
           ),
           const SizedBox(width: 8),
-          ...HealthRecordType.values.map((type) => Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: FilterChip(
-                  label: Text(type.displayName, style: AppTypography.bodySmall),
-                  selected: _selectedFilter == type,
-                  selectedColor: _colorForType(type).withOpacity(0.2),
-                  onSelected: (_) => setState(() {
-                    _selectedFilter = _selectedFilter == type ? null : type;
-                  }),
-                ),
-              )),
+          ...HealthRecordType.values.map((type) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: _buildChip(
+                label: type.displayName,
+                isSelected: _selectedFilter == type,
+                color: _colorForType(type),
+                onTap: () => setState(() {
+                  _selectedFilter = _selectedFilter == type ? null : type;
+                }),
+              ),
+            );
+          }),
         ],
+      ),
+    );
+  }
+
+  Widget _buildChip({
+    required String label,
+    required bool isSelected,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? color : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? color : AppColors.textSecondary.withOpacity(0.4),
+            width: isSelected ? 1.5 : 1,
+          ),
+          boxShadow: isSelected
+              ? [BoxShadow(color: color.withOpacity(0.3), blurRadius: 6, offset: const Offset(0, 2))]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isSelected) ...[
+              Icon(Icons.check, size: 14, color: Colors.white),
+              const SizedBox(width: 4),
+            ],
+            Text(
+              label,
+              style: AppTypography.bodySmall.copyWith(
+                color: isSelected ? Colors.white : AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -156,7 +203,7 @@ class _HealthRecordsScreenState extends ConsumerState<HealthRecordsScreen> {
     final grouped = _groupByMonth(sorted);
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
       itemCount: grouped.length,
       itemBuilder: (context, index) {
         final month = grouped.keys.elementAt(index);
