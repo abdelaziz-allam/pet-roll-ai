@@ -230,7 +230,12 @@ class _HealthRecordsScreenState extends ConsumerState<HealthRecordsScreen> {
     final color = _colorForType(record.type);
     final icon = _iconForType(record.type);
 
-    return Container(
+    return GestureDetector(
+      onTap: () => context.pushNamed(
+        RouteNames.healthRecordDetail,
+        pathParameters: {'petId': widget.petId, 'recordId': record.id},
+      ),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -313,6 +318,7 @@ class _HealthRecordsScreenState extends ConsumerState<HealthRecordsScreen> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

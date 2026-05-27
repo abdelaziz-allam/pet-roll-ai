@@ -97,6 +97,15 @@ class _AddHealthRecordScreenState extends ConsumerState<AddHealthRecordScreen> {
 
     if (source == null) return;
 
+    if (_attachments.length >= 5) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Maximum 5 attachments per record')),
+        );
+      }
+      return;
+    }
+
     final picked = await _picker.pickImage(source: source, imageQuality: 80);
     if (picked != null) {
       setState(() => _attachments.add(File(picked.path)));

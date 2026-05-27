@@ -18,6 +18,7 @@ export const createVaccinationSchema = z.object({
   vetName: z.string().optional().nullable(),
   vetClinic: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
+  status: z.enum(['active', 'completed']).default('active'),
   doses: z.array(doseSchema).optional(),
 });
 
@@ -31,6 +32,7 @@ export const updateVaccinationSchema = z.object({
   vetName: z.string().optional().nullable(),
   vetClinic: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
+  status: z.enum(['active', 'completed']).optional(),
   doses: z.array(doseSchema).optional(),
 });
 

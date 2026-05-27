@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../storage/secure_storage.dart';
@@ -29,6 +30,7 @@ class AuthInterceptor extends Interceptor {
         final retryResponse = await _retry(err.requestOptions);
         return handler.resolve(retryResponse);
       }
+      await FirebaseAuth.instance.signOut();
     }
     handler.next(err);
   }

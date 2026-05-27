@@ -17,6 +17,13 @@ class VaccinationListScreen extends ConsumerWidget {
 
   const VaccinationListScreen({super.key, required this.petId});
 
+  void _openDetail(BuildContext context, String vaccinationId) {
+    context.pushNamed(
+      RouteNames.vaccinationDetail,
+      pathParameters: {'petId': petId, 'vaccinationId': vaccinationId},
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final vaccinationsAsync = ref.watch(vaccinationsProvider(petId));
@@ -25,13 +32,16 @@ class VaccinationListScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text('Vaccinations', style: AppTypography.heading2),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.brandPrimary,
-        onPressed: () => context.pushNamed(
-          RouteNames.addVaccination,
-          pathParameters: {'petId': petId},
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 80),
+        child: FloatingActionButton(
+          backgroundColor: AppColors.brandPrimary,
+          onPressed: () => context.pushNamed(
+            RouteNames.addVaccination,
+            pathParameters: {'petId': petId},
+          ),
+          child: const Icon(Icons.add, color: Colors.white),
         ),
-        child: const Icon(Icons.add, color: Colors.white),
       ),
       body: vaccinationsAsync.when(
         loading: () => const LoadingIndicator(),
@@ -61,21 +71,21 @@ class VaccinationListScreen extends ConsumerWidget {
               ref.invalidate(vaccinationsProvider(petId));
             },
             child: ListView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
               children: [
                 if (overdue.isNotEmpty) ...[
                   _buildSectionHeader('Overdue', AppColors.error),
-                  ...overdue.map((v) => _buildVaccinationCard(v, isOverdue: true)),
+                  ...overdue.map((v) => _buildVaccinationCard(context, v, isOverdue: true)),
                   const SizedBox(height: 16),
                 ],
                 if (upcoming.isNotEmpty) ...[
                   _buildSectionHeader('Upcoming', AppColors.warning),
-                  ...upcoming.map((v) => _buildVaccinationCard(v, isUpcoming: true)),
+                  ...upcoming.map((v) => _buildVaccinationCard(context, v, isUpcoming: true)),
                   const SizedBox(height: 16),
                 ],
                 if (past.isNotEmpty) ...[
                   _buildSectionHeader('Past Vaccinations', AppColors.textSecondary),
-                  ...past.map((v) => _buildVaccinationCard(v)),
+                  ...past.map((v) => _buildVaccinationCard(context, v)),
                 ],
               ],
             ),
@@ -109,6 +119,7 @@ class VaccinationListScreen extends ConsumerWidget {
   }
 
   Widget _buildVaccinationCard(
+    BuildContext context,
     Vaccination vaccination, {
     bool isOverdue = false,
     bool isUpcoming = false,
@@ -125,7 +136,9 @@ class VaccinationListScreen extends ConsumerWidget {
             ? 'Due Soon'
             : 'Completed';
 
-    return Container(
+    return GestureDetector(
+      onTap: () => _openDetail(context, vaccination.id),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -203,6 +216,7 @@ class VaccinationListScreen extends ConsumerWidget {
             ),
           ],
         ],
+      ),
       ),
     );
   }

@@ -11,8 +11,10 @@ class RouteNames {
   static const String petDetail = 'petDetail';
   static const String editPet = 'editPet';
   static const String healthRecords = 'healthRecords';
+  static const String healthRecordDetail = 'healthRecordDetail';
   static const String addHealthRecord = 'addHealthRecord';
   static const String vaccinations = 'vaccinations';
+  static const String vaccinationDetail = 'vaccinationDetail';
   static const String addVaccination = 'addVaccination';
   static const String pregnancy = 'pregnancy';
   static const String startPregnancy = 'startPregnancy';
