@@ -10,15 +10,15 @@ const { useBreakpoint } = Grid;
 
 const AdminLayout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const { isLoading, logout, isAuthenticated } = useAuth();
+  const { user, loading, logout, isAuthenticated } = useAuth();
   const screens = useBreakpoint();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!loading && !isAuthenticated) {
       navigate('/login');
     }
-  }, [isLoading, isAuthenticated, navigate]);
+  }, [loading, isAuthenticated, navigate]);
 
   useEffect(() => {
     if (!screens.lg) {
@@ -28,9 +28,10 @@ const AdminLayout: React.FC = () => {
 
   const handleLogout = () => {
     logout();
+    navigate('/login');
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
         <Spin size="large" />

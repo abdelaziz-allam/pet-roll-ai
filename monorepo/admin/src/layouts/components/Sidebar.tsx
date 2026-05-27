@@ -12,12 +12,12 @@ import {
   LineChartOutlined,
   SettingOutlined,
   HeartFilled,
-  BulbOutlined,
-  MonitorOutlined,
-  ShoppingOutlined,
+  CrownOutlined,
+  AppstoreOutlined,
+  MedicineBoxOutlined,
+  ExperimentOutlined,
 } from '@ant-design/icons';
-import { useAuth } from '@/hooks/useAuth';
-import { hasPermission, type AdminRole } from '@/config/permissions';
+import { usePermission } from '@/hooks/usePermission';
 
 const { Sider } = Layout;
 const { Text } = Typography;
@@ -30,48 +30,57 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const role: AdminRole = user?.role || 'viewer';
+  const { canAccessPage } = usePermission();
 
   const menuItems: MenuProps['items'] = useMemo(() => {
     const items: MenuProps['items'] = [];
 
-    if (hasPermission(role, 'dashboard')) {
+    if (canAccessPage('dashboard')) {
       items.push({ key: '/dashboard', icon: <DashboardOutlined />, label: 'Dashboard' });
     }
-    if (hasPermission(role, 'analytics')) {
+
+    if (canAccessPage('analytics')) {
       items.push({ key: '/analytics', icon: <LineChartOutlined />, label: 'Analytics' });
     }
-    if (hasPermission(role, 'pet_management')) {
+
+    if (canAccessPage('pets')) {
       items.push({ key: '/pets', icon: <HeartOutlined />, label: 'Pets' });
     }
-    if (hasPermission(role, 'user_read')) {
+
+    if (canAccessPage('app_users')) {
       items.push({ key: '/users', icon: <UserOutlined />, label: 'App Users' });
     }
-    if (hasPermission(role, 'verification')) {
+
+    if (canAccessPage('verification')) {
       items.push({ key: '/verification', icon: <SafetyCertificateOutlined />, label: 'Verification' });
     }
-    if (hasPermission(role, 'content_moderation')) {
-      items.push({ key: '/mating', icon: <ShoppingOutlined />, label: 'Mating' });
+
+    if (canAccessPage('mating')) {
+      items.push({ key: '/mating', icon: <TeamOutlined />, label: 'Mating' });
     }
-    if (hasPermission(role, 'broadcast')) {
-      items.push({ key: '/notifications', icon: <BellOutlined />, label: 'Notifications' });
+
+    if (canAccessPage('pets')) {
+      items.push({ key: '/health-certifications', icon: <MedicineBoxOutlined />, label: 'Health Certs' });
     }
-    if (hasPermission(role, 'team_management')) {
-      items.push({ key: '/team', icon: <TeamOutlined />, label: 'Team' });
+
+    if (canAccessPage('analytics')) {
+      items.push({ key: '/vaccination-analytics', icon: <ExperimentOutlined />, label: 'Vax Analytics' });
     }
-    if (hasPermission(role, 'system_settings')) {
-      items.push({ key: '/tips', icon: <BulbOutlined />, label: 'Daily Tips' });
+
+    if (canAccessPage('pets')) {
+      items.push({ key: '/categories', icon: <AppstoreOutlined />, label: 'Pet Categories' });
     }
-    if (hasPermission(role, 'system_settings')) {
+
+    if (canAccessPage('admin_users')) {
+      items.push({ key: '/admin-users', icon: <CrownOutlined />, label: 'Admin Users' });
+    }
+
+    if (canAccessPage('settings')) {
       items.push({ key: '/settings', icon: <SettingOutlined />, label: 'Settings' });
-    }
-    if (hasPermission(role, 'error_logs')) {
-      items.push({ key: '/system', icon: <MonitorOutlined />, label: 'System' });
     }
 
     return items;
-  }, [role]);
+  }, [canAccessPage]);
 
   const selectedKey = useMemo(() => {
     const path = location.pathname;

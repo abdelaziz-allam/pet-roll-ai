@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router-dom';
-import { Layout, Breadcrumb, Space, Badge, Avatar, Dropdown, Tag, Typography } from 'antd';
+import { Layout, Breadcrumb, Space, Badge, Avatar, Dropdown, Tag, Typography, Divider } from 'antd';
 import type { MenuProps } from 'antd';
 import {
   MenuFoldOutlined,
@@ -29,10 +29,8 @@ const routeNameMap: Record<string, string> = {
   mating: 'Mating',
   notifications: 'Notifications',
   analytics: 'Analytics',
-  team: 'Team',
-  tips: 'Daily Tips',
+  'admin-users': 'Admin Users',
   settings: 'Settings',
-  system: 'System',
 };
 
 const Header: React.FC<HeaderProps> = ({ collapsed, onCollapse, onLogout }) => {
@@ -55,7 +53,7 @@ const Header: React.FC<HeaderProps> = ({ collapsed, onCollapse, onLogout }) => {
           <Text strong>{user?.displayName || 'Admin User'}</Text>
           <br />
           <Text type="secondary" style={{ fontSize: 12 }}>
-            {user?.email || 'admin@petfolioo.com'}
+            {user?.email || 'admin@petroll.com'}
           </Text>
           <br />
           <Tag
