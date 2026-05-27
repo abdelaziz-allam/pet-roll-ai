@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/router/route_names.dart';
+import '../../../core/widgets/birthday_celebration.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/avatar_widget.dart';
@@ -42,26 +43,29 @@ class _PetDetailContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      backgroundColor: AppColors.bgSecondary,
-      body: CustomScrollView(
-        slivers: [
-          _PetHeader(pet: pet, ref: ref),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-              child: Column(
-                children: [
-                  Transform.translate(
-                    offset: const Offset(0, -40),
-                    child: _InfoCard(pet: pet),
-                  ),
-                  _ManageSection(petId: pet.id),
-                ],
+    return BirthdayCelebration(
+      showCelebration: pet.isBirthdayToday,
+      child: Scaffold(
+        backgroundColor: AppColors.bgSecondary,
+        body: CustomScrollView(
+          slivers: [
+            _PetHeader(pet: pet, ref: ref),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                child: Column(
+                  children: [
+                    Transform.translate(
+                      offset: const Offset(0, -40),
+                      child: _InfoCard(pet: pet),
+                    ),
+                    _ManageSection(petId: pet.id),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -304,7 +308,10 @@ class _InfoCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       '${pet.species} • ${pet.breed}',
-                      style: AppTypography.body.copyWith(color: AppColors.textSecondary),
+                      style: AppTypography.body.copyWith(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ],
                 ),
@@ -349,6 +356,47 @@ class _InfoCard extends StatelessWidget {
               Expanded(child: _StatPill(icon: Icons.wc_rounded, label: 'Gender', value: pet.gender)),
             ],
           ),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: pet.isBirthdayToday
+                  ? const Color(0xFFFF6B6B).withOpacity(0.08)
+                  : AppColors.bgSecondary,
+              borderRadius: BorderRadius.circular(14),
+              border: pet.isBirthdayToday
+                  ? Border.all(color: const Color(0xFFFF6B6B).withOpacity(0.3))
+                  : null,
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.celebration_rounded,
+                  size: 16,
+                  color: pet.isBirthdayToday ? const Color(0xFFFF6B6B) : AppColors.textSecondary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Born: ${pet.formattedDateOfBirth}',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: pet.isBirthdayToday ? const Color(0xFFFF6B6B) : AppColors.textSecondary,
+                    fontWeight: pet.isBirthdayToday ? FontWeight.w600 : FontWeight.w400,
+                  ),
+                ),
+                if (pet.isBirthdayToday) ...[
+                  const Spacer(),
+                  Text(
+                    '🎂 Today!',
+                    style: AppTypography.bodySmall.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFFFF6B6B),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
           if (pet.isNeutered) ...[
             const SizedBox(height: 14),
             Container(
@@ -391,8 +439,9 @@ class _StatPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
       decoration: BoxDecoration(
-        color: AppColors.bgSecondary,
+        color: AppColors.bgTertiary,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.borderDefault.withOpacity(0.5)),
       ),
       child: Column(
         children: [
@@ -402,7 +451,7 @@ class _StatPill extends StatelessWidget {
             value,
             style: AppTypography.label.copyWith(
               color: AppColors.textPrimary,
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: FontWeight.w700,
             ),
             maxLines: 1,
@@ -412,7 +461,11 @@ class _StatPill extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
-            style: AppTypography.caption.copyWith(color: AppColors.textSecondary, fontSize: 10),
+            style: AppTypography.caption.copyWith(
+              color: AppColors.textSecondary,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
