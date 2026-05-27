@@ -1,51 +1,37 @@
-export function formatCurrency(amount: number): string {
-  return `$${amount.toFixed(2)}`;
+import dayjs from 'dayjs';
+
+export function formatDate(date: string | Date | number, format = 'MMM D, YYYY'): string {
+  return dayjs(date).format(format);
 }
 
-export function formatNumber(num: number | undefined | null): string {
-  if (num == null) return '0';
-  return num.toLocaleString();
+export function formatNumber(n: number): string {
+  return n.toLocaleString('en-US');
 }
 
-export function formatPercent(value: number): string {
-  return `${(value * 100).toFixed(1)}%`;
-}
-
-export function formatDate(date: string | Date): string {
-  return new Date(date).toLocaleDateString();
-}
-
-export function truncateText(text: string, maxLength = 50): string {
-  return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
-}
-
-export function capitalize(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-export function formatStatus(status: string): string {
-  return capitalize(status.replace(/_/g, ' '));
-}
-
-export function formatRole(role: string): string {
-  return capitalize(role);
+export function formatPercent(n: number): string {
+  return `${(n * 100).toFixed(1)}%`;
 }
 
 export function getRoleBadgeColor(role: string): string {
-  switch (role) {
-    case 'super_admin': return 'red';
-    case 'admin': return 'orange';
-    case 'moderator': return 'blue';
-    default: return 'default';
-  }
+  const map: Record<string, string> = {
+    super_admin: 'gold',
+    admin: 'purple',
+    moderator: 'blue',
+    support: 'green',
+  };
+  return map[role] || 'default';
 }
 
 export function getStatusBadgeColor(status: string): string {
-  switch (status) {
-    case 'active': return 'green';
-    case 'banned': return 'red';
-    case 'pending': return 'orange';
-    case 'suspended': return 'volcano';
-    default: return 'default';
-  }
+  const map: Record<string, string> = {
+    active: 'green',
+    banned: 'red',
+    deleted: 'grey',
+  };
+  return map[status] || 'default';
+}
+
+export function truncate(str: string, maxLen: number): string {
+  if (str.length <= maxLen) return str;
+  return `${str.slice(0, maxLen)}...`;
 }

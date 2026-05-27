@@ -1,14 +1,11 @@
+import { Outlet } from 'react-router-dom';
 import { Layout, Typography, Space } from 'antd';
 import { HeartFilled } from '@ant-design/icons';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
-interface AuthLayoutProps {
-  children?: React.ReactNode;
-}
-
-const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
+const AuthLayout: React.FC = () => {
   return (
     <Layout
       style={{
@@ -44,7 +41,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
             Admin Portal
           </Text>
         </Space>
-        {children}
+        <Outlet />
       </Content>
     </Layout>
   );
