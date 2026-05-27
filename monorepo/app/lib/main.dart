@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
@@ -14,6 +15,7 @@ Future<void> main() async {
   await Firebase.initializeApp();
   await Hive.initFlutter();
   await LocalStorage.init();
+  tz.initializeTimeZones();
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,

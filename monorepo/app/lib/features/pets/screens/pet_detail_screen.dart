@@ -8,6 +8,7 @@ import '../../../core/router/route_names.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/avatar_widget.dart';
+import '../../notifications/services/birthday_notification_service.dart';
 import '../models/pet_model.dart';
 import '../providers/pet_provider.dart';
 import '../services/pet_service.dart';
@@ -173,6 +174,7 @@ class _PetHeader extends StatelessWidget {
             onPressed: () async {
               Navigator.pop(ctx);
               await ref.read(petServiceProvider).deletePet(pet.id);
+              await ref.read(birthdayNotificationServiceProvider).cancelBirthdayNotification(pet.id);
               ref.invalidate(userPetsProvider);
               if (context.mounted) context.pop();
             },

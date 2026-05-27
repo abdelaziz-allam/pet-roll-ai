@@ -12,7 +12,7 @@ export const createPetSchema = z.object({
   breed: z.string().optional(),
   breedId: z.string().optional(),
   gender: z.enum(['male', 'female']),
-  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be ISO date format (YYYY-MM-DD)'),
+  dateOfBirth: z.string().transform((val) => val.split('T')[0]),
   weight: z.number().positive().optional(),
   weightUnit: z.enum(['kg', 'lbs']).default('kg'),
   color: z.string().optional(),
