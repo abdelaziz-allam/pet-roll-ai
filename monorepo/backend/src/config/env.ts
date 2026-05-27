@@ -8,7 +8,7 @@ const envSchema = z.object({
   GCP_REGION: z.string().default('europe-north1'),
 
   FIREBASE_PROJECT_ID: z.string().default('petroll-production'),
-  FIREBASE_STORAGE_BUCKET: z.string().default('petroll-production-assets'),
+  FIREBASE_STORAGE_BUCKET: z.string().default('petroll-production.firebasestorage.app'),
   GOOGLE_APPLICATION_CREDENTIALS: z.string().optional(),
 
   FIRESTORE_EMULATOR_HOST: z.string().optional(),
