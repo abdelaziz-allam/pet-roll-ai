@@ -1,325 +1,411 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
+import '../../../core/services/api_service.dart';
+import '../../../core/services/notification_service.dart';
+import '../../../core/theme/app_theme.dart';
 
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_typography.dart';
-import '../../../core/widgets/empty_state.dart';
-import '../../../core/widgets/error_view.dart';
-import '../../../core/widgets/loading_indicator.dart';
-import '../../../core/router/route_names.dart';
-import '../models/health_record_model.dart';
-import '../providers/health_provider.dart';
-
-class HealthRecordsScreen extends ConsumerStatefulWidget {
+class HealthRecordsScreen extends StatefulWidget {
   final String petId;
-
-  const HealthRecordsScreen({super.key, required this.petId});
+  final String ownerId;
+  const HealthRecordsScreen({super.key, required this.petId, required this.ownerId});
 
   @override
-  ConsumerState<HealthRecordsScreen> createState() => _HealthRecordsScreenState();
+  State<HealthRecordsScreen> createState() => _HealthRecordsScreenState();
 }
 
-class _HealthRecordsScreenState extends ConsumerState<HealthRecordsScreen> {
-  HealthRecordType? _selectedFilter;
-
-  Color _colorForType(HealthRecordType type) {
-    switch (type) {
-      case HealthRecordType.vetVisit:
-        return AppColors.info;
-      case HealthRecordType.surgery:
-        return AppColors.error;
-      case HealthRecordType.medication:
-        return AppColors.accentGreen;
-      case HealthRecordType.diagnosis:
-        return AppColors.warning;
-      case HealthRecordType.allergy:
-        return AppColors.brandPrimary;
-      case HealthRecordType.note:
-        return AppColors.textSecondary;
-    }
-  }
-
-  IconData _iconForType(HealthRecordType type) {
-    switch (type) {
-      case HealthRecordType.vetVisit:
-        return Icons.local_hospital;
-      case HealthRecordType.surgery:
-        return Icons.healing;
-      case HealthRecordType.medication:
-        return Icons.medication;
-      case HealthRecordType.diagnosis:
-        return Icons.biotech;
-      case HealthRecordType.allergy:
-        return Icons.warning_amber;
-      case HealthRecordType.note:
-        return Icons.note;
-    }
-  }
-
-  Map<String, List<HealthRecord>> _groupByMonth(List<HealthRecord> records) {
-    final grouped = <String, List<HealthRecord>>{};
-    for (final record in records) {
-      final key = DateFormat('MMMM yyyy').format(record.date);
-      grouped.putIfAbsent(key, () => []).add(record);
-    }
-    return grouped;
-  }
+class _HealthRecordsScreenState extends State<HealthRecordsScreen> {
+  List<dynamic> _records = [];
+  bool _loading = true;
 
   @override
-  Widget build(BuildContext context) {
-    final recordsAsync = ref.watch(healthRecordsProvider(widget.petId));
+  void initState() {
+    super.initState();
+    _loadRecords();
+  }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Health Records', style: AppTypography.heading2),
-      ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 80),
-        child: FloatingActionButton(
-          backgroundColor: AppColors.brandPrimary,
-          onPressed: () => context.pushNamed(
-            RouteNames.addHealthRecord,
-            pathParameters: {'petId': widget.petId},
-          ),
-          child: const Icon(Icons.add, color: Colors.white),
-        ),
-      ),
-      body: Column(
-        children: [
-          _buildFilterChips(),
-          Expanded(
-            child: recordsAsync.when(
-              loading: () => const LoadingIndicator(),
-              error: (error, _) => ErrorView(
-                message: error.toString(),
-                onRetry: () => ref.invalidate(healthRecordsProvider(widget.petId)),
-              ),
-              data: (records) {
-                final filtered = _selectedFilter != null
-                    ? records.where((r) => r.type == _selectedFilter).toList()
-                    : records;
+  Future<void> _loadRecords() async {
+    setState(() => _loading = true);
+    try {
+      final data = await ApiService().get('/pets/${widget.petId}/health');
+      setState(() {
+        _records = data['data'] ?? [];
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() { _records = []; _loading = false; });
+    }
+  }
 
-                if (filtered.isEmpty) {
-                  return EmptyState(
-                    title: 'No health records',
-                    subtitle: 'Tap + to add your pet\'s first health record',
-                    icon: Icons.medical_services_outlined,
-                  );
-                }
+  void _showAddDialog() {
+    final titleCtrl = TextEditingController();
+    final descCtrl = TextEditingController();
+    final vetCtrl = TextEditingController();
+    final clinicCtrl = TextEditingController();
+    String type = 'checkup';
+    DateTime? visitDate;
+    DateTime? nextVisitDate;
 
-                return RefreshIndicator(
-                  color: AppColors.brandPrimary,
-                  onRefresh: () async {
-                    ref.invalidate(healthRecordsProvider(widget.petId));
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) => Padding(
+          padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Add Health Record', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: type,
+                  decoration: const InputDecoration(labelText: 'Type'),
+                  items: ['checkup', 'illness', 'injury', 'surgery', 'dental', 'other']
+                      .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                      .toList(),
+                  onChanged: (v) => type = v!,
+                ),
+                const SizedBox(height: 12),
+                TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Title *', prefixIcon: Icon(Icons.title))),
+                const SizedBox(height: 12),
+                TextField(controller: descCtrl, maxLines: 2, decoration: const InputDecoration(labelText: 'Description', prefixIcon: Icon(Icons.description))),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(child: TextField(controller: vetCtrl, decoration: const InputDecoration(labelText: 'Veterinarian', prefixIcon: Icon(Icons.person)))),
+                    const SizedBox(width: 12),
+                    Expanded(child: TextField(controller: clinicCtrl, decoration: const InputDecoration(labelText: 'Clinic', prefixIcon: Icon(Icons.local_hospital)))),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildDateSelector(
+                  label: 'Visit Date *',
+                  icon: Icons.calendar_today,
+                  color: Colors.blue,
+                  date: visitDate,
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: ctx,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                      lastDate: DateTime.now(),
+                    );
+                    if (picked != null) setSheetState(() => visitDate = picked);
                   },
-                  child: _buildTimeline(filtered),
-                );
-              },
+                ),
+                const SizedBox(height: 12),
+                _buildDateSelector(
+                  label: 'Next Visit Date',
+                  icon: Icons.event_repeat,
+                  color: AppTheme.primary,
+                  date: nextVisitDate,
+                  hint: 'Set to receive reminders',
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: ctx,
+                      initialDate: DateTime.now().add(const Duration(days: 30)),
+                      firstDate: DateTime.now().add(const Duration(days: 1)),
+                      lastDate: DateTime.now().add(const Duration(days: 730)),
+                    );
+                    if (picked != null) setSheetState(() => nextVisitDate = picked);
+                  },
+                ),
+                if (nextVisitDate != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Row(
+                      children: [
+                        Icon(Icons.notifications_active, size: 14, color: AppTheme.success),
+                        const SizedBox(width: 6),
+                        Text(
+                          'You will be reminded before this date',
+                          style: TextStyle(fontSize: 12, color: AppTheme.success, fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (titleCtrl.text.isEmpty || visitDate == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Title and Visit Date are required'), backgroundColor: AppTheme.warning),
+                        );
+                        return;
+                      }
+                      try {
+                        await ApiService().post('/pets/${widget.petId}/health', {
+                          'type': type,
+                          'title': titleCtrl.text,
+                          'description': descCtrl.text,
+                          'veterinarian': vetCtrl.text,
+                          'clinic': clinicCtrl.text,
+                          'date': visitDate!.toIso8601String(),
+                          if (nextVisitDate != null) 'nextVisitDate': nextVisitDate!.toIso8601String(),
+                        });
+
+                        if (nextVisitDate != null) {
+                          final notifId = widget.petId.hashCode + titleCtrl.text.hashCode;
+                          await NotificationService().scheduleReminders(
+                            baseId: notifId.abs() % 100000,
+                            title: '🏥 Vet Visit Reminder',
+                            body: '${titleCtrl.text} - Next visit at ${vetCtrl.text.isNotEmpty ? vetCtrl.text : "vet"}',
+                            targetDate: nextVisitDate!,
+                          );
+                        }
+
+                        Navigator.pop(ctx);
+                        _loadRecords();
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.error),
+                        );
+                      }
+                    },
+                    child: const Text('Save Record'),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildFilterChips() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          _buildChip(
-            label: 'All',
-            isSelected: _selectedFilter == null,
-            color: AppColors.brandPrimary,
-            onTap: () => setState(() => _selectedFilter = null),
-          ),
-          const SizedBox(width: 8),
-          ...HealthRecordType.values.map((type) {
-            return Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: _buildChip(
-                label: type.displayName,
-                isSelected: _selectedFilter == type,
-                color: _colorForType(type),
-                onTap: () => setState(() {
-                  _selectedFilter = _selectedFilter == type ? null : type;
-                }),
-              ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChip({
+  Widget _buildDateSelector({
     required String label,
-    required bool isSelected,
+    required IconData icon,
     required Color color,
+    DateTime? date,
+    String? hint,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isSelected ? color : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? color : AppColors.textSecondary.withOpacity(0.4),
-            width: isSelected ? 1.5 : 1,
-          ),
-          boxShadow: isSelected
-              ? [BoxShadow(color: color.withOpacity(0.3), blurRadius: 6, offset: const Offset(0, 2))]
-              : null,
+          border: Border.all(color: date != null ? color.withOpacity(0.5) : Colors.grey.shade200),
+          borderRadius: BorderRadius.circular(14),
+          color: date != null ? color.withOpacity(0.05) : Colors.white,
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            if (isSelected) ...[
-              Icon(Icons.check, size: 14, color: Colors.white),
-              const SizedBox(width: 4),
-            ],
-            Text(
-              label,
-              style: AppTypography.bodySmall.copyWith(
-                color: isSelected ? Colors.white : AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTimeline(List<HealthRecord> records) {
-    final sorted = List<HealthRecord>.from(records)
-      ..sort((a, b) => b.date.compareTo(a.date));
-    final grouped = _groupByMonth(sorted);
-
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-      itemCount: grouped.length,
-      itemBuilder: (context, index) {
-        final month = grouped.keys.elementAt(index);
-        final monthRecords = grouped[month]!;
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text(
-                month,
-                style: AppTypography.heading3.copyWith(color: AppColors.textPrimary),
-              ),
-            ),
-            ...monthRecords.map((record) => _buildRecordCard(record)),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildRecordCard(HealthRecord record) {
-    final color = _colorForType(record.type);
-    final icon = _iconForType(record.type);
-
-    return GestureDetector(
-      onTap: () => context.pushNamed(
-        RouteNames.healthRecordDetail,
-        pathParameters: {'petId': widget.petId, 'recordId': record.id},
-      ),
-      child: Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Column(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, color: color, size: 20),
-              ),
-              Container(
-                width: 2,
-                height: 40,
-                color: AppColors.borderLight,
-              ),
-            ],
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.bgSecondary,
-                borderRadius: BorderRadius.circular(12),
-              ),
+            Icon(icon, color: color),
+            const SizedBox(width: 12),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: color.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          record.type.displayName,
-                          style: AppTypography.caption.copyWith(color: color),
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        DateFormat('dd MMM').format(record.date),
-                        style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
-                      ),
-                    ],
+                  Text(label, style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                  const SizedBox(height: 2),
+                  Text(
+                    date != null ? '${date.day}/${date.month}/${date.year}' : (hint ?? 'Tap to select'),
+                    style: TextStyle(
+                      color: date != null ? AppTheme.textPrimary : AppTheme.textSecondary,
+                      fontWeight: date != null ? FontWeight.w600 : FontWeight.normal,
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(record.title, style: AppTypography.label),
-                  if (record.description != null && record.description!.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      record.description!,
-                      style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                  if (record.veterinarian != null) ...[
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Icon(Icons.person, size: 14, color: AppColors.textSecondary),
-                        const SizedBox(width: 4),
-                        Text(
-                          record.veterinarian!,
-                          style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
-                        ),
-                      ],
-                    ),
-                  ],
                 ],
               ),
             ),
-          ),
-        ],
-      ),
+            if (date != null) Icon(Icons.check_circle, color: color, size: 20),
+          ],
+        ),
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) return const Center(child: CircularProgressIndicator(color: AppTheme.primary));
+
+    return Stack(
+      children: [
+        _records.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.medical_services_outlined, size: 48, color: Colors.grey[300]),
+                    const SizedBox(height: 12),
+                    const Text('No health records', style: TextStyle(color: AppTheme.textSecondary)),
+                    const SizedBox(height: 4),
+                    const Text('Tap + to add one', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                  ],
+                ),
+              )
+            : RefreshIndicator(
+                onRefresh: _loadRecords,
+                child: ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
+                  itemCount: _records.length,
+                  itemBuilder: (ctx, i) => _buildRecordCard(_records[i]),
+                ),
+              ),
+        Positioned(
+          bottom: 16,
+          right: 16,
+          child: FloatingActionButton(
+            onPressed: _showAddDialog,
+            backgroundColor: AppTheme.primary,
+            child: const Icon(Icons.add, color: Colors.white),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecordCard(dynamic record) {
+    final type = record['type'] ?? 'checkup';
+    final color = _typeColor(type);
+    final visitDate = record['date'] != null ? DateTime.tryParse(record['date']) : null;
+    final nextVisit = record['nextVisitDate'] != null ? DateTime.tryParse(record['nextVisitDate']) : null;
+    final isUpcoming = nextVisit != null && nextVisit.isAfter(DateTime.now());
+    final isOverdue = nextVisit != null && nextVisit.isBefore(DateTime.now());
+    final daysUntilNext = nextVisit != null ? nextVisit.difference(DateTime.now()).inDays : null;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: AppTheme.cardShadow,
+        border: isOverdue ? Border.all(color: AppTheme.error.withOpacity(0.3)) : null,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                child: Icon(_typeIcon(type), color: color, size: 22),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(record['title'] ?? type, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                    const SizedBox(height: 2),
+                    if (record['veterinarian'] != null)
+                      Text('${record['veterinarian']}${record['clinic'] != null ? ' • ${record['clinic']}' : ''}',
+                          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                child: Text(type, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              if (visitDate != null)
+                _infoChip(Icons.event, 'Visited: ${visitDate.day}/${visitDate.month}/${visitDate.year}', Colors.blue),
+              if (nextVisit != null) ...[
+                const SizedBox(width: 8),
+                _infoChip(
+                  isOverdue ? Icons.warning : Icons.event_repeat,
+                  isOverdue
+                      ? 'Overdue!'
+                      : 'Next: ${nextVisit.day}/${nextVisit.month}/${nextVisit.year}',
+                  isOverdue ? AppTheme.error : AppTheme.primary,
+                ),
+              ],
+            ],
+          ),
+          if (isUpcoming && daysUntilNext != null) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: daysUntilNext <= 7 ? AppTheme.warning.withOpacity(0.1) : AppTheme.success.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.notifications_active, size: 14, color: daysUntilNext <= 7 ? AppTheme.warning : AppTheme.success),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Next visit in $daysUntilNext day${daysUntilNext != 1 ? 's' : ''}',
+                    style: TextStyle(fontSize: 12, color: daysUntilNext <= 7 ? AppTheme.warning : AppTheme.success, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          if (isOverdue) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppTheme.error.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.warning_amber, size: 14, color: AppTheme.error),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Visit overdue by ${-daysUntilNext!} day${daysUntilNext != -1 ? 's' : ''}',
+                    style: TextStyle(fontSize: 12, color: AppTheme.error, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _infoChip(IconData icon, String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(color: color.withOpacity(0.08), borderRadius: BorderRadius.circular(6)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: color),
+          const SizedBox(width: 4),
+          Text(text, style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
+  }
+
+  IconData _typeIcon(String type) {
+    switch (type) {
+      case 'checkup': return Icons.check_circle_outline;
+      case 'illness': return Icons.sick;
+      case 'injury': return Icons.healing;
+      case 'surgery': return Icons.local_hospital;
+      case 'dental': return Icons.mood;
+      default: return Icons.medical_services;
+    }
+  }
+
+  Color _typeColor(String type) {
+    switch (type) {
+      case 'checkup': return AppTheme.success;
+      case 'illness': return AppTheme.warning;
+      case 'injury': return AppTheme.error;
+      case 'surgery': return Colors.purple;
+      case 'dental': return Colors.blue;
+      default: return Colors.grey;
+    }
   }
 }

@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Petfolioo</string>
+	<string>Pet Roll</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Petfolioo</string>
+	<string>pet_roll</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -53,34 +53,6 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Petfolioo needs camera access to take photos of your pets</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Petfolioo needs photo library access to select pet photos</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Petfolioo needs permission to save photos to your library</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Petfolioo uses your location to find nearby breeders and mating partners</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Petfolioo uses your location to find nearby breeders and mating partners</string>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>fetch</string>
-		<string>remote-notification</string>
-	</array>
-	<key>FirebaseAppDelegateProxyEnabled</key>
-	<false/>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.googleusercontent.apps.834040996278-ufif9vc0k72ogrlqkmet34glafhvupkb</string>
-			</array>
-		</dict>
-	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

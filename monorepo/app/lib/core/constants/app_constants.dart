@@ -1,39 +1,43 @@
 class AppConstants {
   AppConstants._();
 
-  static const String appName = 'Petfolioo';
-  static const String packageId = 'com.petroll';
+  static const String appName = 'PET Roll';
+  static const String apiBaseUrl = 'http://localhost:3001/api/v1';
+  static const int paginationLimit = 20;
+  static const int maxPhotoSize = 10 * 1024 * 1024;
+  static const int maxPhotosPerPet = 50;
+  static const Duration tokenRefreshThreshold = Duration(minutes: 5);
+  static const Duration cacheExpiry = Duration(hours: 1);
 
-  // API
-  static const String apiBaseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'https://api.petfolioo.com/api/v1',
-  );
-  static const String devApiBaseUrl = 'http://localhost:3000/api/v1';
+  static const List<String> supportedSpecies = ['dog', 'cat'];
+  static const List<String> petGenders = ['male', 'female'];
 
-  // Storage Keys
-  static const String accessTokenKey = 'access_token';
-  static const String refreshTokenKey = 'refresh_token';
-  static const String userIdKey = 'user_id';
-  static const String onboardingCompleteKey = 'onboarding_complete';
-  static const String selectedPetKey = 'selected_pet_id';
+  static const List<String> healthRecordTypes = [
+    'checkup',
+    'illness',
+    'injury',
+    'surgery',
+    'dental',
+    'other',
+  ];
 
-  // Timeouts
-  static const Duration connectionTimeout = Duration(seconds: 30);
-  static const Duration receiveTimeout = Duration(seconds: 30);
+  static const List<String> scheduleTypes = [
+    'feeding',
+    'medication',
+    'grooming',
+    'exercise',
+    'vet_visit',
+    'other',
+  ];
 
-  // Pagination
-  static const int defaultPageSize = 20;
+  static const List<String> scheduleFrequencies = [
+    'daily',
+    'weekly',
+    'biweekly',
+    'monthly',
+    'custom',
+  ];
 
-  // Image
-  static const int maxImageWidth = 1024;
-  static const int maxImageHeight = 1024;
-  static const int maxImageSizeMB = 10;
-  static const int maxPetPhotos = 50;
-  static const List<String> allowedImageTypes = ['jpg', 'jpeg', 'png', 'webp'];
-
-  // Validation
-  static const int minPasswordLength = 8;
-  static const int maxPetNameLength = 50;
-  static const int maxDescriptionLength = 500;
+  static const int dogGestationDays = 63;
+  static const int catGestationDays = 65;
 }
