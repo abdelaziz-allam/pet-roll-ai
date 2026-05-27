@@ -34,6 +34,49 @@ export class AdminService {
     return { newUsers: snapshot.size, period };
   }
 
+  async getSystemHealth() {
+    try {
+      await this.usersRef.limit(1).get();
+      const lastCron = await db.collection('cron_logs').orderBy('createdAt', 'desc').limit(1).get();
+      return {
+        api: 'up',
+        firestore: 'up',
+        fcm: 'up',
+        lastCronRun: lastCron.empty ? null : lastCron.docs[0].data().createdAt,
+      };
+    } catch {
+      return { api: 'up', firestore: 'down', fcm: 'unknown', lastCronRun: null };
+    }
+  }
+
+  async getRecentActivity(limit = 20) {
+    const [recentUsers, recentPets] = await Promise.all([
+      this.usersRef.orderBy('createdAt', 'desc').limit(Math.ceil(limit / 2)).get(),
+      this.petsRef.orderBy('createdAt', 'desc').limit(Math.floor(limit / 2)).get(),
+    ]);
+
+    const activity = [
+      ...recentUsers.docs.map((doc) => ({
+        id: doc.id,
+        type: 'user_joined',
+        message: `New user joined: ${doc.data().displayName || doc.data().email}`,
+        createdAt: doc.data().createdAt,
+      })),
+      ...recentPets.docs.map((doc) => ({
+        id: doc.id,
+        type: 'pet_added',
+        message: `New pet added: ${doc.data().name}`,
+        createdAt: doc.data().createdAt,
+      })),
+    ].sort((a, b) => {
+      const aTime = a.createdAt?.toMillis?.() ?? 0;
+      const bTime = b.createdAt?.toMillis?.() ?? 0;
+      return bTime - aTime;
+    }).slice(0, limit);
+
+    return activity;
+  }
+
   async getUsers(page = 1, limit = 20, status?: string) {
     let query: any = this.usersRef;
     if (status) {
@@ -1074,3 +1117,5 @@ export const listReports = (_status?: string) => Promise.resolve({ reports: [] }
 export const updateReport = (_id: string, _status: string, _action: string, _adminId: string) => Promise.resolve({ message: 'Report updated' });
 export const createReport = (_body: any, _adminId: string) => Promise.resolve({ message: 'Report created' });
 export const computeStats = () => _instance.getStats();
+export const getSystemHealth = () => _instance.getSystemHealth();
+export const getRecentActivity = (limit?: number) => _instance.getRecentActivity(limit);

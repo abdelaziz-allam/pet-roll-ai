@@ -45,6 +45,7 @@ test.describe('Admin Portal Authentication', () => {
     await page.getByPlaceholder('Password').fill(ADMIN_PASSWORD);
     await page.getByRole('button', { name: 'Sign In' }).click();
     await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 });
-    await expect(page.getByText('Dashboard')).toBeVisible({ timeout: 10000 });
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible({ timeout: 10000 });
   });
 });

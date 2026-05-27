@@ -33,6 +33,19 @@ export async function adminRoutes(app: FastifyInstance) {
     return reply.send(stats);
   });
 
+  // GET /stats/health - system health (support+)
+  app.get('/stats/health', { preHandler: [requireAuth, requireMinRole('support')] }, async (_request, reply) => {
+    const health = await adminService.getSystemHealth();
+    return reply.send(health);
+  });
+
+  // GET /stats/activity - recent activity feed (support+)
+  app.get('/stats/activity', { preHandler: [requireAuth, requireMinRole('support')] }, async (request, reply) => {
+    const { limit } = request.query as { limit?: string };
+    const activity = await adminService.getRecentActivity(limit ? parseInt(limit, 10) : 20);
+    return reply.send(activity);
+  });
+
   // ─── User Management ──────────────────────────────────────────────────────
 
   // GET /users - list users (support+)

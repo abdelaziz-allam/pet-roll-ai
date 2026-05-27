@@ -2,7 +2,8 @@ export function formatCurrency(amount: number): string {
   return `$${amount.toFixed(2)}`;
 }
 
-export function formatNumber(num: number): string {
+export function formatNumber(num: number | undefined | null): string {
+  if (num == null) return '0';
   return num.toLocaleString();
 }
 
