@@ -49,6 +49,14 @@ export async function adminRoutes(app: FastifyInstance) {
     return reply.send(user);
   });
 
+  // PUT /users/:id - update user profile (admin+)
+  app.put('/users/:id', { preHandler: [requireAuth, requireMinRole('admin')] }, async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const body = request.body as { displayName?: string; phone?: string; timezone?: string; country?: string; city?: string };
+    const result = await adminService.updateUser(id, body);
+    return reply.send(result);
+  });
+
   // PUT /users/:id/role - change role (admin+)
   app.put('/users/:id/role', { preHandler: [requireAuth, requireMinRole('admin')] }, async (request, reply) => {
     const { id } = request.params as { id: string };

@@ -4,6 +4,7 @@ import { env } from '../../config/env.js';
 import type { RegisterInput, UpdateProfileInput } from './auth.schema.js';
 import type { User } from '../../types/user.js';
 import { FieldValue } from 'firebase-admin/firestore';
+import { resolveTimezoneCountrySync } from '../../utils/timezone-country.js';
 
 const USERS = 'users';
 
@@ -69,6 +70,12 @@ export async function updateProfile(uid: string, input: UpdateProfileInput) {
     ...input,
     updatedAt: FieldValue.serverTimestamp(),
   };
+
+  if (input.timezone || input.country) {
+    const synced = resolveTimezoneCountrySync(input.timezone, input.country);
+    if (synced.timezone) updateData.timezone = synced.timezone;
+    if (synced.country) updateData.country = synced.country;
+  }
 
   if (input.settings) {
     for (const [key, value] of Object.entries(input.settings)) {

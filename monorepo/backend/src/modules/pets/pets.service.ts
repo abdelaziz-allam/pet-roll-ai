@@ -6,9 +6,19 @@ import type { CreatePetInput, UpdatePetInput } from './pets.schema.js';
 const PETS = 'pets';
 
 export async function createPet(ownerId: string, input: CreatePetInput) {
+  let location: { country?: string; city?: string } | undefined;
+  const ownerDoc = await db.collection('users').doc(ownerId).get();
+  if (ownerDoc.exists) {
+    const ownerData = ownerDoc.data()!;
+    if (ownerData.country) {
+      location = { country: ownerData.country, city: ownerData.city || undefined };
+    }
+  }
+
   const petData = {
     ...input,
     ownerId,
+    location,
     photos: [],
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
