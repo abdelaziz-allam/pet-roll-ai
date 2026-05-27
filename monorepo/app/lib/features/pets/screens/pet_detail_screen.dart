@@ -1,616 +1,544 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../../core/services/api_service.dart';
+import '../../../core/services/notification_service.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../health/screens/health_records_screen.dart';
+import '../../vaccination/screens/vaccination_screen.dart';
+import '../../pregnancy/screens/pregnancy_screen.dart';
+import 'health_certification_screen.dart';
 
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_typography.dart';
-import '../../../core/router/route_names.dart';
-import '../../../core/widgets/birthday_celebration.dart';
-import '../../../core/widgets/loading_indicator.dart';
-import '../../../core/widgets/error_view.dart';
-import '../../../core/widgets/avatar_widget.dart';
-import '../../notifications/services/birthday_notification_service.dart';
-import '../models/pet_model.dart';
-import '../providers/pet_provider.dart';
-import '../services/pet_service.dart';
-
-class PetDetailScreen extends ConsumerWidget {
-  final String petId;
-
-  const PetDetailScreen({super.key, required this.petId});
+class PetDetailScreen extends StatefulWidget {
+  final Map<String, dynamic> pet;
+  const PetDetailScreen({super.key, required this.pet});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final petAsync = ref.watch(petDetailProvider(petId));
-
-    return petAsync.when(
-      loading: () => const Scaffold(body: LoadingIndicator()),
-      error: (error, _) => Scaffold(
-        body: ErrorView(
-          message: error.toString(),
-          onRetry: () => ref.invalidate(petDetailProvider(petId)),
-        ),
-      ),
-      data: (pet) => _PetDetailContent(pet: pet),
-    );
-  }
+  State<PetDetailScreen> createState() => _PetDetailScreenState();
 }
 
-class _PetDetailContent extends ConsumerWidget {
-  final PetModel pet;
+class _PetDetailScreenState extends State<PetDetailScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  late Map<String, dynamic> _pet;
+  bool _editing = false;
 
-  const _PetDetailContent({required this.pet});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return BirthdayCelebration(
-      showCelebration: pet.isBirthdayToday,
-      child: Scaffold(
-        backgroundColor: AppColors.bgSecondary,
-        body: CustomScrollView(
-          slivers: [
-            _PetHeader(pet: pet, ref: ref),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-                child: Column(
-                  children: [
-                    Transform.translate(
-                      offset: const Offset(0, -20),
-                      child: _InfoCard(pet: pet),
-                    ),
-                    _ManageSection(petId: pet.id),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PetHeader extends StatelessWidget {
-  final PetModel pet;
-  final WidgetRef ref;
-
-  const _PetHeader({required this.pet, required this.ref});
+  final _nameCtrl = TextEditingController();
+  final _breedCtrl = TextEditingController();
+  final _weightCtrl = TextEditingController();
+  final _colorCtrl = TextEditingController();
+  final _notesCtrl = TextEditingController();
+  String? _gender;
+  String? _species;
+  bool _isNeutered = false;
+  bool _isAvailableForMating = false;
 
   @override
-  Widget build(BuildContext context) {
-    return SliverAppBar(
-      expandedHeight: 280,
-      pinned: true,
-      backgroundColor: AppColors.brandPrimary,
-      foregroundColor: Colors.white,
-      leading: GestureDetector(
-        onTap: () => context.pop(),
-        child: Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: Colors.white),
-        ),
-      ),
-      actions: [
-        GestureDetector(
-          onTap: () => _showMenu(context),
-          child: Container(
-            margin: const EdgeInsets.all(8),
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.more_horiz_rounded, size: 20, color: Colors.white),
-          ),
-        ),
-      ],
-      flexibleSpace: FlexibleSpaceBar(
-        background: _PhotoSection(photos: pet.photos, name: pet.name),
-      ),
-    );
+  void initState() {
+    super.initState();
+    _pet = Map.from(widget.pet);
+    _tabController = TabController(length: 3, vsync: this);
+    _populateFields();
   }
 
-  void _showMenu(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) => Container(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.borderDefault,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            _MenuOption(
-              icon: Icons.edit_rounded,
-              label: 'Edit Pet',
-              onTap: () {
-                Navigator.pop(ctx);
-                context.pushNamed(
-                  RouteNames.editPet,
-                  pathParameters: {'petId': pet.id},
-                );
-              },
-            ),
-            const SizedBox(height: 8),
-            _MenuOption(
-              icon: Icons.delete_outline_rounded,
-              label: 'Delete Pet',
-              color: AppColors.error,
-              onTap: () {
-                Navigator.pop(ctx);
-                _showDeleteDialog(context);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
+  void _populateFields() {
+    _nameCtrl.text = _pet['name'] ?? '';
+    _breedCtrl.text = _pet['breed'] ?? '';
+    _weightCtrl.text = (_pet['weight'] ?? '').toString();
+    _colorCtrl.text = _pet['color'] ?? '';
+    _notesCtrl.text = _pet['notes'] ?? '';
+    _gender = _pet['gender'];
+    _species = _pet['species'];
+    _isNeutered = _pet['isNeutered'] == true;
+    _isAvailableForMating = _pet['isAvailableForMating'] == true;
   }
 
-  void _showDeleteDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Delete Pet'),
-        content: Text('Are you sure you want to delete ${pet.name}?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await ref.read(petServiceProvider).deletePet(pet.id);
-              await ref.read(birthdayNotificationServiceProvider).cancelBirthdayNotification(pet.id);
-              ref.invalidate(userPetsProvider);
-              if (context.mounted) context.pop();
-            },
-            child: Text('Delete', style: TextStyle(color: AppColors.error)),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MenuOption extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color? color;
-  final VoidCallback onTap;
-
-  const _MenuOption({required this.icon, required this.label, this.color, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final c = color ?? AppColors.textPrimary;
-    return ListTile(
-      onTap: onTap,
-      leading: Icon(icon, color: c),
-      title: Text(label, style: AppTypography.label.copyWith(color: c)),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    );
-  }
-}
-
-class _PhotoSection extends StatelessWidget {
-  final List<PetPhoto> photos;
-  final String name;
-
-  const _PhotoSection({required this.photos, required this.name});
-
-  @override
-  Widget build(BuildContext context) {
-    if (photos.isEmpty) {
-      return Container(
-        decoration: const BoxDecoration(gradient: AppColors.headerGradient),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(height: 40),
-              AvatarWidget(name: name, size: 100),
-              const SizedBox(height: 12),
-              Text(
-                name,
-                style: AppTypography.heading2.copyWith(color: Colors.white),
-              ),
-            ],
-          ),
-        ),
+  Future<void> _savePet() async {
+    try {
+      final body = <String, dynamic>{
+        'name': _nameCtrl.text,
+        'breed': _breedCtrl.text,
+        'species': _species,
+        'gender': _gender,
+        'isNeutered': _isNeutered,
+        'isAvailableForMating': _isAvailableForMating,
+      };
+      if (_weightCtrl.text.isNotEmpty) {
+        body['weight'] = double.tryParse(_weightCtrl.text);
+      }
+      if (_colorCtrl.text.isNotEmpty) {
+        body['color'] = _colorCtrl.text;
+      }
+      if (_notesCtrl.text.isNotEmpty) {
+        body['notes'] = _notesCtrl.text;
+      }
+      final updated = await ApiService().put('/pets/${_pet['id']}', body);
+      if (updated != null) {
+        setState(() { _pet = Map<String, dynamic>.from(updated); });
+      }
+      setState(() { _editing = false; });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pet updated'), backgroundColor: AppTheme.success),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.error),
       );
     }
-
-    return PageView.builder(
-      itemCount: photos.length,
-      itemBuilder: (context, index) {
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.network(
-              photos[index].url,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                decoration: const BoxDecoration(gradient: AppColors.headerGradient),
-                child: Center(child: AvatarWidget(name: name, size: 80)),
-              ),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black.withOpacity(0.3)],
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
   }
-}
 
-class _InfoCard extends StatelessWidget {
-  final PetModel pet;
-
-  const _InfoCard({required this.pet});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.bgPrimary,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
+  Future<void> _deletePet() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Pet'),
+        content: Text('Are you sure you want to delete ${_pet['name']}? This cannot be undone.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete', style: TextStyle(color: AppTheme.error)),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      pet.name,
-                      style: AppTypography.heading1.copyWith(
-                        color: AppColors.textPrimary,
-                        fontSize: 26,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${pet.species} • ${pet.breed}',
-                      style: AppTypography.body.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
+    );
+    if (confirm != true) return;
+    try {
+      await ApiService().delete('/pets/${_pet['id']}');
+      if (mounted) Navigator.pop(context, true);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.error),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _nameCtrl.dispose();
+    _breedCtrl.dispose();
+    _weightCtrl.dispose();
+    _colorCtrl.dispose();
+    _notesCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final photos = _pet['photos'] as List?;
+    final photoUrl = (photos != null && photos.isNotEmpty)
+        ? (photos.first is Map ? photos.first['url'] : photos.first)
+        : null;
+
+    return Scaffold(
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) => [
+          SliverAppBar(
+            expandedHeight: 280,
+            pinned: true,
+            backgroundColor: Colors.white,
+            leading: IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(color: Colors.black26, shape: BoxShape.circle),
+                child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
               ),
-              if (pet.isAvailableForMating)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    gradient: AppColors.primaryGradient,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.favorite_rounded, size: 14, color: Colors.white),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Mating',
-                        style: AppTypography.caption.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
+              onPressed: () => Navigator.pop(context),
+            ),
+            actions: [
+              IconButton(
+                icon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: Colors.black26, shape: BoxShape.circle),
+                  child: Icon(_editing ? Icons.close : Icons.edit, color: Colors.white, size: 20),
+                ),
+                onPressed: () => setState(() { _editing = !_editing; if (!_editing) _populateFields(); }),
+              ),
+              IconButton(
+                icon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: Colors.black26, shape: BoxShape.circle),
+                  child: const Icon(Icons.delete_outline, color: Colors.white, size: 20),
+                ),
+                onPressed: _deletePet,
+              ),
+            ],
+            flexibleSpace: FlexibleSpaceBar(
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (photoUrl != null)
+                    CachedNetworkImage(imageUrl: photoUrl, fit: BoxFit.cover)
+                  else
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [AppTheme.primary.withOpacity(0.8), AppTheme.accent],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
                       ),
-                    ],
+                      child: Center(child: Text(_speciesEmoji(_pet['species'] ?? ''), style: const TextStyle(fontSize: 80))),
+                    ),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.transparent, Colors.black.withOpacity(0.6)],
+                      ),
+                    ),
                   ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(child: _StatPill(icon: Icons.cake_rounded, label: 'Age', value: pet.age)),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _StatPill(
-                  icon: Icons.monitor_weight_rounded,
-                  label: 'Weight',
-                  value: pet.weight != null ? '${pet.weight} ${pet.weightUnit ?? 'kg'}' : '--',
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(child: _StatPill(icon: Icons.wc_rounded, label: 'Gender', value: pet.gender)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: pet.isBirthdayToday
-                  ? const Color(0xFFFF6B6B).withOpacity(0.08)
-                  : AppColors.bgSecondary,
-              borderRadius: BorderRadius.circular(14),
-              border: pet.isBirthdayToday
-                  ? Border.all(color: const Color(0xFFFF6B6B).withOpacity(0.3))
-                  : null,
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.celebration_rounded,
-                  size: 16,
-                  color: pet.isBirthdayToday ? const Color(0xFFFF6B6B) : AppColors.textSecondary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Born: ${pet.formattedDateOfBirth}',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: pet.isBirthdayToday ? const Color(0xFFFF6B6B) : AppColors.textSecondary,
-                    fontWeight: pet.isBirthdayToday ? FontWeight.w600 : FontWeight.w400,
-                  ),
-                ),
-                if (pet.isBirthdayToday) ...[
-                  const Spacer(),
-                  Text(
-                    '🎂 Today!',
-                    style: AppTypography.bodySmall.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFFFF6B6B),
+                  Positioned(
+                    bottom: 20,
+                    left: 20,
+                    right: 20,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _pet['name'] ?? 'Unknown',
+                          style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w800),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${_pet['breed'] ?? ''} · ${_pet['species'] ?? ''}',
+                          style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 15),
+                        ),
+                      ],
                     ),
                   ),
                 ],
-              ],
+              ),
             ),
           ),
-          if (pet.isNeutered) ...[
-            const SizedBox(height: 14),
+        ],
+        body: Column(
+          children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.success.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              child: TabBar(
+                controller: _tabController,
+                labelColor: AppTheme.primary,
+                unselectedLabelColor: AppTheme.textSecondary,
+                indicatorColor: AppTheme.primary,
+                indicatorWeight: 3,
+                tabs: const [
+                  Tab(text: 'Profile', icon: Icon(Icons.info_outline, size: 20)),
+                  Tab(text: 'Health', icon: Icon(Icons.medical_services_outlined, size: 20)),
+                  Tab(text: 'More', icon: Icon(Icons.more_horiz, size: 20)),
+                ],
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
                 children: [
-                  Icon(Icons.check_circle_rounded, size: 14, color: AppColors.success),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Neutered',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.success,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  _buildProfileTab(),
+                  HealthRecordsScreen(petId: _pet['id'], ownerId: _pet['ownerId'] ?? ''),
+                  _buildMoreTab(),
                 ],
               ),
             ),
           ],
-        ],
+        ),
       ),
+      bottomNavigationBar: _editing
+          ? SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: ElevatedButton(
+                  onPressed: _savePet,
+                  child: const Text('Save Changes'),
+                ),
+              ),
+            )
+          : null,
     );
   }
-}
 
-class _StatPill extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-
-  const _StatPill({required this.icon, required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-      decoration: BoxDecoration(
-        color: AppColors.bgTertiary,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.borderDefault.withOpacity(0.5)),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, size: 18, color: AppColors.brandPrimary),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: AppTypography.label.copyWith(
-              color: AppColors.textPrimary,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: AppTypography.caption.copyWith(
-              color: AppColors.textSecondary,
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ManageSection extends StatelessWidget {
-  final String petId;
-
-  const _ManageSection({required this.petId});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildProfileTab() {
+    if (_editing) return _buildEditForm();
+    return ListView(
+      padding: const EdgeInsets.all(20),
       children: [
-        Text(
-          'Manage',
-          style: AppTypography.heading3.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w700,
-          ),
+        _buildInfoSection('Basic Info', [
+          _infoTile(Icons.pets, 'Species', _pet['species'] ?? '-'),
+          _infoTile(Icons.category, 'Breed', _pet['breed'] ?? '-'),
+          _infoTile(_pet['gender'] == 'male' ? Icons.male : Icons.female, 'Gender', _pet['gender'] ?? '-'),
+          _infoTile(Icons.palette, 'Color', _pet['color'] ?? '-'),
+          _infoTile(Icons.monitor_weight, 'Weight', _pet['weight'] != null ? '${_pet['weight']} kg' : '-'),
+        ]),
+        const SizedBox(height: 16),
+        _buildInfoSection('Status', [
+          _infoTile(Icons.check_circle, 'Status', _pet['status'] ?? 'active'),
+          _infoTile(Icons.content_cut, 'Neutered', _isNeutered ? 'Yes' : 'No'),
+          _infoTile(Icons.favorite, 'Available for Mating', _isAvailableForMating ? 'Yes' : 'No'),
+        ]),
+        const SizedBox(height: 16),
+        _buildInfoSection('Location', [
+          _infoTile(Icons.flag, 'Country', _pet['country'] ?? _pet['location']?['country'] ?? '-'),
+          _infoTile(Icons.location_city, 'City', _pet['city'] ?? _pet['location']?['city'] ?? '-'),
+        ]),
+        if (_pet['notes'] != null && (_pet['notes'] as String).isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _buildInfoSection('Notes', [
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Text(_pet['notes'], style: const TextStyle(color: AppTheme.textSecondary)),
+            ),
+          ]),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildEditForm() {
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        _buildField('Name', _nameCtrl),
+        _buildField('Breed', _breedCtrl),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<String>(
+          value: _species,
+          decoration: const InputDecoration(labelText: 'Species'),
+          items: ['dog', 'cat', 'bird', 'horse', 'rabbit', 'fish', 'reptile', 'hamster']
+              .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+              .toList(),
+          onChanged: (v) => setState(() => _species = v),
         ),
-        const SizedBox(height: 14),
-        _ManageTile(
-          icon: Icons.medical_services_rounded,
-          label: 'Health Records',
-          subtitle: 'Track vet visits & diagnoses',
-          color: AppColors.success,
-          bgColor: AppColors.categoryHealth,
-          onTap: () => context.pushNamed(
-            RouteNames.healthRecords,
-            pathParameters: {'petId': petId},
-          ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<String>(
+          value: _gender,
+          decoration: const InputDecoration(labelText: 'Gender'),
+          items: ['male', 'female'].map((g) => DropdownMenuItem(value: g, child: Text(g))).toList(),
+          onChanged: (v) => setState(() => _gender = v),
         ),
-        const SizedBox(height: 10),
-        _ManageTile(
-          icon: Icons.vaccines_rounded,
-          label: 'Vaccinations',
-          subtitle: 'Stay up to date',
-          color: AppColors.accentOrange,
-          bgColor: AppColors.categorySchedule,
-          onTap: () => context.pushNamed(
-            RouteNames.vaccinations,
-            pathParameters: {'petId': petId},
-          ),
+        const SizedBox(height: 12),
+        _buildField('Weight (kg)', _weightCtrl, keyboard: TextInputType.number),
+        _buildField('Color', _colorCtrl),
+        const SizedBox(height: 12),
+        SwitchListTile(
+          title: const Text('Neutered'),
+          value: _isNeutered,
+          onChanged: (v) => setState(() => _isNeutered = v),
+          activeColor: AppTheme.primary,
         ),
-        const SizedBox(height: 10),
-        _ManageTile(
-          icon: Icons.child_friendly_rounded,
-          label: 'Pregnancy',
-          subtitle: 'Monitor pregnancy journey',
-          color: AppColors.brandSecondary,
-          bgColor: AppColors.categoryBreeding,
-          onTap: () => context.pushNamed(
-            RouteNames.pregnancy,
-            pathParameters: {'petId': petId},
-          ),
+        SwitchListTile(
+          title: const Text('Available for Mating'),
+          value: _isAvailableForMating,
+          onChanged: (v) => setState(() => _isAvailableForMating = v),
+          activeColor: AppTheme.primary,
         ),
-        const SizedBox(height: 10),
-        _ManageTile(
-          icon: Icons.calendar_month_rounded,
-          label: 'Schedules',
-          subtitle: 'Reminders & appointments',
-          color: AppColors.info,
-          bgColor: AppColors.categoryGrooming,
-          onTap: () => context.pushNamed(
-            RouteNames.schedules,
-            pathParameters: {'petId': petId},
-          ),
+        const SizedBox(height: 12),
+        _buildField('Notes', _notesCtrl, maxLines: 3),
+      ],
+    );
+  }
+
+  Widget _buildMoreTab() {
+    final birthDateStr = _pet['dateOfBirth'];
+    final birthDate = birthDateStr != null ? DateTime.tryParse(birthDateStr) : null;
+    String birthdaySubtitle = 'Not set - Tap to add';
+    if (birthDate != null) {
+      final nextBirthday = _getNextBirthday(birthDate);
+      final daysUntil = nextBirthday.difference(DateTime.now()).inDays;
+      birthdaySubtitle = 'Born: ${birthDate.day}/${birthDate.month}/${birthDate.year} • $daysUntil days until next 🎂';
+    }
+
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        _buildActionCard(
+          Icons.vaccines,
+          'Vaccinations',
+          'Track vaccines, doses & schedules',
+          Colors.blue,
+          () => Navigator.push(context, MaterialPageRoute(builder: (_) => VaccinationScreen(petId: _pet['id'], ownerId: _pet['ownerId'] ?? ''))),
+        ),
+        const SizedBox(height: 12),
+        _buildActionCard(
+          Icons.pregnant_woman,
+          'Pregnancy',
+          'Track pregnancies & due dates',
+          Colors.purple,
+          () => Navigator.push(context, MaterialPageRoute(builder: (_) => PregnancyScreen(petId: _pet['id'], ownerId: _pet['ownerId'] ?? ''))),
+        ),
+        const SizedBox(height: 12),
+        _buildActionCard(
+          Icons.verified_user,
+          'Health Certification',
+          _pet['healthCertified'] == true ? 'Certified' : 'Request health certification',
+          _pet['healthCertified'] == true ? Colors.green : Colors.teal,
+          () async {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => HealthCertificationScreen(petId: _pet['id'], petName: _pet['name'] ?? '')),
+            );
+            if (result == true) {
+              final updated = await ApiService().get('/pets/${_pet['id']}');
+              if (updated != null && mounted) setState(() => _pet = Map<String, dynamic>.from(updated));
+            }
+          },
+        ),
+        const SizedBox(height: 12),
+        _buildActionCard(
+          Icons.cake,
+          'Birthday',
+          birthdaySubtitle,
+          Colors.orange,
+          _showBirthdayPicker,
+        ),
+        const SizedBox(height: 12),
+        _buildActionCard(
+          Icons.photo_library,
+          'Photo Gallery',
+          '${((_pet['photos'] as List?) ?? []).length} photos',
+          Colors.green,
+          () {},
         ),
       ],
     );
   }
-}
 
-class _ManageTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String subtitle;
-  final Color color;
-  final Color bgColor;
-  final VoidCallback onTap;
+  DateTime _getNextBirthday(DateTime birthDate) {
+    final now = DateTime.now();
+    var next = DateTime(now.year, birthDate.month, birthDate.day);
+    if (next.isBefore(now) || next.isAtSameMomentAs(now)) {
+      next = DateTime(now.year + 1, birthDate.month, birthDate.day);
+    }
+    return next;
+  }
 
-  const _ManageTile({
-    required this.icon,
-    required this.label,
-    required this.subtitle,
-    required this.color,
-    required this.bgColor,
-    required this.onTap,
-  });
+  void _showBirthdayPicker() async {
+    final existing = _pet['dateOfBirth'] != null ? DateTime.tryParse(_pet['dateOfBirth']) : null;
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: existing ?? DateTime.now().subtract(const Duration(days: 365)),
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+      helpText: 'Select ${_pet['name']}\'s birth date',
+    );
+    if (picked == null) return;
 
-  @override
-  Widget build(BuildContext context) {
+    try {
+      await ApiService().put('/pets/${_pet['id']}', {
+        'dateOfBirth': picked.toIso8601String(),
+      });
+
+      // Schedule birthday notification
+      final notifId = (_pet['id'].hashCode + 99999).abs() % 100000;
+      await NotificationService().scheduleBirthdayNotification(
+        notificationId: notifId,
+        petName: _pet['name'] ?? 'Your pet',
+        birthDate: picked,
+      );
+
+      setState(() => _pet['dateOfBirth'] = picked.toIso8601String());
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('🎂 Birthday set! You\'ll get a gift card notification on ${picked.day}/${picked.month} each year.'),
+            backgroundColor: AppTheme.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.error),
+        );
+      }
+    }
+  }
+
+  Widget _buildActionCard(IconData icon, String title, String subtitle, Color color, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.bgPrimary,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: AppTheme.cardShadow,
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: bgColor,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(icon, size: 22, color: color),
+              decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+              child: Icon(icon, color: color, size: 24),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    label,
-                    style: AppTypography.label.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
                   const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
-                  ),
+                  Text(subtitle, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textHint),
+            const Icon(Icons.chevron_right, color: AppTheme.textSecondary),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildInfoSection(String title, List<Widget> children) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: AppTheme.cardShadow,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+            child: Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+          ),
+          ...children,
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+
+  Widget _infoTile(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: AppTheme.textSecondary),
+          const SizedBox(width: 12),
+          Expanded(child: Text(label, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14))),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildField(String label, TextEditingController ctrl, {TextInputType? keyboard, int maxLines = 1}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextField(
+        controller: ctrl,
+        keyboardType: keyboard,
+        maxLines: maxLines,
+        decoration: InputDecoration(labelText: label),
+      ),
+    );
+  }
+
+  String _speciesEmoji(String species) {
+    const map = {'dog': '🐕', 'cat': '🐱', 'bird': '🦜', 'horse': '🐴', 'rabbit': '🐰', 'fish': '🐠', 'reptile': '🦎', 'hamster': '🐹'};
+    return map[species] ?? '🐾';
   }
 }

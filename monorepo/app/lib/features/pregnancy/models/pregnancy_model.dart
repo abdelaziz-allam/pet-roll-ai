@@ -1,127 +1,70 @@
-import '../../../core/utils/date_parsing.dart';
-
-enum PregnancyStatus { active, completed, terminated }
-
-class Milestone {
-  final String id;
-  final int week;
-  final String title;
-  final String description;
-  final bool isCompleted;
-  final DateTime? completedAt;
-
-  const Milestone({
-    required this.id,
-    required this.week,
-    required this.title,
-    required this.description,
-    this.isCompleted = false,
-    this.completedAt,
-  });
-
-  factory Milestone.fromJson(Map<String, dynamic> json) {
-    return Milestone(
-      id: json['id'] as String,
-      week: json['week'] as int,
-      title: json['title'] as String,
-      description: json['description'] as String,
-      isCompleted: json['isCompleted'] as bool? ?? false,
-      completedAt: parseDateTime(json['completedAt']),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'week': week,
-      'title': title,
-      'description': description,
-      'isCompleted': isCompleted,
-      'completedAt': completedAt?.toIso8601String(),
-    };
-  }
-}
-
-class WeightEntry {
-  final DateTime date;
-  final double weight;
-  final String unit;
-
-  const WeightEntry({
-    required this.date,
-    required this.weight,
-    required this.unit,
-  });
-
-  factory WeightEntry.fromJson(Map<String, dynamic> json) {
-    return WeightEntry(
-      date: parseDateTime(json['date']) ?? DateTime.now(),
-      weight: (json['weight'] as num).toDouble(),
-      unit: json['unit'] as String,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'date': date.toIso8601String(),
-      'weight': weight,
-      'unit': unit,
-    };
-  }
-}
-
-class Pregnancy {
+class PregnancyModel {
   final String id;
   final String petId;
   final String ownerId;
-  final DateTime breedingDate;
+  final DateTime matingDate;
   final DateTime expectedDueDate;
-  final PregnancyStatus status;
-  final String species;
-  final List<Milestone> milestones;
+  final String status;
+  final MateInfo? mateInfo;
   final List<WeightEntry> weightLog;
   final String? notes;
+  final DateTime? actualDeliveryDate;
+  final int? litterSize;
   final DateTime createdAt;
-  final DateTime updatedAt;
 
-  const Pregnancy({
+  PregnancyModel({
     required this.id,
     required this.petId,
     required this.ownerId,
-    required this.breedingDate,
+    required this.matingDate,
     required this.expectedDueDate,
     required this.status,
-    required this.species,
-    this.milestones = const [],
+    this.mateInfo,
     this.weightLog = const [],
     this.notes,
+    this.actualDeliveryDate,
+    this.litterSize,
     required this.createdAt,
-    required this.updatedAt,
   });
 
-  factory Pregnancy.fromJson(Map<String, dynamic> json) {
-    return Pregnancy(
+  int get currentWeek {
+    final daysSinceMating = DateTime.now().difference(matingDate).inDays;
+    return (daysSinceMating / 7).ceil();
+  }
+
+  int get daysRemaining {
+    return expectedDueDate.difference(DateTime.now()).inDays;
+  }
+
+  double get progressPercent {
+    final totalDays = expectedDueDate.difference(matingDate).inDays;
+    final elapsed = DateTime.now().difference(matingDate).inDays;
+    return (elapsed / totalDays).clamp(0.0, 1.0);
+  }
+
+  bool get isActive => status == 'active';
+
+  factory PregnancyModel.fromJson(Map<String, dynamic> json) {
+    return PregnancyModel(
       id: json['id'] as String,
       petId: json['petId'] as String,
       ownerId: json['ownerId'] as String,
-      breedingDate: parseDateTime(json['breedingDate']) ?? DateTime.now(),
-      expectedDueDate: parseDateTime(json['expectedDueDate']) ?? DateTime.now(),
-      status: PregnancyStatus.values.firstWhere(
-        (e) => e.name == json['status'],
-        orElse: () => PregnancyStatus.active,
-      ),
-      species: json['species'] as String,
-      milestones: (json['milestones'] as List<dynamic>?)
-              ?.map((e) => Milestone.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
+      matingDate: DateTime.parse(json['matingDate'] as String),
+      expectedDueDate: DateTime.parse(json['expectedDueDate'] as String),
+      status: json['status'] as String,
+      mateInfo: json['mateInfo'] != null
+          ? MateInfo.fromJson(json['mateInfo'] as Map<String, dynamic>)
+          : null,
       weightLog: (json['weightLog'] as List<dynamic>?)
-              ?.map((e) => WeightEntry.fromJson(e as Map<String, dynamic>))
+              ?.map((w) => WeightEntry.fromJson(w as Map<String, dynamic>))
               .toList() ??
           [],
       notes: json['notes'] as String?,
-      createdAt: parseDateTime(json['createdAt']) ?? DateTime.now(),
-      updatedAt: parseDateTime(json['updatedAt']) ?? DateTime.now(),
+      actualDeliveryDate: json['actualDeliveryDate'] != null
+          ? DateTime.parse(json['actualDeliveryDate'] as String)
+          : null,
+      litterSize: json['litterSize'] as int?,
+      createdAt: DateTime.parse(json['createdAt'] as String),
     );
   }
 
@@ -129,30 +72,46 @@ class Pregnancy {
     return {
       'id': id,
       'petId': petId,
-      'ownerId': ownerId,
-      'breedingDate': breedingDate.toIso8601String(),
+      'matingDate': matingDate.toIso8601String(),
       'expectedDueDate': expectedDueDate.toIso8601String(),
-      'status': status.name,
-      'species': species,
-      'milestones': milestones.map((e) => e.toJson()).toList(),
-      'weightLog': weightLog.map((e) => e.toJson()).toList(),
+      'status': status,
+      'mateInfo': mateInfo?.toJson(),
+      'weightLog': weightLog.map((w) => w.toJson()).toList(),
       'notes': notes,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
     };
   }
+}
 
-  int get currentWeek {
-    return DateTime.now().difference(breedingDate).inDays ~/ 7;
+class MateInfo {
+  final String? name;
+  final String? breed;
+  final String? ownerId;
+
+  MateInfo({this.name, this.breed, this.ownerId});
+
+  factory MateInfo.fromJson(Map<String, dynamic> json) {
+    return MateInfo(
+      name: json['name'] as String?,
+      breed: json['breed'] as String?,
+      ownerId: json['ownerId'] as String?,
+    );
   }
 
-  int get totalWeeks {
-    return expectedDueDate.difference(breedingDate).inDays ~/ 7;
+  Map<String, dynamic> toJson() => {'name': name, 'breed': breed, 'ownerId': ownerId};
+}
+
+class WeightEntry {
+  final double weight;
+  final DateTime date;
+
+  WeightEntry({required this.weight, required this.date});
+
+  factory WeightEntry.fromJson(Map<String, dynamic> json) {
+    return WeightEntry(
+      weight: (json['weight'] as num).toDouble(),
+      date: DateTime.parse(json['date'] as String),
+    );
   }
 
-  double get progress {
-    final total = expectedDueDate.difference(breedingDate).inDays;
-    final elapsed = DateTime.now().difference(breedingDate).inDays;
-    return (elapsed / total).clamp(0.0, 1.0);
-  }
+  Map<String, dynamic> toJson() => {'weight': weight, 'date': date.toIso8601String()};
 }

@@ -5,7 +5,6 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.gms.google-services")
 }
 
 val keystoreProperties = Properties()
@@ -15,9 +14,9 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.petroll.app"
-    compileSdk = 36
-    ndkVersion = "28.2.13676358"
+    namespace = "com.petroll.pet_roll"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
@@ -30,12 +29,11 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.petroll.app"
+        applicationId = "com.petroll.pet_roll"
         minSdk = flutter.minSdkVersion
-        targetSdk = 35
+        targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        multiDexEnabled = true
     }
 
     signingConfigs {

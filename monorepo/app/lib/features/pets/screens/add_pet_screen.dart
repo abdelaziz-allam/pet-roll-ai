@@ -1,622 +1,646 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../core/services/api_service.dart';
+import '../../../core/theme/app_theme.dart';
 
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_typography.dart';
-import '../../../core/widgets/app_button.dart';
-import '../../../core/widgets/app_text_field.dart';
-import '../../../core/widgets/loading_indicator.dart';
-import '../../notifications/services/birthday_notification_service.dart';
-import '../providers/pet_provider.dart';
-import '../services/pet_service.dart';
-
-class AddPetScreen extends ConsumerStatefulWidget {
+class AddPetScreen extends StatefulWidget {
   const AddPetScreen({super.key});
 
   @override
-  ConsumerState<AddPetScreen> createState() => _AddPetScreenState();
+  State<AddPetScreen> createState() => _AddPetScreenState();
 }
 
-class _AddPetScreenState extends ConsumerState<AddPetScreen> {
-  final _pageController = PageController();
-  int _currentStep = 0;
-  bool _isSubmitting = false;
-
-  final _nameController = TextEditingController();
-  String _selectedSpecies = '';
-  String _selectedBreed = '';
-  String? _selectedBreedId;
-  final _breedSearchController = TextEditingController();
-
+class _AddPetScreenState extends State<AddPetScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameCtrl = TextEditingController();
+  final _breedCtrl = TextEditingController();
+  final _weightCtrl = TextEditingController();
+  final _colorCtrl = TextEditingController();
+  final _notesCtrl = TextEditingController();
+  String _species = 'dog';
+  String _gender = 'male';
+  bool _isNeutered = false;
+  bool _isAvailableForMating = false;
+  String? _country;
+  String? _city;
+  List<Map<String, dynamic>> _countries = [];
+  List<String> _cities = [];
+  bool _loadingCities = false;
   DateTime? _dateOfBirth;
-  String _selectedGender = '';
-  final _weightController = TextEditingController();
-  String _weightUnit = 'kg';
-  final _colorController = TextEditingController();
+  final List<File> _photos = [];
+  bool _saving = false;
 
-  final List<XFile> _photos = [];
+  final _picker = ImagePicker();
 
   @override
-  void dispose() {
-    _pageController.dispose();
-    _nameController.dispose();
-    _breedSearchController.dispose();
-    _weightController.dispose();
-    _colorController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _loadCountries();
   }
 
-  void _nextStep() {
-    if (_currentStep < 2) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-      setState(() => _currentStep++);
-    } else {
-      _submitPet();
-    }
-  }
-
-  void _previousStep() {
-    if (_currentStep > 0) {
-      _pageController.previousPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-      setState(() => _currentStep--);
-    } else {
-      context.pop();
-    }
-  }
-
-  bool get _canProceed {
-    switch (_currentStep) {
-      case 0:
-        return _nameController.text.isNotEmpty && _selectedSpecies.isNotEmpty;
-      case 1:
-        return _selectedGender.isNotEmpty;
-      case 2:
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  Future<void> _submitPet() async {
-    if (_isSubmitting) return;
-    setState(() => _isSubmitting = true);
-
+  Future<void> _loadCountries() async {
     try {
-      final data = <String, dynamic>{
-        'name': _nameController.text.trim(),
-        'species': _selectedSpecies,
-        'breed': _selectedBreed,
-        'gender': _selectedGender,
+      final data = await ApiService().get('/pets/locations/countries');
+      if (data is List) {
+        setState(() {
+          _countries = data.cast<Map<String, dynamic>>();
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _loadCities(String country) async {
+    setState(() { _loadingCities = true; _cities = []; _city = null; });
+    try {
+      final data = await ApiService().get('/pets/locations/cities?country=$country');
+      if (data is List) {
+        setState(() {
+          _cities = data.map((c) => c.toString()).toList();
+          _loadingCities = false;
+        });
+      } else {
+        setState(() => _loadingCities = false);
+      }
+    } catch (_) {
+      setState(() => _loadingCities = false);
+    }
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    final picked = await _picker.pickImage(source: source, maxWidth: 1024, imageQuality: 80);
+    if (picked != null) {
+      setState(() => _photos.add(File(picked.path)));
+    }
+  }
+
+  void _showImageSourceSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Add Photo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _imageSourceOption(Icons.camera_alt, 'Camera', () {
+                    Navigator.pop(ctx);
+                    _pickImage(ImageSource.camera);
+                  }),
+                  _imageSourceOption(Icons.photo_library, 'Gallery', () {
+                    Navigator.pop(ctx);
+                    _pickImage(ImageSource.gallery);
+                  }),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _imageSourceOption(IconData icon, String label, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppTheme.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: AppTheme.primary, size: 32),
+          ),
+          const SizedBox(height: 8),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _saving = true);
+    try {
+      final api = ApiService();
+      final petData = <String, dynamic>{
+        'name': _nameCtrl.text,
+        'species': _species,
+        'breed': _breedCtrl.text.isNotEmpty ? _breedCtrl.text : _species,
+        'gender': _gender,
+        'dateOfBirth': (_dateOfBirth ?? DateTime.now().subtract(const Duration(days: 365))).toIso8601String(),
+        'isNeutered': _isNeutered,
+        'isAvailableForMating': _isAvailableForMating,
+        if (_country != null || _city != null)
+          'location': {'country': _country ?? '', 'city': _city ?? ''},
       };
-
-      if (_selectedBreedId != null) data['breedId'] = _selectedBreedId;
-      if (_dateOfBirth != null) {
-        data['dateOfBirth'] = '${_dateOfBirth!.year.toString().padLeft(4, '0')}-${_dateOfBirth!.month.toString().padLeft(2, '0')}-${_dateOfBirth!.day.toString().padLeft(2, '0')}';
+      if (_weightCtrl.text.isNotEmpty) {
+        petData['weight'] = double.tryParse(_weightCtrl.text);
       }
-      if (_weightController.text.isNotEmpty) {
-        data['weight'] = double.tryParse(_weightController.text);
-        data['weightUnit'] = _weightUnit;
+      if (_colorCtrl.text.isNotEmpty) {
+        petData['color'] = _colorCtrl.text;
       }
-
-      final petService = ref.read(petServiceProvider);
-      final pet = await petService.createPet(data);
-
-      for (final photo in _photos) {
-        await petService.uploadPhoto(pet.id, photo.path);
+      if (_notesCtrl.text.isNotEmpty) {
+        petData['notes'] = _notesCtrl.text;
       }
 
-      if (_dateOfBirth != null) {
-        final birthdayService = ref.read(birthdayNotificationServiceProvider);
-        await birthdayService.scheduleBirthdayNotification(
-          petId: pet.id,
-          petName: _nameController.text.trim(),
-          dateOfBirth: _dateOfBirth!,
+      final result = await api.post('/pets', petData);
+
+      if (_photos.isNotEmpty && result != null && result['id'] != null) {
+        for (final photo in _photos) {
+          try {
+            await api.uploadFile('/pets/${result['id']}/photos/upload', photo);
+          } catch (_) {}
+        }
+      }
+
+      if (mounted) {
+        Navigator.pop(context, true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Pet added successfully!'), backgroundColor: AppTheme.success),
         );
       }
-
-      ref.invalidate(userPetsProvider);
-      if (mounted) context.pop();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to add pet: $e')),
+          SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.error),
         );
       }
     } finally {
-      if (mounted) setState(() => _isSubmitting = false);
+      if (mounted) setState(() => _saving = false);
     }
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _breedCtrl.dispose();
+    _weightCtrl.dispose();
+    _colorCtrl.dispose();
+    _notesCtrl.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgPrimary,
       appBar: AppBar(
-        title: Text(
-          'Add Pet',
-          style: AppTypography.heading2.copyWith(color: AppColors.textPrimary),
-        ),
-        backgroundColor: AppColors.bgPrimary,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: _previousStep,
-        ),
+        title: const Text('Add New Pet', style: TextStyle(fontWeight: FontWeight.w700)),
       ),
-      body: Column(
-        children: [
-          _StepIndicator(currentStep: _currentStep),
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            _buildPhotoSection(),
+            const SizedBox(height: 24),
+            _buildSectionTitle('Basic Information'),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _nameCtrl,
+              decoration: const InputDecoration(labelText: 'Pet Name *', prefixIcon: Icon(Icons.pets)),
+              validator: (v) => (v == null || v.isEmpty) ? 'Name is required' : null,
+            ),
+            const SizedBox(height: 12),
+            Row(
               children: [
-                _StepBasicInfo(
-                  nameController: _nameController,
-                  selectedSpecies: _selectedSpecies,
-                  onSpeciesSelected: (species) => setState(() => _selectedSpecies = species),
-                  breedSearchController: _breedSearchController,
-                  selectedBreed: _selectedBreed,
-                  onBreedSelected: (breed, breedId) => setState(() {
-                    _selectedBreed = breed;
-                    _selectedBreedId = breedId;
-                  }),
-                  onNameChanged: () => setState(() {}),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _species,
+                    decoration: const InputDecoration(labelText: 'Species'),
+                    items: ['dog', 'cat', 'bird', 'horse', 'rabbit', 'fish', 'reptile', 'hamster']
+                        .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                        .toList(),
+                    onChanged: (v) => setState(() => _species = v!),
+                  ),
                 ),
-                _StepDetails(
-                  dateOfBirth: _dateOfBirth,
-                  onDateSelected: (date) => setState(() => _dateOfBirth = date),
-                  selectedGender: _selectedGender,
-                  onGenderSelected: (gender) => setState(() => _selectedGender = gender),
-                  weightController: _weightController,
-                  weightUnit: _weightUnit,
-                  onWeightUnitChanged: (unit) => setState(() => _weightUnit = unit),
-                  colorController: _colorController,
-                ),
-                _StepPhotos(
-                  photos: _photos,
-                  onPhotosChanged: () => setState(() {}),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _gender,
+                    decoration: const InputDecoration(labelText: 'Gender'),
+                    items: ['male', 'female'].map((g) => DropdownMenuItem(value: g, child: Text(g))).toList(),
+                    onChanged: (v) => setState(() => _gender = v!),
+                  ),
                 ),
               ],
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: AppButton(
-              label: _currentStep == 2 ? 'Add Pet' : 'Next',
-              onPressed: _canProceed ? _nextStep : null,
-              isLoading: _isSubmitting,
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _breedCtrl,
+              decoration: const InputDecoration(labelText: 'Breed', prefixIcon: Icon(Icons.category)),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StepIndicator extends StatelessWidget {
-  final int currentStep;
-
-  const _StepIndicator({required this.currentStep});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: List.generate(3, (index) {
-          final isActive = index <= currentStep;
-          return Expanded(
-            child: Container(
-              margin: EdgeInsets.only(right: index < 2 ? 8 : 0),
-              height: 4,
-              decoration: BoxDecoration(
-                color: isActive ? AppColors.brandPrimary : AppColors.borderLight,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-}
-
-class _StepBasicInfo extends ConsumerWidget {
-  final TextEditingController nameController;
-  final String selectedSpecies;
-  final ValueChanged<String> onSpeciesSelected;
-  final TextEditingController breedSearchController;
-  final String selectedBreed;
-  final void Function(String breed, String? breedId) onBreedSelected;
-  final VoidCallback onNameChanged;
-
-  const _StepBasicInfo({
-    required this.nameController,
-    required this.selectedSpecies,
-    required this.onSpeciesSelected,
-    required this.breedSearchController,
-    required this.selectedBreed,
-    required this.onBreedSelected,
-    required this.onNameChanged,
-  });
-
-  static const _speciesOptions = ['Dog', 'Cat', 'Bird', 'Rabbit', 'Horse', 'Other'];
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final breedsAsync = selectedSpecies.isNotEmpty
-        ? ref.watch(breedsProvider(selectedSpecies.toLowerCase()))
-        : null;
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Basic Info', style: AppTypography.heading2.copyWith(color: AppColors.textPrimary)),
-          const SizedBox(height: 4),
-          Text(
-            'Tell us about your pet',
-            style: AppTypography.body.copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: 24),
-          AppTextField(
-            controller: nameController,
-            label: 'Pet Name',
-            hint: 'Enter your pet\'s name',
-            onChanged: (_) => onNameChanged(),
-          ),
-          const SizedBox(height: 20),
-          Text('Species', style: AppTypography.label.copyWith(color: AppColors.textPrimary)),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: _speciesOptions.map((species) {
-              final isSelected = selectedSpecies == species;
-              return GestureDetector(
-                onTap: () => onSpeciesSelected(species),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColors.brandPrimary : AppColors.bgSecondary,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isSelected ? AppColors.brandPrimary : AppColors.borderDefault,
-                    ),
-                  ),
-                  child: Text(
-                    species,
-                    style: AppTypography.label.copyWith(
-                      color: isSelected ? Colors.white : AppColors.textPrimary,
-                    ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _weightCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: 'Weight (kg)', prefixIcon: Icon(Icons.monitor_weight)),
                   ),
                 ),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 20),
-          if (selectedSpecies.isNotEmpty) ...[
-            Text('Breed', style: AppTypography.label.copyWith(color: AppColors.textPrimary)),
-            const SizedBox(height: 8),
-            AppTextField(
-              controller: breedSearchController,
-              hint: 'Search breed...',
-              prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 8),
-            if (breedsAsync != null)
-              breedsAsync.when(
-                loading: () => const Padding(
-                  padding: EdgeInsets.all(8),
-                  child: LoadingIndicator(size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextFormField(
+                    controller: _colorCtrl,
+                    decoration: const InputDecoration(labelText: 'Color', prefixIcon: Icon(Icons.palette)),
+                  ),
                 ),
-                error: (_, __) => const SizedBox.shrink(),
-                data: (breeds) {
-                  final query = breedSearchController.text.toLowerCase();
-                  final filtered = breeds.where((b) {
-                    final name = (b['name'] as String? ?? '').toLowerCase();
-                    return query.isEmpty || name.contains(query);
-                  }).toList();
-
-                  if (filtered.isEmpty) return const SizedBox.shrink();
-
-                  return Container(
-                    constraints: const BoxConstraints(maxHeight: 150),
-                    decoration: BoxDecoration(
-                      color: AppColors.bgPrimary,
-                      border: Border.all(color: AppColors.borderLight),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: filtered.length,
-                      itemBuilder: (context, index) {
-                        final breed = filtered[index];
-                        final name = breed['name'] as String? ?? '';
-                        final id = breed['id'] as String?;
-                        final isSelected = selectedBreed == name;
-                        return ListTile(
-                          dense: true,
-                          title: Text(
-                            name,
-                            style: AppTypography.body.copyWith(
-                              color: isSelected ? AppColors.brandPrimary : AppColors.textPrimary,
+              ],
+            ),
+            const SizedBox(height: 16),
+            GestureDetector(
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now().subtract(const Duration(days: 365)),
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime.now(),
+                  helpText: 'Select Date of Birth',
+                );
+                if (picked != null) setState(() => _dateOfBirth = picked);
+              },
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  border: Border.all(color: _dateOfBirth != null ? AppTheme.primary.withOpacity(0.5) : Colors.grey.shade200),
+                  borderRadius: BorderRadius.circular(14),
+                  color: _dateOfBirth != null ? AppTheme.primary.withOpacity(0.05) : Colors.white,
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.cake, color: _dateOfBirth != null ? AppTheme.primary : Colors.grey),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Date of Birth', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                          const SizedBox(height: 2),
+                          Text(
+                            _dateOfBirth != null
+                                ? '${_dateOfBirth!.day}/${_dateOfBirth!.month}/${_dateOfBirth!.year}'
+                                : 'Tap to select',
+                            style: TextStyle(
+                              color: _dateOfBirth != null ? AppTheme.textPrimary : AppTheme.textSecondary,
+                              fontWeight: _dateOfBirth != null ? FontWeight.w600 : FontWeight.normal,
                             ),
                           ),
-                          trailing: isSelected
-                              ? const Icon(Icons.check, size: 18, color: AppColors.brandPrimary)
-                              : null,
-                          onTap: () => onBreedSelected(name, id),
-                        );
-                      },
+                        ],
+                      ),
                     ),
-                  );
+                    if (_dateOfBirth != null) const Icon(Icons.check_circle, color: AppTheme.primary, size: 20),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            _buildSectionTitle('Location'),
+            const SizedBox(height: 12),
+            _buildLocationPicker(
+              label: 'Country',
+              icon: Icons.flag,
+              value: _country,
+              onTap: () => _showSearchablePicker(
+                title: 'Select Country',
+                items: _countries.map((c) => c['name'] as String).toList(),
+                onSelected: (v) {
+                  setState(() => _country = v);
+                  _loadCities(v);
                 },
               ),
+            ),
+            const SizedBox(height: 12),
+            _buildLocationPicker(
+              label: 'City',
+              icon: Icons.location_city,
+              value: _city,
+              isLoading: _loadingCities,
+              onTap: _country == null
+                  ? () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please select a country first'), backgroundColor: AppTheme.warning),
+                      );
+                    }
+                  : () => _showSearchablePicker(
+                      title: 'Select City',
+                      items: _cities,
+                      onSelected: (v) => setState(() => _city = v),
+                    ),
+            ),
+            const SizedBox(height: 24),
+            _buildSectionTitle('Details'),
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Column(
+                children: [
+                  SwitchListTile(
+                    title: const Text('Neutered / Spayed'),
+                    value: _isNeutered,
+                    onChanged: (v) => setState(() => _isNeutered = v),
+                    activeColor: AppTheme.primary,
+                  ),
+                  Divider(height: 1, color: Colors.grey.shade100),
+                  SwitchListTile(
+                    title: const Text('Available for Mating'),
+                    value: _isAvailableForMating,
+                    onChanged: (v) => setState(() => _isAvailableForMating = v),
+                    activeColor: AppTheme.primary,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _notesCtrl,
+              maxLines: 3,
+              decoration: const InputDecoration(labelText: 'Notes', prefixIcon: Icon(Icons.notes), alignLabelWithHint: true),
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              height: 52,
+              child: ElevatedButton(
+                onPressed: _saving ? null : _submit,
+                child: _saving
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : const Text('Add Pet', style: TextStyle(fontSize: 16)),
+              ),
+            ),
+            const SizedBox(height: 40),
           ],
-        ],
+        ),
       ),
     );
   }
-}
 
-class _StepDetails extends StatelessWidget {
-  final DateTime? dateOfBirth;
-  final ValueChanged<DateTime> onDateSelected;
-  final String selectedGender;
-  final ValueChanged<String> onGenderSelected;
-  final TextEditingController weightController;
-  final String weightUnit;
-  final ValueChanged<String> onWeightUnitChanged;
-  final TextEditingController colorController;
-
-  const _StepDetails({
-    required this.dateOfBirth,
-    required this.onDateSelected,
-    required this.selectedGender,
-    required this.onGenderSelected,
-    required this.weightController,
-    required this.weightUnit,
-    required this.onWeightUnitChanged,
-    required this.colorController,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Details', style: AppTypography.heading2.copyWith(color: AppColors.textPrimary)),
-          const SizedBox(height: 4),
-          Text(
-            'A few more details',
-            style: AppTypography.body.copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: 24),
-          Text('Date of Birth', style: AppTypography.label.copyWith(color: AppColors.textPrimary)),
-          const SizedBox(height: 8),
-          GestureDetector(
-            onTap: () async {
-              final date = await showDatePicker(
-                context: context,
-                initialDate: dateOfBirth ?? DateTime.now(),
-                firstDate: DateTime(2000),
-                lastDate: DateTime.now(),
-              );
-              if (date != null) onDateSelected(date);
-            },
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.borderDefault),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                dateOfBirth != null
-                    ? '${dateOfBirth!.day}/${dateOfBirth!.month}/${dateOfBirth!.year}'
-                    : 'Select date',
-                style: AppTypography.body.copyWith(
-                  color: dateOfBirth != null ? AppColors.textPrimary : AppColors.textHint,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text('Gender', style: AppTypography.label.copyWith(color: AppColors.textPrimary)),
-          const SizedBox(height: 8),
-          Row(
-            children: ['Male', 'Female'].map((gender) {
-              final isSelected = selectedGender == gender;
-              return Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(right: gender == 'Male' ? 8 : 0),
-                  child: GestureDetector(
-                    onTap: () => onGenderSelected(gender),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      decoration: BoxDecoration(
-                        color: isSelected ? AppColors.brandPrimary : AppColors.bgSecondary,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isSelected ? AppColors.brandPrimary : AppColors.borderDefault,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          gender,
-                          style: AppTypography.label.copyWith(
-                            color: isSelected ? Colors.white : AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 20),
-          Text('Weight', style: AppTypography.label.copyWith(color: AppColors.textPrimary)),
-          const SizedBox(height: 8),
-          Row(
+  Widget _buildPhotoSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle('Photos'),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 110,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
             children: [
-              Expanded(
-                flex: 2,
-                child: AppTextField(
-                  controller: weightController,
-                  hint: 'Weight',
-                  keyboardType: TextInputType.number,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.borderDefault),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: weightUnit,
-                      isExpanded: true,
-                      items: ['kg', 'lbs'].map((unit) {
-                        return DropdownMenuItem(value: unit, child: Text(unit));
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) onWeightUnitChanged(value);
-                      },
-                    ),
-                  ),
-                ),
-              ),
+              ..._photos.asMap().entries.map((e) => _buildPhotoThumbnail(e.key, e.value)),
+              _buildAddPhotoButton(),
             ],
           ),
-          const SizedBox(height: 20),
-          AppTextField(
-            controller: colorController,
-            label: 'Color',
-            hint: 'e.g. Golden, Black, White',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPhotoThumbnail(int index, File file) {
+    return Container(
+      width: 100,
+      height: 100,
+      margin: const EdgeInsets.only(right: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        image: DecorationImage(image: FileImage(file), fit: BoxFit.cover),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: () => setState(() => _photos.removeAt(index)),
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                child: const Icon(Icons.close, color: Colors.white, size: 14),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
-}
 
-class _StepPhotos extends StatelessWidget {
-  final List<XFile> photos;
-  final VoidCallback onPhotosChanged;
-
-  const _StepPhotos({
-    required this.photos,
-    required this.onPhotosChanged,
-  });
-
-  static const int maxPhotos = 50;
-
-  Future<void> _pickPhoto() async {
-    if (photos.length >= maxPhotos) return;
-    final picker = ImagePicker();
-    final image = await picker.pickImage(source: ImageSource.gallery, maxWidth: 1200);
-    if (image != null) {
-      photos.add(image);
-      onPhotosChanged();
-    }
+  Widget _buildAddPhotoButton() {
+    return GestureDetector(
+      onTap: _showImageSourceSheet,
+      child: Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppTheme.primary, style: BorderStyle.solid, width: 2),
+          color: AppTheme.primary.withOpacity(0.05),
+        ),
+        child: const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.add_a_photo, color: AppTheme.primary, size: 28),
+            SizedBox(height: 4),
+            Text('Add', style: TextStyle(color: AppTheme.primary, fontSize: 12, fontWeight: FontWeight.w600)),
+          ],
+        ),
+      ),
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Photos', style: AppTypography.heading2.copyWith(color: AppColors.textPrimary)),
-          const SizedBox(height: 4),
-          Text(
-            'Add up to $maxPhotos photos of your pet (${photos.length}/$maxPhotos)',
-            style: AppTypography.body.copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: 24),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-            ),
-            itemCount: photos.length + 1,
-            itemBuilder: (context, index) {
-              if (index == photos.length) {
-                return GestureDetector(
-                  onTap: _pickPhoto,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.bgSecondary,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.borderDefault, style: BorderStyle.solid),
-                    ),
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.add_a_photo_outlined, size: 28, color: AppColors.textSecondary),
-                        SizedBox(height: 4),
-                        Text('Add', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-                      ],
-                    ),
-                  ),
-                );
-              }
+  Widget _buildSectionTitle(String title) {
+    return Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textPrimary));
+  }
 
-              return Stack(
+  Widget _buildLocationPicker({
+    required String label,
+    required IconData icon,
+    required String? value,
+    required VoidCallback onTap,
+    bool isLoading = false,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: value != null ? AppTheme.primary.withOpacity(0.04) : Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: value != null ? AppTheme.primary.withOpacity(0.4) : Colors.grey.shade200,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: value != null ? AppTheme.primary : Colors.grey, size: 22),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.file(
-                      File(photos[index].path),
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  Positioned(
-                    top: 4,
-                    right: 4,
-                    child: GestureDetector(
-                      onTap: () {
-                        photos.removeAt(index);
-                        onPhotosChanged();
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.black54,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.close, size: 14, color: Colors.white),
-                      ),
+                  Text(label, style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                  const SizedBox(height: 2),
+                  Text(
+                    value ?? 'Tap to select',
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: value != null ? AppTheme.textPrimary : AppTheme.textSecondary,
+                      fontWeight: value != null ? FontWeight.w600 : FontWeight.normal,
                     ),
                   ),
                 ],
-              );
-            },
+              ),
+            ),
+            if (isLoading)
+              const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary))
+            else if (value != null)
+              const Icon(Icons.check_circle, color: AppTheme.primary, size: 20)
+            else
+              Icon(Icons.chevron_right, color: Colors.grey.shade400, size: 22),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSearchablePicker({
+    required String title,
+    required List<String> items,
+    required ValueChanged<String> onSelected,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _SearchablePickerSheet(
+        title: title,
+        items: items,
+        onSelected: (v) {
+          Navigator.pop(ctx);
+          onSelected(v);
+        },
+      ),
+    );
+  }
+}
+
+class _SearchablePickerSheet extends StatefulWidget {
+  final String title;
+  final List<String> items;
+  final ValueChanged<String> onSelected;
+
+  const _SearchablePickerSheet({
+    required this.title,
+    required this.items,
+    required this.onSelected,
+  });
+
+  @override
+  State<_SearchablePickerSheet> createState() => _SearchablePickerSheetState();
+}
+
+class _SearchablePickerSheetState extends State<_SearchablePickerSheet> {
+  final _searchCtrl = TextEditingController();
+  List<String> _filtered = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _filtered = widget.items;
+  }
+
+  void _onSearch(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filtered = widget.items;
+      } else {
+        final q = query.toLowerCase();
+        _filtered = widget.items.where((item) => item.toLowerCase().contains(q)).toList();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.7,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 12),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+          ),
+          const SizedBox(height: 16),
+          Text(widget.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: TextField(
+              controller: _searchCtrl,
+              onChanged: _onSearch,
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: 'Search...',
+                prefixIcon: const Icon(Icons.search, color: AppTheme.primary),
+                filled: true,
+                fillColor: Colors.grey.shade50,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.grey.shade200)),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppTheme.primary)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: _filtered.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.search_off, size: 48, color: Colors.grey.shade300),
+                        const SizedBox(height: 12),
+                        Text('No results found', style: TextStyle(color: Colors.grey.shade500, fontSize: 15)),
+                      ],
+                    ),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    itemCount: _filtered.length,
+                    separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.shade100),
+                    itemBuilder: (ctx, i) {
+                      final item = _filtered[i];
+                      return ListTile(
+                        title: Text(item, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+                        trailing: const Icon(Icons.chevron_right, size: 18, color: AppTheme.primary),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        onTap: () => widget.onSelected(item),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
