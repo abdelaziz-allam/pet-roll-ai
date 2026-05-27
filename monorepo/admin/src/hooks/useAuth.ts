@@ -33,7 +33,7 @@ export function useAuth(): AuthState {
     const token = localStorage.getItem(TOKEN_KEY);
     if (token && !user) {
       setLoading(true);
-      fetch('/api/v1/admin-auth/me', {
+      fetch(`${import.meta.env.VITE_API_URL || '/api/v1'}/admin-auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => {
@@ -57,7 +57,7 @@ export function useAuth(): AuthState {
   const login = useCallback(async (email: string, password: string) => {
     setLoading(true);
     try {
-      const res = await fetch('/api/v1/admin-auth/login', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || '/api/v1'}/admin-auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
