@@ -10,42 +10,67 @@ export class AdminService {
   private categoriesRef = db.collection('pet_categories');
 
   async getStats() {
-    const [usersCount, petsCount, listingsCount] = await Promise.all([
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const [usersCount, petsCount, listingsCount, pendingVerif, prevUsersSnap, prevPetsSnap] = await Promise.all([
       this.usersRef.count().get(),
       db.collection('pets').count().get(),
       db.collection('mating_listings').where('status', '==', 'active').count().get(),
+      db.collection('verifications').where('status', '==', 'pending').count().get(),
+      this.usersRef.where('createdAt', '<', thirtyDaysAgo).count().get(),
+      db.collection('pets').where('createdAt', '<', thirtyDaysAgo).count().get(),
     ]);
+    const totalUsers = usersCount.data().count;
+    const totalPets = petsCount.data().count;
+    const prevUsers = prevUsersSnap.data().count;
+    const prevPets = prevPetsSnap.data().count;
     return {
-      totalUsers: usersCount.data().count,
-      totalPets: petsCount.data().count,
+      totalUsers,
+      totalPets,
       activeListings: listingsCount.data().count,
+      pendingVerifications: pendingVerif.data().count,
+      notificationsSentToday: 0,
+      userGrowthPercent: prevUsers > 0 ? ((totalUsers - prevUsers) / prevUsers) : 0,
+      petGrowthPercent: prevPets > 0 ? ((totalPets - prevPets) / prevPets) : 0,
     };
   }
 
   async getGrowthStats(period: string) {
+    const daysBack = period === '7' ? 7 : period === '90' ? 90 : 30;
     const now = new Date();
-    const daysBack = period === 'week' ? 7 : period === 'month' ? 30 : 90;
-    const since = new Date(now.getTime() - daysBack * 24 * 60 * 60 * 1000);
+    const points: { date: string; users: number; pets: number }[] = [];
 
-    const snapshot = await this.usersRef
-      .where('createdAt', '>=', since)
-      .get();
+    for (let i = daysBack - 1; i >= 0; i--) {
+      const dayStart = new Date(now);
+      dayStart.setDate(now.getDate() - i);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(dayStart);
+      dayEnd.setHours(23, 59, 59, 999);
 
-    return { newUsers: snapshot.size, period };
+      const [usersSnap, petsSnap] = await Promise.all([
+        this.usersRef.where('createdAt', '>=', dayStart).where('createdAt', '<=', dayEnd).count().get(),
+        this.petsRef.where('createdAt', '>=', dayStart).where('createdAt', '<=', dayEnd).count().get(),
+      ]);
+
+      points.push({
+        date: dayStart.toISOString().slice(0, 10),
+        users: usersSnap.data().count,
+        pets: petsSnap.data().count,
+      });
+    }
+
+    return points;
   }
 
   async getSystemHealth() {
     try {
       await this.usersRef.limit(1).get();
       const lastCron = await db.collection('cron_logs').orderBy('createdAt', 'desc').limit(1).get();
-      return {
-        api: 'up',
-        firestore: 'up',
-        fcm: 'up',
-        lastCronRun: lastCron.empty ? null : lastCron.docs[0].data().createdAt,
-      };
+      const lastCronRun = lastCron.empty
+        ? null
+        : lastCron.docs[0].data().createdAt?.toDate?.()?.toISOString?.() ?? null;
+      return { api: 'healthy', firestore: 'healthy', fcm: 'healthy', lastCronRun };
     } catch {
-      return { api: 'up', firestore: 'down', fcm: 'unknown', lastCronRun: null };
+      return { api: 'healthy', firestore: 'down', fcm: 'healthy', lastCronRun: null };
     }
   }
 
@@ -55,24 +80,27 @@ export class AdminService {
       this.petsRef.orderBy('createdAt', 'desc').limit(Math.floor(limit / 2)).get(),
     ]);
 
+    const toIso = (ts: any): string => {
+      if (!ts) return new Date().toISOString();
+      if (typeof ts.toDate === 'function') return ts.toDate().toISOString();
+      return new Date(ts).toISOString();
+    };
+
     const activity = [
       ...recentUsers.docs.map((doc) => ({
         id: doc.id,
-        type: 'user_joined',
-        message: `New user joined: ${doc.data().displayName || doc.data().email}`,
-        createdAt: doc.data().createdAt,
+        type: 'user_registered' as const,
+        description: `New user joined: ${doc.data().displayName || doc.data().email || 'Unknown'}`,
+        timestamp: toIso(doc.data().createdAt),
       })),
       ...recentPets.docs.map((doc) => ({
         id: doc.id,
-        type: 'pet_added',
-        message: `New pet added: ${doc.data().name}`,
-        createdAt: doc.data().createdAt,
+        type: 'pet_created' as const,
+        description: `New pet added: ${doc.data().name || 'Unknown'}`,
+        timestamp: toIso(doc.data().createdAt),
       })),
-    ].sort((a, b) => {
-      const aTime = a.createdAt?.toMillis?.() ?? 0;
-      const bTime = b.createdAt?.toMillis?.() ?? 0;
-      return bTime - aTime;
-    }).slice(0, limit);
+    ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+     .slice(0, limit);
 
     return activity;
   }
@@ -1103,6 +1131,7 @@ export const getStats = () => _instance.getStats();
 export const getGrowthStats = (period?: string | number) => _instance.getGrowthStats(String(period || '30'));
 export const listUsers = (query?: any) => _instance.getUsers(query?.page, query?.limit, query?.status);
 export const getUserById = (id: string) => _instance.getUserById(id);
+export const updateUser = (id: string, body: any) => _instance.updateUser(id, body);
 export const updateUserRole = (id: string, body: any) => _instance.updateUserRole(id, body.role);
 export const banUser = (id: string, body: any) => _instance.banUser(id, body.reason);
 export const deleteUser = (id: string) => _instance.deleteUser(id);
