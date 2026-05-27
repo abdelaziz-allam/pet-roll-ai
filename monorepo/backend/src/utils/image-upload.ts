@@ -34,18 +34,9 @@ export async function uploadImage(
       contentType,
       metadata,
     },
-    public: true,
   });
 
-  let url: string;
-  try {
-    [url] = await file.getSignedUrl({
-      action: 'read',
-      expires: Date.now() + 365 * 24 * 60 * 60 * 1000,
-    });
-  } catch {
-    url = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
-  }
+  const url = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
 
   return { url, path: filePath, fileName };
 }
