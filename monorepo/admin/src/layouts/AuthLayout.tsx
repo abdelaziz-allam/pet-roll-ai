@@ -35,7 +35,7 @@ const AuthLayout: React.FC = () => {
         >
           <HeartFilled style={{ fontSize: 48, color: '#F1379D' }} />
           <Title level={2} style={{ margin: 0, fontFamily: 'Poppins' }}>
-            PET Roll
+            Petfolioo
           </Title>
           <Text type="secondary" style={{ fontSize: 16 }}>
             Admin Portal

@@ -6,7 +6,7 @@ const ADMIN_PASSWORD = 'P@tF0lioo@2612210106022312';
 test.describe('Admin Portal Navigation', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/login');
-    await page.getByPlaceholder('admin@petroll.com').fill(ADMIN_EMAIL);
+    await page.getByPlaceholder('admin@petfolioo.com').fill(ADMIN_EMAIL);
     await page.getByPlaceholder('Password').fill(ADMIN_PASSWORD);
     await page.getByRole('button', { name: 'Sign In' }).click();
     await expect(page).toHaveURL(/\/dashboard/, { timeout: 20000 });

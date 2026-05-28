@@ -90,8 +90,8 @@ const LoginPage: React.FC = () => {
 
       <Space direction="vertical" size={4} style={{ width: '100%', textAlign: 'center', marginBottom: 32 }}>
         <div style={{ fontSize: 32, marginBottom: 8 }}>
-          <span style={{ color: '#F1379D', fontWeight: 700 }}>PET</span>{' '}
-          <span style={{ fontWeight: 700 }}>Roll</span>
+          <span style={{ color: '#F1379D', fontWeight: 700 }}>Pet</span>
+          <span style={{ fontWeight: 700 }}>folioo</span>
         </div>
         <Title level={4} style={{ margin: 0, fontFamily: 'Poppins' }}>
           {view === 'login' && 'Admin Portal'}
@@ -132,7 +132,7 @@ const LoginPage: React.FC = () => {
           >
             <Input
               prefix={<MailOutlined style={{ color: '#bfbfbf' }} />}
-              placeholder="admin@petroll.com"
+              placeholder="admin@petfolioo.com"
             />
           </Form.Item>
 
@@ -181,7 +181,7 @@ const LoginPage: React.FC = () => {
                 fontSize: 13,
                 lineHeight: 1.8,
               }}>
-                <div><strong>Email:</strong> admin@petroll.com</div>
+                <div><strong>Email:</strong> admin@petfolioo.com</div>
                 <div><strong>Password:</strong> admin123456</div>
               </div>
             </>
