@@ -6,20 +6,28 @@ export default defineConfig({
   retries: 1,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:5002',
+    baseURL: 'http://localhost:5010',
     headless: true,
     screenshot: 'only-on-failure',
     video: 'off',
   },
   projects: [
     {
-      name: 'chromium',
+      name: 'Desktop',
       use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'Mobile',
+      use: { ...devices['iPhone 14'] },
+    },
+    {
+      name: 'Tablet',
+      use: { ...devices['iPad (gen 7)'] },
     },
   ],
   webServer: {
-    command: 'npm run dev -- --port 5002',
-    url: 'http://localhost:5002',
+    command: 'npm run dev -- --port 5010',
+    url: 'http://localhost:5010',
     reuseExistingServer: true,
     timeout: 30000,
   },

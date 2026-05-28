@@ -403,6 +403,7 @@ const CategoriesPage: React.FC = () => {
           dataSource={categories}
           rowKey="id"
           loading={loading}
+          scroll={{ x: 600 }}
           pagination={{ pageSize: 10, showTotal: (total) => `${total} categories` }}
         />
       </Card>

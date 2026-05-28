@@ -104,7 +104,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
       style={{
         background: '#272727',
         overflow: 'auto',
-        height: '100vh',
+        minHeight: '100vh',
         position: 'sticky',
         top: 0,
         left: 0,

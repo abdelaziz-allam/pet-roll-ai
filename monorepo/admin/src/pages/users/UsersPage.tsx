@@ -291,7 +291,7 @@ const UsersPage: React.FC = () => {
 
   return (
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
         <div>
           <Title level={4} style={{ margin: 0 }}>App Users</Title>
           <Text type="secondary">Manage application users (pet owners, breeders)</Text>
@@ -311,7 +311,7 @@ const UsersPage: React.FC = () => {
               placeholder="Search users..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{ width: 250 }}
+              style={{ width: '100%', maxWidth: 250 }}
             />
             <Select placeholder="Status" allowClear value={statusFilter} onChange={setStatusFilter} style={{ width: 130 }}>
               <Option value="active">Active</Option>
@@ -343,6 +343,7 @@ const UsersPage: React.FC = () => {
           dataSource={filteredUsers}
           rowKey="id"
           loading={loading}
+          scroll={{ x: 800 }}
           pagination={{ pageSize: 10, showTotal: (total) => `${total} users` }}
         />
       </Card>
@@ -352,7 +353,7 @@ const UsersPage: React.FC = () => {
         title="User Details"
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        width={480}
+        width={Math.min(480, window.innerWidth - 20)}
       >
         {selectedUser && (
           <>

@@ -221,6 +221,7 @@ const VerificationPage: React.FC = () => {
           dataSource={requests}
           rowKey="id"
           loading={loading}
+          scroll={{ x: 800 }}
           pagination={{ pageSize: 10, showTotal: (total) => `${total} requests` }}
         />
       </Card>
