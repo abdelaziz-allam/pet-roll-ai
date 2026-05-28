@@ -327,10 +327,4 @@ When a mating request is accepted (either by the listing owner responding, or by
 
 ---
 
-## Development Notes
-
-- **In-memory mode**: When `USE_MEMORY_STORE=true`, all data is stored in memory and resets on server restart. Use the seed endpoints to recreate data after restart.
-- **Admin vs App auth**: The admin portal uses its own JWT-based authentication (email/password). Mobile app users authenticate through Firebase Auth (Google, Apple, Phone OTP).
-- **Pet ban system**: When a pet is banned, the `banReason` is stored and displayed to the pet owner in the mobile app so they understand why their pet profile was hidden.
-- **Settings persistence**: Platform settings (maintenance mode, rate limits, token expiry, file upload limits) are stored in the `app_settings` Firestore collection as a single `global` document. Changes via the admin Settings page take effect immediately.
-- **Email in dev mode**: When `SMTP_USER` is not set and `NODE_ENV=development`, the email service logs what would be sent without attempting SMTP delivery.
+ 

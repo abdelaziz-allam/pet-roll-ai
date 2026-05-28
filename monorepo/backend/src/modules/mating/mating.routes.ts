@@ -135,4 +135,15 @@ export async function matingRoutes(fastify: FastifyInstance) {
     const result = await matingService.respondToRequest(id, request.user!.uid, status);
     return reply.code(200).send(result);
   });
+
+  fastify.get('/wedding-cards', async (request, reply) => {
+    const cards = await matingService.getWeddingCards(request.user!.uid);
+    return reply.code(200).send(cards);
+  });
+
+  fastify.get('/wedding-cards/:id', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const card = await matingService.getWeddingCard(id, request.user!.uid);
+    return reply.code(200).send(card);
+  });
 }

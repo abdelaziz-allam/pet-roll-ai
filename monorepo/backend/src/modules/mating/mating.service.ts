@@ -7,8 +7,14 @@ export class MatingService {
   private petsRef = db.collection('pets');
 
   async createListing(ownerId: string, input: any) {
+    let petName = input.petName;
+    if (!petName && input.petId) {
+      const petDoc = await this.petsRef.doc(input.petId).get();
+      if (petDoc.exists) petName = petDoc.data()!.name;
+    }
     const data = {
       ...input,
+      petName: petName || null,
       ownerId,
       status: 'active',
       viewCount: 0,
@@ -32,19 +38,29 @@ export class MatingService {
       ? { displayName: ownerDoc.data()!.displayName, avatar: ownerDoc.data()!.avatar || null }
       : { displayName: 'Unknown', avatar: null };
 
-    const healthSnap = await db.collection('health_records')
-      .where('petId', '==', petId)
-      .orderBy('date', 'desc')
-      .limit(5)
-      .get();
-    const healthRecords = healthSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    let healthRecords: any[] = [];
+    try {
+      const healthSnap = await db.collection('health_records')
+        .where('petId', '==', petId)
+        .orderBy('date', 'desc')
+        .limit(5)
+        .get();
+      healthRecords = healthSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    } catch (err: any) {
+      if (err?.code !== 9) throw err;
+    }
 
-    const vaccSnap = await db.collection('vaccinations')
-      .where('petId', '==', petId)
-      .orderBy('date', 'desc')
-      .limit(10)
-      .get();
-    const vaccinations = vaccSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    let vaccinations: any[] = [];
+    try {
+      const vaccSnap = await db.collection('vaccinations')
+        .where('petId', '==', petId)
+        .orderBy('date', 'desc')
+        .limit(10)
+        .get();
+      vaccinations = vaccSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    } catch (err: any) {
+      if (err?.code !== 9) throw err;
+    }
 
     return {
       id: doc.id,
@@ -334,11 +350,11 @@ export class MatingService {
       let receiverPet: any = {};
       if (requestData.petId) {
         const petDoc = await db.collection('pets').doc(requestData.petId).get();
-        if (petDoc.exists) senderPet = petDoc.data()!;
+        if (petDoc.exists) senderPet = { id: requestData.petId, ...petDoc.data()! };
       }
       if (listing.petId) {
         const petDoc = await db.collection('pets').doc(listing.petId).get();
-        if (petDoc.exists) receiverPet = petDoc.data()!;
+        if (petDoc.exists) receiverPet = { id: listing.petId, ...petDoc.data()! };
       }
 
       const getPhotoUrl = (pet: any) => {
@@ -353,6 +369,43 @@ export class MatingService {
         ? `${listing.location.city || ''}${listing.location.city && listing.location.country ? ', ' : ''}${listing.location.country || ''}`
         : undefined;
 
+      const matchDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+      // Persist wedding card for both users
+      const weddingCardData = {
+        requestId: requestData.id || null,
+        senderId: requestData.senderId,
+        receiverId: requestData.receiverId,
+        senderPet: {
+          id: senderPet.id || null,
+          name: senderPet.name || 'Pet',
+          breed: senderPet.breed || listing.breed || '',
+          species: senderPet.species || listing.species || '',
+          photo: getPhotoUrl(senderPet) || null,
+        },
+        receiverPet: {
+          id: receiverPet.id || null,
+          name: receiverPet.name || listing.petName || 'Pet',
+          breed: receiverPet.breed || listing.breed || '',
+          species: receiverPet.species || listing.species || '',
+          photo: getPhotoUrl(receiverPet) || null,
+        },
+        senderOwner: {
+          id: requestData.senderId,
+          name: sender.displayName || 'Pet Parent',
+        },
+        receiverOwner: {
+          id: requestData.receiverId,
+          name: receiver.displayName || 'Pet Parent',
+        },
+        location: location || null,
+        matchDate,
+        matchTimestamp: FieldValue.serverTimestamp(),
+        createdAt: FieldValue.serverTimestamp(),
+      };
+
+      await db.collection('wedding_cards').add(weddingCardData);
+
       await emailService.sendMatchWeddingCard({
         senderName: sender.displayName || 'Pet Parent',
         senderEmail: sender.email || '',
@@ -366,11 +419,72 @@ export class MatingService {
         receiverPetPhoto: getPhotoUrl(receiverPet),
         species: listing.species || '',
         location: location || undefined,
-        matchDate: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+        matchDate,
       });
     } catch (err) {
       console.error('[MATING] Failed to send wedding card:', err);
     }
+  }
+
+  async getWeddingCards(userId: string) {
+    const cardsRef = db.collection('wedding_cards');
+
+    let asSenderDocs: any[] = [];
+    let asReceiverDocs: any[] = [];
+
+    try {
+      const asSender = await cardsRef.where('senderId', '==', userId).orderBy('createdAt', 'desc').get();
+      asSenderDocs = asSender.docs;
+    } catch (err: any) {
+      if (err?.code === 9) {
+        const fallback = await cardsRef.where('senderId', '==', userId).get();
+        asSenderDocs = fallback.docs;
+      } else { throw err; }
+    }
+
+    try {
+      const asReceiver = await cardsRef.where('receiverId', '==', userId).orderBy('createdAt', 'desc').get();
+      asReceiverDocs = asReceiver.docs;
+    } catch (err: any) {
+      if (err?.code === 9) {
+        const fallback = await cardsRef.where('receiverId', '==', userId).get();
+        asReceiverDocs = fallback.docs;
+      } else { throw err; }
+    }
+
+    const cards: any[] = [];
+    const seen = new Set<string>();
+
+    for (const doc of [...asSenderDocs, ...asReceiverDocs]) {
+      if (!seen.has(doc.id)) {
+        seen.add(doc.id);
+        cards.push({ id: doc.id, ...doc.data() });
+      }
+    }
+
+    cards.sort((a, b) => {
+      const aTime = a.createdAt?._seconds || 0;
+      const bTime = b.createdAt?._seconds || 0;
+      return bTime - aTime;
+    });
+
+    return cards;
+  }
+
+  async getWeddingCard(cardId: string, userId: string) {
+    const doc = await db.collection('wedding_cards').doc(cardId).get();
+    if (!doc.exists) {
+      const error: any = new Error('Wedding card not found');
+      error.statusCode = 404;
+      throw error;
+    }
+    const data = doc.data()!;
+    if (data.senderId !== userId && data.receiverId !== userId) {
+      const error: any = new Error('Wedding card not found');
+      error.statusCode = 404;
+      throw error;
+    }
+    return { id: doc.id, ...data };
   }
 }
 

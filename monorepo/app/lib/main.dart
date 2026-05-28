@@ -11,16 +11,16 @@ void main() {
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.dark,
   ));
-  runApp(const PetRollApp());
+  runApp(const PetfoliooApp());
 }
 
-class PetRollApp extends StatelessWidget {
-  const PetRollApp({super.key});
+class PetfoliooApp extends StatelessWidget {
+  const PetfoliooApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PET Roll',
+      title: 'Petfolioo',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.theme,
       home: const SplashLoader(),
@@ -50,8 +50,9 @@ class _SplashLoaderState extends State<SplashLoader> {
     final api = ApiService();
     if (!api.isLoggedIn) {
       try {
-        final loginData = await api.post('/auth/dev-login', {
-          'email': 'ahmed@example.com',
+        final loginData = await api.post('/auth/test-login', {
+          'email': 'petrolluser1@gmail.com',
+          'secret': 'petroll-prod-jwt-secret-NHSxYY8CmoRzDoSmIKa2rB0TPZBIolF8',
         });
         api.setToken(loginData['accessToken']);
       } catch (_) {}
@@ -80,7 +81,7 @@ class _SplashLoaderState extends State<SplashLoader> {
               child: const Icon(Icons.pets, size: 50, color: Colors.white),
             ),
             const SizedBox(height: 24),
-            const Text('PET Roll', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+            const Text('Petfolioo', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Text('Your Pet Companion', style: TextStyle(color: Colors.grey[500])),
             const SizedBox(height: 32),

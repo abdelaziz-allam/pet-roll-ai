@@ -5,19 +5,18 @@ export function paginate<T>(
   total: number,
   query: PaginationQuery
 ): PaginatedResponse<T> {
-  const totalPages = Math.ceil(total / query.limit);
+  const page = query.page || 1;
+  const limit = query.limit || 20;
+  const totalPages = Math.ceil(total / limit);
   return {
     data,
-    pagination: {
-      page: query.page,
-      limit: query.limit,
-      total,
-      totalPages,
-      hasNext: query.page < totalPages,
-    },
+    total,
+    page,
+    limit,
+    totalPages,
   };
 }
 
 export function getOffset(query: PaginationQuery): number {
-  return (query.page - 1) * query.limit;
+  return ((query.page || 1) - 1) * (query.limit || 20);
 }

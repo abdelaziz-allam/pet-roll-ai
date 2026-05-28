@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../widgets/wedding_card_dialog.dart';
+import '../widgets/wedding_card_view.dart';
 import 'pet_mating_profile_screen.dart';
 
 class MatingRequestDetailScreen extends StatefulWidget {
@@ -36,11 +38,30 @@ class _MatingRequestDetailScreenState extends State<MatingRequestDetailScreen> {
         _request = {..._request, 'status': status};
         _responding = false;
       });
-      if (mounted) {
+
+      if (status == 'accepted' && mounted) {
+        final listing = _request['listing'] as Map<String, dynamic>?;
+        final pet = _request['pet'] as Map<String, dynamic>?;
+        final sender = _request['sender'] as Map<String, dynamic>?;
+        final listingPhotos = listing?['photos'] as List? ?? [];
+        String? photoUrl;
+        if (listingPhotos.isNotEmpty) {
+          final p = listingPhotos[0];
+          photoUrl = p is String ? p : (p is Map ? p['url'] : null);
+        }
+
+        await WeddingCardDialog.show(
+          context,
+          myPetName: pet?['name'] ?? 'Your Pet',
+          partnerPetName: listing?['petName'] ?? 'Partner Pet',
+          ownerName: sender?['displayName'] ?? 'Pet Owner',
+          partnerPhotoUrl: photoUrl,
+        );
+      } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(status == 'accepted' ? 'Request accepted!' : 'Request declined'),
-            backgroundColor: status == 'accepted' ? AppTheme.success : AppTheme.textSecondary,
+            content: const Text('Request declined'),
+            backgroundColor: AppTheme.textSecondary,
           ),
         );
       }
@@ -268,6 +289,49 @@ class _MatingRequestDetailScreenState extends State<MatingRequestDetailScreen> {
                       const SizedBox(width: 8),
                       _buildMiniPetAvatar(myPetPhotoUrl, myPetName),
                     ],
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        final cardData = {
+                          'senderPet': {
+                            'name': myPetName,
+                            'breed': myPetBreed,
+                            'species': myPetSpecies,
+                            'photo': myPetPhotoUrl,
+                          },
+                          'receiverPet': {
+                            'name': listingPetName,
+                            'breed': listingBreed,
+                            'species': listingSpecies,
+                            'photo': listingPhotoUrl,
+                          },
+                          'senderOwner': {
+                            'name': widget.isSent ? (sender?['displayName'] ?? '') : (receiver?['displayName'] ?? ''),
+                          },
+                          'receiverOwner': {
+                            'name': widget.isSent ? (receiver?['displayName'] ?? '') : (sender?['displayName'] ?? ''),
+                          },
+                          'matchDate': _formatFullDate(createdAt),
+                          'location': locationStr,
+                        };
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => WeddingCardView(card: cardData)),
+                        );
+                      },
+                      icon: const Icon(Icons.card_giftcard, size: 18),
+                      label: const Text('View Wedding Card'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                      ),
+                    ),
                   ),
                 ],
               ),

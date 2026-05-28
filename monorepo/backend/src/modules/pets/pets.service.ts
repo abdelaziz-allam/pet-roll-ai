@@ -5,8 +5,24 @@ export class PetsService {
   private petsRef = db.collection('pets');
 
   async createPet(ownerId: string, input: CreatePetInput) {
+    const petInput = { ...input };
+
+    if (!petInput.location?.country && !petInput.location?.city) {
+      const ownerDoc = await db.collection('users').doc(ownerId).get();
+      if (ownerDoc.exists) {
+        const ownerData = ownerDoc.data()!;
+        if (ownerData.country || ownerData.city) {
+          petInput.location = {
+            ...petInput.location,
+            country: ownerData.country || undefined,
+            city: ownerData.city || undefined,
+          };
+        }
+      }
+    }
+
     const petData = {
-      ...input,
+      ...petInput,
       ownerId,
       photos: [],
       createdAt: FieldValue.serverTimestamp(),

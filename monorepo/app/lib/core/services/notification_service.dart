@@ -190,7 +190,7 @@ class NotificationService {
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'pet_roll_reminders',
-          'PET Roll Reminders',
+          'Petfolioo Reminders',
           channelDescription: 'Reminders for pet health, vaccinations, and events',
           importance: Importance.high,
           priority: Priority.high,

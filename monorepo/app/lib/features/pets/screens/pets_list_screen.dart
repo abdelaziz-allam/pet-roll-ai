@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/router/route_names.dart';
+import '../../../core/widgets/birthday_celebration.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/empty_state.dart';
@@ -18,8 +19,11 @@ class PetsListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final petsAsync = ref.watch(userPetsProvider);
+    final hasBirthdayPet = petsAsync.valueOrNull?.any((p) => p.isBirthdayToday) ?? false;
 
-    return Scaffold(
+    return BirthdayCelebration(
+      showCelebration: hasBirthdayPet,
+      child: Scaffold(
       backgroundColor: AppColors.bgSecondary,
       body: SafeArea(
         child: Column(
@@ -29,14 +33,27 @@ class PetsListScreen extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: Row(
                 children: [
-                  Text(
-                    'My Pets',
-                    style: AppTypography.heading1.copyWith(
-                      color: AppColors.textPrimary,
-                      fontSize: 28,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'My Pets',
+                          style: AppTypography.heading1.copyWith(
+                            color: AppColors.textPrimary,
+                            fontSize: 28,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Your furry family members',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const Spacer(),
                   GestureDetector(
                     onTap: () => context.pushNamed(RouteNames.addPet),
                     child: Container(
@@ -58,6 +75,18 @@ class PetsListScreen extends ConsumerWidget {
                 ],
               ),
             ),
+            if (hasBirthdayPet)
+              Builder(
+                builder: (context) {
+                  final birthdayPets = petsAsync.valueOrNull?.where((p) => p.isBirthdayToday).toList() ?? [];
+                  if (birthdayPets.isEmpty) return const SizedBox.shrink();
+                  final bp = birthdayPets.first;
+                  return PetBirthdayBanner(
+                    petName: bp.name,
+                    age: bp.ageInMonths ~/ 12,
+                  );
+                },
+              ),
             const SizedBox(height: 20),
             Expanded(
               child: petsAsync.when(
@@ -93,6 +122,7 @@ class PetsListScreen extends ConsumerWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
