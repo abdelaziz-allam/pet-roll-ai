@@ -329,6 +329,7 @@ const PetsPage: React.FC = () => {
           dataSource={filteredPets}
           rowKey="id"
           loading={loading}
+          scroll={{ x: 900 }}
           pagination={{ pageSize: 10, showTotal: (total) => `${total} pets` }}
           onRow={(record) => ({
             onClick: () => openPetDetail(record.id),
@@ -342,7 +343,7 @@ const PetsPage: React.FC = () => {
       <Drawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        width={720}
+        width={Math.min(720, window.innerWidth - 20)}
         styles={{ body: { padding: 0, background: '#f8f9fa' } }}
         title={null}
         closable={false}

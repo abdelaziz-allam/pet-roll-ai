@@ -14,8 +14,14 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: 'https://api.petfolioo.com',
         changeOrigin: true,
+        secure: true,
+      },
+      '/health': {
+        target: 'https://api.petfolioo.com',
+        changeOrigin: true,
+        secure: true,
       },
     },
   },

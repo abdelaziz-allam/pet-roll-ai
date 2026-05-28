@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router-dom';
-import { Layout, Breadcrumb, Space, Badge, Avatar, Dropdown, Tag, Typography, Divider } from 'antd';
+import { Layout, Breadcrumb, Space, Badge, Avatar, Dropdown, Tag, Typography, Grid } from 'antd';
 import type { MenuProps } from 'antd';
 import {
   MenuFoldOutlined,
@@ -14,6 +14,7 @@ import { getRoleBadgeColor } from '@/utils/format';
 
 const { Header: AntHeader } = Layout;
 const { Text } = Typography;
+const { useBreakpoint } = Grid;
 
 interface HeaderProps {
   collapsed: boolean;
@@ -36,6 +37,8 @@ const routeNameMap: Record<string, string> = {
 const Header: React.FC<HeaderProps> = ({ collapsed, onCollapse, onLogout }) => {
   const location = useLocation();
   const { user } = useAuth();
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
 
   const pathSegments = location.pathname.split('/').filter(Boolean);
   const breadcrumbItems = [
@@ -79,7 +82,7 @@ const Header: React.FC<HeaderProps> = ({ collapsed, onCollapse, onLogout }) => {
     <AntHeader
       style={{
         background: '#fff',
-        padding: '0 24px',
+        padding: isMobile ? '0 12px' : '0 24px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -90,18 +93,18 @@ const Header: React.FC<HeaderProps> = ({ collapsed, onCollapse, onLogout }) => {
         height: 64,
       }}
     >
-      <Space size={16}>
+      <Space size={isMobile ? 8 : 16}>
         <span
           onClick={() => onCollapse(!collapsed)}
           style={{ fontSize: 18, cursor: 'pointer', color: '#272727' }}
         >
           {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
         </span>
-        <Breadcrumb items={breadcrumbItems} />
+        {!isMobile && <Breadcrumb items={breadcrumbItems} />}
       </Space>
 
-      <Space size={20}>
-        <SearchOutlined style={{ fontSize: 18, cursor: 'pointer' }} />
+      <Space size={isMobile ? 12 : 20}>
+        {!isMobile && <SearchOutlined style={{ fontSize: 18, cursor: 'pointer' }} />}
         <Badge count={3} size="small">
           <BellOutlined style={{ fontSize: 18, cursor: 'pointer' }} />
         </Badge>

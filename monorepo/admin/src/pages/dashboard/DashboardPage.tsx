@@ -257,12 +257,12 @@ const DashboardPage: React.FC = () => {
 
         {/* Pet Analytics Filters */}
         <Card size="small">
-          <Space wrap>
+          <Space wrap style={{ width: '100%' }}>
             <FilterOutlined />
             <Select
               placeholder="Country"
               allowClear
-              style={{ width: 160 }}
+              style={{ width: 140, minWidth: 100 }}
               value={countryFilter}
               onChange={(val) => { setCountryFilter(val); setCityFilter(undefined); }}
               options={uniqueCountries.map((c) => ({ label: c, value: c }))}
@@ -270,7 +270,7 @@ const DashboardPage: React.FC = () => {
             <Select
               placeholder="City"
               allowClear
-              style={{ width: 160 }}
+              style={{ width: 140, minWidth: 100 }}
               value={cityFilter}
               onChange={setCityFilter}
               options={uniqueCities.map((c) => ({ label: c, value: c }))}
@@ -278,7 +278,7 @@ const DashboardPage: React.FC = () => {
             <Select
               placeholder="Pet Category"
               allowClear
-              style={{ width: 160 }}
+              style={{ width: 140, minWidth: 100 }}
               value={speciesFilter}
               onChange={setSpeciesFilter}
               options={categories.map((c) => ({ label: `${c.icon || ''} ${c.label}`, value: c.name }))}
@@ -401,7 +401,7 @@ const DashboardPage: React.FC = () => {
               <BarChart data={petAnalytics.byCountry} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" />
-                <YAxis type="category" dataKey="country" width={120} />
+                <YAxis type="category" dataKey="country" width={80} />
                 <Tooltip />
                 <Bar dataKey="count" fill="#F1379D" name="Pets" />
               </BarChart>
@@ -417,6 +417,7 @@ const DashboardPage: React.FC = () => {
             rowKey="id"
             pagination={false}
             size="small"
+            scroll={{ x: 500 }}
             locale={{ emptyText: 'No recent users' }}
           />
         </Card>

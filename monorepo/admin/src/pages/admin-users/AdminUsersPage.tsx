@@ -268,6 +268,7 @@ const AdminUsersPage: React.FC = () => {
         dataSource={users}
         rowKey="id"
         loading={loading}
+        scroll={{ x: 700 }}
         pagination={{ pageSize: 10 }}
       />
 
