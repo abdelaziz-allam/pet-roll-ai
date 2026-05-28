@@ -2,7 +2,7 @@ import { storage } from '../config/firebase.js';
 import { env } from '../config/env.js';
 import { randomUUID } from 'crypto';
 
-const bucket = storage.bucket(env.FIREBASE_STORAGE_BUCKET);
+const bucket = storage.bucket(env.GCS_BUCKET);
 
 export interface UploadResult {
   url: string;

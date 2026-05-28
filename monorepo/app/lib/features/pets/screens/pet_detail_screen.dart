@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/birthday_celebration.dart';
 import '../../health/screens/health_records_screen.dart';
 import '../../vaccination/screens/vaccination_screen.dart';
 import '../../pregnancy/screens/pregnancy_screen.dart';
@@ -20,6 +21,7 @@ class _PetDetailScreenState extends State<PetDetailScreen> with SingleTickerProv
   late TabController _tabController;
   late Map<String, dynamic> _pet;
   bool _editing = false;
+  bool _showBirthdayBanner = false;
 
   final _nameCtrl = TextEditingController();
   final _breedCtrl = TextEditingController();
@@ -31,12 +33,31 @@ class _PetDetailScreenState extends State<PetDetailScreen> with SingleTickerProv
   bool _isNeutered = false;
   bool _isAvailableForMating = false;
 
+  bool get _isBirthdayToday {
+    final dob = _pet['dateOfBirth'];
+    if (dob == null) return false;
+    final birthDate = DateTime.tryParse(dob);
+    if (birthDate == null) return false;
+    final now = DateTime.now();
+    return birthDate.month == now.month && birthDate.day == now.day;
+  }
+
+  int get _petAge {
+    final dob = _pet['dateOfBirth'];
+    if (dob == null) return 0;
+    final birthDate = DateTime.tryParse(dob);
+    if (birthDate == null) return 0;
+    final now = DateTime.now();
+    return now.year - birthDate.year;
+  }
+
   @override
   void initState() {
     super.initState();
     _pet = Map.from(widget.pet);
     _tabController = TabController(length: 3, vsync: this);
     _populateFields();
+    _showBirthdayBanner = _isBirthdayToday;
   }
 
   void _populateFields() {
@@ -131,7 +152,9 @@ class _PetDetailScreenState extends State<PetDetailScreen> with SingleTickerProv
         ? (photos.first is Map ? photos.first['url'] : photos.first)
         : null;
 
-    return Scaffold(
+    return BirthdayCelebration(
+      showCelebration: _isBirthdayToday,
+      child: Scaffold(
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) => [
           SliverAppBar(
@@ -255,6 +278,7 @@ class _PetDetailScreenState extends State<PetDetailScreen> with SingleTickerProv
               ),
             )
           : null,
+    ),
     );
   }
 
@@ -263,6 +287,12 @@ class _PetDetailScreenState extends State<PetDetailScreen> with SingleTickerProv
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
+        if (_showBirthdayBanner)
+          PetBirthdayBanner(
+            petName: _pet['name'] ?? '',
+            age: _petAge,
+            onDismiss: () => setState(() => _showBirthdayBanner = false),
+          ),
         _buildInfoSection('Basic Info', [
           _infoTile(Icons.pets, 'Species', _pet['species'] ?? '-'),
           _infoTile(Icons.category, 'Breed', _pet['breed'] ?? '-'),

@@ -43,6 +43,16 @@ class PetModel {
     required this.updatedAt,
   });
 
+  bool get isBirthdayToday {
+    final now = DateTime.now();
+    return dateOfBirth.month == now.month && dateOfBirth.day == now.day;
+  }
+
+  String? get primaryPhotoUrl {
+    if (photos.isEmpty) return null;
+    return photos.first.url;
+  }
+
   int get ageInMonths {
     final now = DateTime.now();
     return (now.year - dateOfBirth.year) * 12 + now.month - dateOfBirth.month;

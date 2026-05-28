@@ -2,7 +2,8 @@ import { z } from 'zod';
 
 export const createListingSchema = z.object({
   petId: z.string().min(1),
-  species: z.enum(['dog', 'cat']),
+  petName: z.string().max(100).optional(),
+  species: z.enum(['dog', 'cat', 'horse', 'bird', 'rabbit', 'fish']),
   breed: z.string().min(1),
   gender: z.enum(['male', 'female']),
   age: z.number().positive(),

@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import { db, FieldValue } from '../../config/firebase';
 import { env } from '../../config/env';
 import { RegisterInput, UpdateProfileInput } from './auth.schema';
+import { resolveTimezoneCountrySync } from '../../utils/timezone-country.js';
 
 export class AuthService {
   private usersRef = db.collection('users');
@@ -14,11 +15,15 @@ export class AuthService {
       throw error;
     }
 
+    const synced = resolveTimezoneCountrySync(input.timezone, input.country);
+
     const userData = {
       email,
       displayName: input.displayName,
       phone: input.phone || null,
-      timezone: input.timezone,
+      timezone: synced.timezone || input.timezone,
+      country: synced.country || input.country || null,
+      city: input.city || null,
       role: 'user',
       status: 'active',
       isVerifiedBreeder: false,
@@ -73,6 +78,16 @@ export class AuthService {
 
   async updateProfile(uid: string, input: UpdateProfileInput) {
     const updateData: any = { ...input, updatedAt: FieldValue.serverTimestamp() };
+
+    if (input.timezone || input.country) {
+      const synced = resolveTimezoneCountrySync(input.timezone, input.country);
+      if (synced.timezone && !input.timezone) {
+        updateData.timezone = synced.timezone;
+      }
+      if (synced.country && !input.country) {
+        updateData.country = synced.country;
+      }
+    }
 
     if (input.settings) {
       Object.entries(input.settings).forEach(([key, value]) => {

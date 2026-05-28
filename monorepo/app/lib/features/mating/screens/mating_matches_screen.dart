@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../widgets/wedding_card_dialog.dart';
 import 'mating_request_detail_screen.dart';
 
 class MatingMatchesScreen extends StatefulWidget {
@@ -50,15 +51,36 @@ class _MatingMatchesScreenState extends State<MatingMatchesScreen> with SingleTi
     }
   }
 
-  Future<void> _respondToRequest(String requestId, String status) async {
+  Future<void> _respondToRequest(String requestId, String status, {Map<String, dynamic>? request}) async {
     try {
       await ApiService().put('/mating/requests/$requestId/respond', {'status': status});
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(status == 'accepted' ? 'Request accepted!' : 'Request rejected'),
-          backgroundColor: status == 'accepted' ? AppTheme.success : AppTheme.textSecondary,
-        ),
-      );
+
+      if (status == 'accepted' && mounted && request != null) {
+        final listing = request['listing'] as Map<String, dynamic>?;
+        final pet = request['pet'] as Map<String, dynamic>?;
+        final sender = request['sender'] as Map<String, dynamic>?;
+        final listingPhotos = listing?['photos'] as List? ?? [];
+        String? photoUrl;
+        if (listingPhotos.isNotEmpty) {
+          final p = listingPhotos[0];
+          photoUrl = p is String ? p : (p is Map ? p['url'] : null);
+        }
+
+        await WeddingCardDialog.show(
+          context,
+          myPetName: pet?['name'] ?? 'Your Pet',
+          partnerPetName: listing?['petName'] ?? 'Partner Pet',
+          ownerName: sender?['displayName'] ?? 'Pet Owner',
+          partnerPhotoUrl: photoUrl,
+        );
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(status == 'accepted' ? 'Request accepted!' : 'Request rejected'),
+            backgroundColor: status == 'accepted' ? AppTheme.success : AppTheme.textSecondary,
+          ),
+        );
+      }
       _loadRequests();
     } catch (e) {
       if (mounted) {
@@ -411,7 +433,7 @@ class _MatingMatchesScreenState extends State<MatingMatchesScreen> with SingleTi
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () => _respondToRequest(request['id'], 'rejected'),
+                          onPressed: () => _respondToRequest(request['id'], 'rejected', request: request),
                           icon: const Icon(Icons.close, size: 18),
                           label: const Text('Decline'),
                           style: OutlinedButton.styleFrom(
@@ -424,7 +446,7 @@ class _MatingMatchesScreenState extends State<MatingMatchesScreen> with SingleTi
                       const SizedBox(width: 10),
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: () => _respondToRequest(request['id'], 'accepted'),
+                          onPressed: () => _respondToRequest(request['id'], 'accepted', request: request),
                           icon: const Icon(Icons.check, size: 18),
                           label: const Text('Accept'),
                           style: ElevatedButton.styleFrom(

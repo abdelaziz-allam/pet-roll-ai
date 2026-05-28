@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/birthday_celebration.dart';
 import 'pet_detail_screen.dart';
 import 'add_pet_screen.dart';
 
@@ -16,6 +17,42 @@ class _PetsScreenState extends State<PetsScreen> {
   List<dynamic> _pets = [];
   bool _loading = true;
   String? _error;
+
+  bool get _hasBirthdayPet {
+    final now = DateTime.now();
+    for (final pet in _pets) {
+      final dob = pet['dateOfBirth'];
+      if (dob == null) continue;
+      final birthDate = DateTime.tryParse(dob.toString());
+      if (birthDate != null && birthDate.month == now.month && birthDate.day == now.day) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Map<String, dynamic>? get _birthdayPet {
+    final now = DateTime.now();
+    for (final pet in _pets) {
+      final dob = pet['dateOfBirth'];
+      if (dob == null) continue;
+      final birthDate = DateTime.tryParse(dob.toString());
+      if (birthDate != null && birthDate.month == now.month && birthDate.day == now.day) {
+        return pet;
+      }
+    }
+    return null;
+  }
+
+  int get _birthdayPetAge {
+    final pet = _birthdayPet;
+    if (pet == null) return 0;
+    final dob = pet['dateOfBirth'];
+    if (dob == null) return 0;
+    final birthDate = DateTime.tryParse(dob.toString());
+    if (birthDate == null) return 0;
+    return DateTime.now().year - birthDate.year;
+  }
 
   @override
   void initState() {
@@ -39,7 +76,9 @@ class _PetsScreenState extends State<PetsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BirthdayCelebration(
+      showCelebration: _hasBirthdayPet,
+      child: Scaffold(
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,6 +101,11 @@ class _PetsScreenState extends State<PetsScreen> {
                 ],
               ),
             ),
+            if (_hasBirthdayPet && _birthdayPet != null)
+              PetBirthdayBanner(
+                petName: _birthdayPet!['name'] ?? '',
+                age: _birthdayPetAge,
+              ),
             const SizedBox(height: 16),
             Expanded(
               child: _loading
@@ -89,6 +133,7 @@ class _PetsScreenState extends State<PetsScreen> {
           ],
         ),
       ),
+    ),
     );
   }
 

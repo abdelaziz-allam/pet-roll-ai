@@ -338,7 +338,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Divider(height: 1, color: Colors.grey.shade100),
           _settingsTile(Icons.language, 'Language', 'English'),
           Divider(height: 1, color: Colors.grey.shade100),
-          _settingsTile(Icons.info_outline, 'About', 'PET Roll v1.0.0'),
+          _settingsTile(Icons.info_outline, 'About', 'Petfolioo v1.0.0'),
         ],
       ),
     );

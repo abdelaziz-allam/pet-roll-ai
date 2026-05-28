@@ -25,6 +25,8 @@ interface User {
   petsCount: number;
   phone?: string;
   timezone?: string;
+  country?: string;
+  city?: string;
 }
 
 const APP_USER_ROLES = [
@@ -123,6 +125,8 @@ const UsersPage: React.FC = () => {
       email: user.email,
       phone: user.phone || '',
       timezone: user.timezone || '',
+      country: user.country || '',
+      city: user.city || '',
     });
     setEditModalOpen(true);
   };
@@ -134,6 +138,8 @@ const UsersPage: React.FC = () => {
         displayName: values.displayName,
         phone: values.phone || null,
         timezone: values.timezone || null,
+        country: values.country || null,
+        city: values.city || null,
       });
       message.success('User updated successfully');
       setEditModalOpen(false);
@@ -152,6 +158,8 @@ const UsersPage: React.FC = () => {
         role: values.role || 'user',
         phone: values.phone || null,
         timezone: values.timezone || null,
+        country: values.country || null,
+        city: values.city || null,
       });
       message.success('User created successfully');
       setCreateModalOpen(false);
@@ -371,6 +379,8 @@ const UsersPage: React.FC = () => {
               <Descriptions.Item label="User ID">{selectedUser.id}</Descriptions.Item>
               <Descriptions.Item label="Phone">{selectedUser.phone || '—'}</Descriptions.Item>
               <Descriptions.Item label="Timezone">{selectedUser.timezone || '—'}</Descriptions.Item>
+              <Descriptions.Item label="Country">{selectedUser.country || '—'}</Descriptions.Item>
+              <Descriptions.Item label="City">{selectedUser.city || '—'}</Descriptions.Item>
               <Descriptions.Item label="Pets">{selectedUser.petsCount}</Descriptions.Item>
               <Descriptions.Item label="Verified Breeder">
                 {selectedUser.isVerifiedBreeder ? 'Yes' : 'No'}
@@ -421,6 +431,12 @@ const UsersPage: React.FC = () => {
               options={TIMEZONES}
             />
           </Form.Item>
+          <Form.Item name="country" label="Country">
+            <Input placeholder="e.g. Japan, France, United States" />
+          </Form.Item>
+          <Form.Item name="city" label="City">
+            <Input placeholder="e.g. Tokyo, Paris, New York" />
+          </Form.Item>
         </Form>
       </Modal>
 
@@ -450,6 +466,12 @@ const UsersPage: React.FC = () => {
               optionFilterProp="label"
               options={TIMEZONES}
             />
+          </Form.Item>
+          <Form.Item name="country" label="Country">
+            <Input placeholder="e.g. Japan, France, United States" />
+          </Form.Item>
+          <Form.Item name="city" label="City">
+            <Input placeholder="e.g. Tokyo, Paris, New York" />
           </Form.Item>
         </Form>
       </Modal>

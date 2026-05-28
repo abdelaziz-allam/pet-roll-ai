@@ -11,17 +11,7 @@ class ApiService {
   String get baseUrl {
     const configuredUrl = String.fromEnvironment('API_BASE_URL');
     if (configuredUrl.isNotEmpty) return configuredUrl;
-
-    if (kReleaseMode) {
-      return 'https://api.petroll.com/api/v1';
-    }
-    if (kIsWeb) {
-      return 'http://localhost:3001/api/v1';
-    }
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://10.0.2.2:3001/api/v1';
-    }
-    return 'http://localhost:3001/api/v1';
+    return 'https://api.petfolioo.com/api/v1';
   }
 
   String? _token;
