@@ -143,7 +143,7 @@ const SettingsPage: React.FC = () => {
             label="Application Name"
             rules={[{ required: true, message: 'Application name is required' }]}
           >
-            <Input placeholder="PET Roll" />
+            <Input placeholder="Petfolioo" />
           </Form.Item>
 
           <Form.Item
@@ -154,7 +154,7 @@ const SettingsPage: React.FC = () => {
               { type: 'email', message: 'Please enter a valid email' },
             ]}
           >
-            <Input placeholder="support@petroll.com" />
+            <Input placeholder="support@petfolioo.com" />
           </Form.Item>
 
           <Form.Item name="defaultLanguage" label="Default Language">

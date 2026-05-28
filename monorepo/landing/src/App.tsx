@@ -54,7 +54,7 @@ const App: React.FC = () => {
                 </defs>
               </svg>
             </div>
-            <span className="brand-text">PET <span className="brand-accent">Roll</span></span>
+            <span className="brand-text">Pet<span className="brand-accent">folioo</span></span>
           </a>
           <ul className="navbar-links">
             <li><a href="#features">Features</a></li>
@@ -381,14 +381,14 @@ const App: React.FC = () => {
           <div className="section-header reveal">
             <span className="section-tag">Testimonials</span>
             <h2>Loved by Pet Parents</h2>
-            <p>See what our community has to say about PET Roll.</p>
+            <p>See what our community has to say about Petfolioo.</p>
           </div>
           <div className="testimonials-grid">
             <div className="testimonial-card reveal">
               <div className="testimonial-stars">
                 {'★'.repeat(5)}
               </div>
-              <p>"PET Roll completely changed how I manage my dog's health. The vaccination reminders alone have saved me multiple vet emergencies."</p>
+              <p>"Petfolioo completely changed how I manage my dog's health. The vaccination reminders alone have saved me multiple vet emergencies."</p>
               <div className="testimonial-author">
                 <div className="author-avatar">SM</div>
                 <div>
@@ -444,7 +444,7 @@ const App: React.FC = () => {
             </div>
             <div className="cta-content">
               <h2>Ready to Give Your Pet<br />the Best Care?</h2>
-              <p>Join thousands of pet owners who trust PET Roll for their pet's health management. Download free today.</p>
+              <p>Join thousands of pet owners who trust Petfolioo for their pet's health management. Download free today.</p>
               <div className="cta-buttons">
                 <a href="#" className="store-btn store-btn-apple">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -488,7 +488,7 @@ const App: React.FC = () => {
                     </linearGradient>
                   </defs>
                 </svg>
-                <span>PET <span className="brand-accent">Roll</span></span>
+                <span>Pet<span className="brand-accent">folioo</span></span>
               </a>
               <p>The complete pet health management platform for modern pet parents and professional breeders.</p>
               <div className="footer-socials">
@@ -535,7 +535,7 @@ const App: React.FC = () => {
             </div>
           </div>
           <div className="footer-bottom">
-            <p>&copy; 2024 PET Roll. All rights reserved. Made with love for pets everywhere.</p>
+            <p>&copy; 2024 Petfolioo. All rights reserved. Made with love for pets everywhere.</p>
           </div>
         </div>
       </footer>

@@ -133,7 +133,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
                 whiteSpace: 'nowrap',
               }}
             >
-              PET Roll Admin
+              Petfolioo Admin
             </Text>
           )}
         </Space>

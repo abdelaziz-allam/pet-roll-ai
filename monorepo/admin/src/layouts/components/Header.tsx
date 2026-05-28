@@ -56,7 +56,7 @@ const Header: React.FC<HeaderProps> = ({ collapsed, onCollapse, onLogout }) => {
           <Text strong>{user?.displayName || 'Admin User'}</Text>
           <br />
           <Text type="secondary" style={{ fontSize: 12 }}>
-            {user?.email || 'admin@petroll.com'}
+            {user?.email || 'admin@petfolioo.com'}
           </Text>
           <br />
           <Tag

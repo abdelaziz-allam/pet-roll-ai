@@ -5,7 +5,7 @@ const ADMIN_PASSWORD = 'P@tF0lioo@2612210106022312';
 
 async function login(page: any) {
   await page.goto('/login');
-  await page.getByPlaceholder('admin@petroll.com').fill(ADMIN_EMAIL);
+  await page.getByPlaceholder('admin@petfolioo.com').fill(ADMIN_EMAIL);
   await page.getByPlaceholder('Password').fill(ADMIN_PASSWORD);
   await page.getByRole('button', { name: 'Sign In' }).click();
   await expect(page).toHaveURL(/\/dashboard/, { timeout: 20000 });
@@ -16,7 +16,7 @@ test.describe('Responsive Layout', () => {
   test('login page is usable at all viewport sizes', async ({ page }) => {
     await page.goto('/login');
     await expect(page.getByRole('button', { name: 'Sign In' })).toBeVisible();
-    await expect(page.getByPlaceholder('admin@petroll.com')).toBeVisible();
+    await expect(page.getByPlaceholder('admin@petfolioo.com')).toBeVisible();
   });
 
   test('dashboard renders without overflow', async ({ page }) => {
