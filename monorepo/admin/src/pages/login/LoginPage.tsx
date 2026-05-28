@@ -89,9 +89,26 @@ const LoginPage: React.FC = () => {
       {envBadge}
 
       <Space direction="vertical" size={4} style={{ width: '100%', textAlign: 'center', marginBottom: 32 }}>
-        <div style={{ fontSize: 32, marginBottom: 8 }}>
-          <span style={{ color: '#F1379D', fontWeight: 700 }}>Pet</span>
-          <span style={{ fontWeight: 700 }}>folioo</span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 8 }}>
+          <svg width="36" height="36" viewBox="0 0 64 64" fill="none">
+            <defs>
+              <linearGradient id="loginPaw" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#F1379D"/>
+                <stop offset="100%" stopColor="#722ed1"/>
+              </linearGradient>
+            </defs>
+            <circle cx="32" cy="32" r="30" fill="url(#loginPaw)"/>
+            <g fill="white" transform="translate(14, 12) scale(0.75)">
+              <ellipse cx="14" cy="8" rx="5" ry="6.5"/>
+              <ellipse cx="34" cy="8" rx="5" ry="6.5"/>
+              <ellipse cx="6" cy="22" rx="4.2" ry="5.5"/>
+              <ellipse cx="42" cy="22" rx="4.2" ry="5.5"/>
+              <path d="M24 24c-6 0-11 4-13 9-2.8 6 1 12 7 13.5 2 .6 4 2 6 2s4-1.4 6-2c6-1.5 9.8-7.5 7-13.5-2-5-7-9-13-9z"/>
+            </g>
+          </svg>
+          <span style={{ fontSize: 28, fontWeight: 700, fontFamily: 'Poppins' }}>
+            <span style={{ color: '#F1379D' }}>Pet</span><span style={{ color: '#1a1a1a' }}>folioo</span>
+          </span>
         </div>
         <Title level={4} style={{ margin: 0, fontFamily: 'Poppins' }}>
           {view === 'login' && 'Admin Portal'}

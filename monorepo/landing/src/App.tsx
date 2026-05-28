@@ -44,14 +44,21 @@ const App: React.FC = () => {
         <div className="container">
           <a href="#" className="navbar-brand">
             <div className="brand-icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="url(#heartGrad)"/>
+              <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
                 <defs>
-                  <linearGradient id="heartGrad" x1="2" y1="3" x2="22" y2="21">
+                  <linearGradient id="navPaw" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#F1379D"/>
                     <stop offset="100%" stopColor="#722ed1"/>
                   </linearGradient>
                 </defs>
+                <circle cx="32" cy="32" r="30" fill="url(#navPaw)"/>
+                <g fill="white" transform="translate(14, 12) scale(0.75)">
+                  <ellipse cx="14" cy="8" rx="5" ry="6.5"/>
+                  <ellipse cx="34" cy="8" rx="5" ry="6.5"/>
+                  <ellipse cx="6" cy="22" rx="4.2" ry="5.5"/>
+                  <ellipse cx="42" cy="22" rx="4.2" ry="5.5"/>
+                  <path d="M24 24c-6 0-11 4-13 9-2.8 6 1 12 7 13.5 2 .6 4 2 6 2s4-1.4 6-2c6-1.5 9.8-7.5 7-13.5-2-5-7-9-13-9z"/>
+                </g>
               </svg>
             </div>
             <span className="brand-text">Pet<span className="brand-accent">folioo</span></span>
@@ -479,14 +486,21 @@ const App: React.FC = () => {
           <div className="footer-grid">
             <div className="footer-about">
               <a href="#" className="footer-brand">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="url(#footerHeart)"/>
+                <svg width="28" height="28" viewBox="0 0 64 64" fill="none">
                   <defs>
-                    <linearGradient id="footerHeart" x1="2" y1="3" x2="22" y2="21">
+                    <linearGradient id="footerPaw" x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stopColor="#F1379D"/>
                       <stop offset="100%" stopColor="#722ed1"/>
                     </linearGradient>
                   </defs>
+                  <circle cx="32" cy="32" r="30" fill="url(#footerPaw)"/>
+                  <g fill="white" transform="translate(14, 12) scale(0.75)">
+                    <ellipse cx="14" cy="8" rx="5" ry="6.5"/>
+                    <ellipse cx="34" cy="8" rx="5" ry="6.5"/>
+                    <ellipse cx="6" cy="22" rx="4.2" ry="5.5"/>
+                    <ellipse cx="42" cy="22" rx="4.2" ry="5.5"/>
+                    <path d="M24 24c-6 0-11 4-13 9-2.8 6 1 12 7 13.5 2 .6 4 2 6 2s4-1.4 6-2c6-1.5 9.8-7.5 7-13.5-2-5-7-9-13-9z"/>
+                  </g>
                 </svg>
                 <span>Pet<span className="brand-accent">folioo</span></span>
               </a>
