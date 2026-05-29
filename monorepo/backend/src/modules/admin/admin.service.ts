@@ -290,7 +290,7 @@ export class AdminService {
     return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
   }
 
-  async processVerification(requestId: string, approved: boolean, adminId: string, rejectionReason?: string) {
+  async processVerification(requestId: string, approved: boolean, adminId: string, rejectionReason?: string, expiryDate?: string) {
     const doc = await db.collection('verification_requests').doc(requestId).get();
     if (!doc.exists) {
       const error: any = new Error('Request not found');
@@ -310,6 +310,10 @@ export class AdminService {
       updateData.rejectionReason = rejectionReason;
     }
 
+    if (approved && expiryDate) {
+      updateData.expiryDate = expiryDate;
+    }
+
     await db.collection('verification_requests').doc(requestId).update(updateData);
 
     if (approved) {
@@ -319,7 +323,37 @@ export class AdminService {
       });
     }
 
-    return { id: requestId, status: newStatus, rejectionReason: updateData.rejectionReason || null };
+    return { id: requestId, status: newStatus, expiryDate: updateData.expiryDate || null, rejectionReason: updateData.rejectionReason || null };
+  }
+
+  async revokeVerification(requestId: string, adminId: string, reason: string) {
+    const doc = await db.collection('verification_requests').doc(requestId).get();
+    if (!doc.exists) {
+      const error: any = new Error('Request not found');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const data = doc.data()!;
+    if (data.status !== 'approved') {
+      const error: any = new Error('Can only revoke approved verifications');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    await db.collection('verification_requests').doc(requestId).update({
+      status: 'revoked',
+      revokedAt: new Date().toISOString(),
+      revokedBy: adminId,
+      revokeReason: reason,
+    });
+
+    await this.usersRef.doc(data.userId).update({
+      isVerifiedBreeder: false,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+
+    return { id: requestId, status: 'revoked', revokeReason: reason };
   }
   // --- Mating ---
 

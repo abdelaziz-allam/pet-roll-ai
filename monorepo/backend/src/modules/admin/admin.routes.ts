@@ -150,8 +150,18 @@ export async function adminRoutes(fastify: FastifyInstance) {
 
   fastify.put('/verifications/:id', async (request, reply) => {
     const { id } = request.params as { id: string };
-    const { approved, rejectionReason } = request.body as { approved: boolean; rejectionReason?: string };
-    const result = await adminService.processVerification(id, approved, request.adminUser!.uid, rejectionReason);
+    const { approved, rejectionReason, expiryDate } = request.body as { approved: boolean; rejectionReason?: string; expiryDate?: string };
+    const result = await adminService.processVerification(id, approved, request.adminUser!.uid, rejectionReason, expiryDate);
+    return reply.code(200).send(result);
+  });
+
+  fastify.put('/verifications/:id/revoke', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const { reason } = request.body as { reason: string };
+    if (!reason || !reason.trim()) {
+      return reply.code(400).send({ error: 'Reason is required for revoking verification' });
+    }
+    const result = await adminService.revokeVerification(id, request.adminUser!.uid, reason);
     return reply.code(200).send(result);
   });
 
