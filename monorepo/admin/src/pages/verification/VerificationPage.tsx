@@ -2,13 +2,15 @@ import { useState, useEffect } from 'react';
 import {
   Table, Card, Tag, Space, Button, Typography, Modal, message,
   Descriptions, Image, Select, Input, Timeline, Tabs, Empty, Spin,
+  DatePicker,
 } from 'antd';
 import {
   CheckOutlined, CloseOutlined, EyeOutlined, FileOutlined,
-  FilePdfOutlined, FileImageOutlined, HistoryOutlined,
+  FilePdfOutlined, FileImageOutlined, HistoryOutlined, StopOutlined,
 } from '@ant-design/icons';
 import { formatDate } from '@/utils/format';
 import { api } from '@/services/api';
+import dayjs from 'dayjs';
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -32,16 +34,25 @@ interface VerificationRequest {
   kennelName: string;
   breedExperience: string;
   documents: VerificationDocument[];
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'revoked';
   submissionNumber: number;
   rejectionReason: string | null;
   processedBy: string | null;
   processedAt: string | null;
+  expiryDate: string | null;
+  revokedAt: string | null;
+  revokedBy: string | null;
+  revokeReason: string | null;
   createdAt: string;
   history?: VerificationRequest[];
 }
 
-const statusColor: Record<string, string> = { pending: 'orange', approved: 'green', rejected: 'red' };
+const statusColor: Record<string, string> = {
+  pending: 'orange',
+  approved: 'green',
+  rejected: 'red',
+  revoked: 'volcano',
+};
 
 const VerificationPage: React.FC = () => {
   const [requests, setRequests] = useState<VerificationRequest[]>([]);
@@ -53,6 +64,12 @@ const VerificationPage: React.FC = () => {
   const [rejectingRequest, setRejectingRequest] = useState<VerificationRequest | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [approveModalOpen, setApproveModalOpen] = useState(false);
+  const [approvingRequest, setApprovingRequest] = useState<VerificationRequest | null>(null);
+  const [expiryDate, setExpiryDate] = useState<dayjs.Dayjs | null>(null);
+  const [revokeModalOpen, setRevokeModalOpen] = useState(false);
+  const [revokingRequest, setRevokingRequest] = useState<VerificationRequest | null>(null);
+  const [revokeReason, setRevokeReason] = useState('');
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -82,26 +99,33 @@ const VerificationPage: React.FC = () => {
     }
   };
 
-  const handleApprove = (req: VerificationRequest) => {
-    Modal.confirm({
-      title: `Approve ${req.displayName || req.userName}?`,
-      content: 'This will grant verified breeder status to this user.',
-      okText: 'Approve',
-      okType: 'primary',
-      onOk: async () => {
-        setProcessing(true);
-        try {
-          await api.put(`/admin/verifications/${req.id}`, { approved: true });
-          message.success(`${req.displayName || req.userName} approved as verified breeder`);
-          fetchRequests();
-          if (selectedRequest?.id === req.id) setSelectedRequest(null);
-        } catch (err: any) {
-          message.error(err.message || 'Failed to approve');
-        } finally {
-          setProcessing(false);
-        }
-      },
-    });
+  const openApproveModal = (req: VerificationRequest) => {
+    setApprovingRequest(req);
+    setExpiryDate(dayjs().add(1, 'year'));
+    setApproveModalOpen(true);
+  };
+
+  const handleApprove = async () => {
+    if (!expiryDate) {
+      message.warning('Please select an expiry date for the verification');
+      return;
+    }
+    setProcessing(true);
+    try {
+      await api.put(`/admin/verifications/${approvingRequest!.id}`, {
+        approved: true,
+        expiryDate: expiryDate.toISOString(),
+      });
+      message.success(`${approvingRequest!.displayName || approvingRequest!.userName} approved as verified breeder`);
+      setApproveModalOpen(false);
+      setApprovingRequest(null);
+      fetchRequests();
+      if (selectedRequest?.id === approvingRequest!.id) setSelectedRequest(null);
+    } catch (err: any) {
+      message.error(err.message || 'Failed to approve');
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const openRejectModal = (req: VerificationRequest) => {
@@ -128,6 +152,34 @@ const VerificationPage: React.FC = () => {
       if (selectedRequest?.id === rejectingRequest!.id) setSelectedRequest(null);
     } catch (err: any) {
       message.error(err.message || 'Failed to reject');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const openRevokeModal = (req: VerificationRequest) => {
+    setRevokingRequest(req);
+    setRevokeReason('');
+    setRevokeModalOpen(true);
+  };
+
+  const handleRevoke = async () => {
+    if (!revokeReason.trim()) {
+      message.warning('Please provide a reason for revoking');
+      return;
+    }
+    setProcessing(true);
+    try {
+      await api.put(`/admin/verifications/${revokingRequest!.id}/revoke`, {
+        reason: revokeReason.trim(),
+      });
+      message.success(`${revokingRequest!.displayName || revokingRequest!.userName}'s verification has been revoked`);
+      setRevokeModalOpen(false);
+      setRevokingRequest(null);
+      fetchRequests();
+      if (selectedRequest?.id === revokingRequest!.id) setSelectedRequest(null);
+    } catch (err: any) {
+      message.error(err.message || 'Failed to revoke verification');
     } finally {
       setProcessing(false);
     }
@@ -172,6 +224,20 @@ const VerificationPage: React.FC = () => {
       render: (s: string) => <Tag color={statusColor[s]}>{s}</Tag>,
     },
     {
+      title: 'Expiry',
+      key: 'expiry',
+      render: (_: any, r: VerificationRequest) => {
+        if (r.status !== 'approved' || !r.expiryDate) return <Text type="secondary">—</Text>;
+        const isExpired = dayjs(r.expiryDate).isBefore(dayjs());
+        return (
+          <Text type={isExpired ? 'danger' : undefined}>
+            {formatDate(r.expiryDate)}
+            {isExpired && <Tag color="red" style={{ marginLeft: 4 }}>Expired</Tag>}
+          </Text>
+        );
+      },
+    },
+    {
       title: 'Submitted',
       dataIndex: 'createdAt',
       key: 'submitted',
@@ -185,9 +251,12 @@ const VerificationPage: React.FC = () => {
           <Button size="small" icon={<EyeOutlined />} onClick={() => viewDetails(record)}>View</Button>
           {record.status === 'pending' && (
             <>
-              <Button size="small" type="primary" icon={<CheckOutlined />} onClick={() => handleApprove(record)}>Approve</Button>
+              <Button size="small" type="primary" icon={<CheckOutlined />} onClick={() => openApproveModal(record)}>Approve</Button>
               <Button size="small" danger icon={<CloseOutlined />} onClick={() => openRejectModal(record)}>Reject</Button>
             </>
+          )}
+          {record.status === 'approved' && (
+            <Button size="small" danger icon={<StopOutlined />} onClick={() => openRevokeModal(record)}>Ban</Button>
           )}
         </Space>
       ),
@@ -213,6 +282,7 @@ const VerificationPage: React.FC = () => {
             <Option value="pending">Pending</Option>
             <Option value="approved">Approved</Option>
             <Option value="rejected">Rejected</Option>
+            <Option value="revoked">Revoked/Banned</Option>
           </Select>
         </Space>
 
@@ -221,7 +291,7 @@ const VerificationPage: React.FC = () => {
           dataSource={requests}
           rowKey="id"
           loading={loading}
-          scroll={{ x: 800 }}
+          scroll={{ x: 900 }}
           pagination={{ pageSize: 10, showTotal: (total) => `${total} requests` }}
         />
       </Card>
@@ -241,7 +311,12 @@ const VerificationPage: React.FC = () => {
             <Space>
               <Button onClick={() => setSelectedRequest(null)}>Close</Button>
               <Button danger icon={<CloseOutlined />} onClick={() => { setSelectedRequest(null); openRejectModal(selectedRequest!); }}>Reject</Button>
-              <Button type="primary" icon={<CheckOutlined />} onClick={() => handleApprove(selectedRequest!)}>Approve</Button>
+              <Button type="primary" icon={<CheckOutlined />} onClick={() => { setSelectedRequest(null); openApproveModal(selectedRequest!); }}>Approve</Button>
+            </Space>
+          ) : selectedRequest?.status === 'approved' ? (
+            <Space>
+              <Button onClick={() => setSelectedRequest(null)}>Close</Button>
+              <Button danger icon={<StopOutlined />} onClick={() => { setSelectedRequest(null); openRevokeModal(selectedRequest!); }}>Ban / Revoke</Button>
             </Space>
           ) : null
         }
@@ -265,9 +340,27 @@ const VerificationPage: React.FC = () => {
                       <Descriptions.Item label="Experience" span={2}>{selectedRequest.breedExperience}</Descriptions.Item>
                       <Descriptions.Item label="Submitted">{formatDate(selectedRequest.createdAt)}</Descriptions.Item>
                       <Descriptions.Item label="Status"><Tag color={statusColor[selectedRequest.status]}>{selectedRequest.status}</Tag></Descriptions.Item>
+                      {selectedRequest.expiryDate && (
+                        <Descriptions.Item label="Expiry Date" span={2}>
+                          <Text type={dayjs(selectedRequest.expiryDate).isBefore(dayjs()) ? 'danger' : undefined}>
+                            {formatDate(selectedRequest.expiryDate)}
+                            {dayjs(selectedRequest.expiryDate).isBefore(dayjs()) && ' (EXPIRED)'}
+                          </Text>
+                        </Descriptions.Item>
+                      )}
                       {selectedRequest.rejectionReason && (
                         <Descriptions.Item label="Rejection Reason" span={2}>
                           <Text type="danger">{selectedRequest.rejectionReason}</Text>
+                        </Descriptions.Item>
+                      )}
+                      {selectedRequest.revokeReason && (
+                        <Descriptions.Item label="Revoke Reason" span={2}>
+                          <Text type="danger">{selectedRequest.revokeReason}</Text>
+                        </Descriptions.Item>
+                      )}
+                      {selectedRequest.revokedAt && (
+                        <Descriptions.Item label="Revoked At">
+                          {formatDate(selectedRequest.revokedAt)}
                         </Descriptions.Item>
                       )}
                       {selectedRequest.processedAt && (
@@ -327,7 +420,7 @@ const VerificationPage: React.FC = () => {
                     {selectedRequest.history && selectedRequest.history.length > 0 ? (
                       <Timeline
                         items={selectedRequest.history.map((h) => ({
-                          color: h.status === 'approved' ? 'green' : h.status === 'rejected' ? 'red' : 'blue',
+                          color: h.status === 'approved' ? 'green' : h.status === 'rejected' ? 'red' : h.status === 'revoked' ? 'volcano' : 'blue',
                           children: (
                             <Card size="small" style={{ marginBottom: 8 }}>
                               <Space direction="vertical" size={4} style={{ width: '100%' }}>
@@ -339,9 +432,17 @@ const VerificationPage: React.FC = () => {
                                 <Text>Kennel: {h.kennelName}</Text>
                                 <Text>Experience: {h.breedExperience}</Text>
                                 <Text type="secondary">Documents: {h.documents?.length || 0} file(s)</Text>
+                                {h.expiryDate && (
+                                  <Text type="secondary">Expires: {formatDate(h.expiryDate)}</Text>
+                                )}
                                 {h.rejectionReason && (
                                   <Paragraph type="danger" style={{ margin: 0 }}>
                                     Rejection reason: {h.rejectionReason}
+                                  </Paragraph>
+                                )}
+                                {h.revokeReason && (
+                                  <Paragraph type="danger" style={{ margin: 0 }}>
+                                    Revoke reason: {h.revokeReason}
                                   </Paragraph>
                                 )}
                                 {h.processedAt && (
@@ -363,6 +464,35 @@ const VerificationPage: React.FC = () => {
         )}
       </Modal>
 
+      {/* Approve Modal with Expiry Date */}
+      <Modal
+        title={`Approve ${approvingRequest?.displayName || approvingRequest?.userName || ''}'s Verification`}
+        open={approveModalOpen}
+        onCancel={() => { setApproveModalOpen(false); setApprovingRequest(null); }}
+        onOk={handleApprove}
+        okText="Approve"
+        okType="primary"
+        okButtonProps={{ loading: processing, disabled: !expiryDate }}
+      >
+        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+          <Text>This will grant verified breeder status. Please set an expiry date for this verification.</Text>
+          <div>
+            <Text strong style={{ display: 'block', marginBottom: 8 }}>Verification Expiry Date *</Text>
+            <DatePicker
+              value={expiryDate}
+              onChange={(date) => setExpiryDate(date)}
+              style={{ width: '100%' }}
+              disabledDate={(current) => current && current < dayjs().startOf('day')}
+              format="YYYY-MM-DD"
+              placeholder="Select expiry date"
+            />
+            <Text type="secondary" style={{ fontSize: 12, marginTop: 4, display: 'block' }}>
+              The breeder's verified status will expire on this date. Default: 1 year from today.
+            </Text>
+          </div>
+        </Space>
+      </Modal>
+
       {/* Reject Modal */}
       <Modal
         title={`Reject ${rejectingRequest?.displayName || rejectingRequest?.userName || ''}'s Verification`}
@@ -380,6 +510,32 @@ const VerificationPage: React.FC = () => {
             placeholder="e.g., License document is expired. Please submit a valid breeding license."
             value={rejectionReason}
             onChange={(e) => setRejectionReason(e.target.value)}
+            maxLength={500}
+            showCount
+          />
+        </Space>
+      </Modal>
+
+      {/* Revoke/Ban Modal */}
+      <Modal
+        title={`Ban / Revoke ${revokingRequest?.displayName || revokingRequest?.userName || ''}'s Verification`}
+        open={revokeModalOpen}
+        onCancel={() => { setRevokeModalOpen(false); setRevokingRequest(null); }}
+        onOk={handleRevoke}
+        okText="Revoke Verification"
+        okType="danger"
+        okButtonProps={{ loading: processing, disabled: !revokeReason.trim() }}
+      >
+        <Space direction="vertical" size={12} style={{ width: '100%' }}>
+          <Text type="danger" strong>
+            This will permanently revoke this breeder's verified status. They will lose their certificate and need to reapply.
+          </Text>
+          <Text>Please provide a reason for revoking this verification:</Text>
+          <TextArea
+            rows={4}
+            placeholder="e.g., Violation of breeding standards, fraudulent documents, complaints received..."
+            value={revokeReason}
+            onChange={(e) => setRevokeReason(e.target.value)}
             maxLength={500}
             showCount
           />
