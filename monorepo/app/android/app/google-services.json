@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "834040996278-fm91r20kv3j5fqnh14muqselel3n73he.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.petroll.app",
+            "certificate_hash": "c98d020237162a322295ef3e59101f3d6edc74b8"
+          }
+        },
+        {
           "client_id": "834040996278-0lmec5vdgu349d8fktcog17qmd2ae3tt.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,6 +37,13 @@
             {
               "client_id": "834040996278-0lmec5vdgu349d8fktcog17qmd2ae3tt.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "834040996278-ufif9vc0k72ogrlqkmet34glafhvupkb.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.petroll.app"
+              }
             }
           ]
         }
@@ -43,6 +58,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "834040996278-c70af6kunc902iv84c7j68cjkokijcvv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.petroll.pet_roll",
+            "certificate_hash": "5a1677223f9bb6e182f88a90c60cb4ce543f9b79"
+          }
+        },
+        {
+          "client_id": "834040996278-chlboak8g9lhbbk5vo9h6ujla5p3f625.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.petroll.pet_roll",
+            "certificate_hash": "8e37d663467c546abe19cc16783cb2b0442917f8"
+          }
+        },
+        {
           "client_id": "834040996278-0lmec5vdgu349d8fktcog17qmd2ae3tt.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -58,6 +89,13 @@
             {
               "client_id": "834040996278-0lmec5vdgu349d8fktcog17qmd2ae3tt.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "834040996278-ufif9vc0k72ogrlqkmet34glafhvupkb.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.petroll.app"
+              }
             }
           ]
         }
