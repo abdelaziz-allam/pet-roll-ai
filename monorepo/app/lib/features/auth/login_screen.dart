@@ -7,8 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/api_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../../main.dart';
 import '../home/home_screen.dart';
 
 class AppLoginScreen extends StatefulWidget {
@@ -237,6 +239,60 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
     }
   }
 
+  void _showLanguagePicker() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Select Language', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 20),
+            _buildLangOption(ctx, 'English', 'en'),
+            const SizedBox(height: 8),
+            _buildLangOption(ctx, 'Svenska', 'sv'),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLangOption(BuildContext ctx, String label, String code) {
+    final isSelected = localeNotifier.value.languageCode == code;
+    return GestureDetector(
+      onTap: () async {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('app_locale', code);
+        localeNotifier.value = Locale(code);
+        if (mounted) setState(() {});
+        Navigator.pop(ctx);
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.primary.withOpacity(0.08) : Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppTheme.primary : Colors.grey.shade200,
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Text(label, style: TextStyle(fontSize: 16, fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500)),
+            const Spacer(),
+            if (isSelected) const Icon(Icons.check_circle, color: AppTheme.primary, size: 22),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -248,7 +304,31 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 48),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: GestureDetector(
+                    onTap: _showLanguagePicker,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.language, size: 18, color: AppTheme.primary),
+                          const SizedBox(width: 6),
+                          Text(
+                            localeNotifier.value.languageCode == 'sv' ? 'SV' : 'EN',
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.primary),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
                 Center(
                   child: Container(
                     width: 80,

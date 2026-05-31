@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:in_app_review/in_app_review.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../main.dart';
+import '../../feedback/feedback_screen.dart';
 import '../../pets/screens/pet_detail_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -128,6 +131,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
       MaterialPageRoute(builder: (_) => const SplashLoader()),
       (route) => false,
     );
+  }
+
+  Future<void> _requestReview() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastPrompt = prefs.getInt('last_review_prompt') ?? 0;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final thirtyDays = 30 * 24 * 60 * 60 * 1000;
+
+    if (now - lastPrompt < thirtyDays && lastPrompt > 0) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Thank you! You can rate us again later.'), backgroundColor: AppTheme.primary),
+        );
+      }
+      return;
+    }
+
+    await prefs.setInt('last_review_prompt', now);
+
+    if (mounted) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Enjoying Petfolioo?', style: TextStyle(fontWeight: FontWeight.w700)),
+          content: const Text('If you love our app, please take a moment to rate us on the Play Store. Your feedback helps us grow!'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Later'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _openPlayStore();
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary),
+              child: const Text('Rate Now', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  void _openPlayStore() async {
+    final inAppReview = InAppReview.instance;
+    if (await inAppReview.isAvailable()) {
+      await inAppReview.requestReview();
+    } else {
+      await inAppReview.openStoreListing(appStoreId: 'com.petroll.pet_roll');
+    }
   }
 
   @override
@@ -336,9 +391,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onTap: _showNotificationSettings,
           ),
           Divider(height: 1, color: Colors.grey.shade100),
-          _settingsTile(Icons.language, 'Language', 'English'),
+          ListTile(
+            leading: const Icon(Icons.feedback_outlined, color: AppTheme.primary),
+            title: const Text('Feedback & Suggestions', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
+            subtitle: const Text('Help us improve Petfolioo', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+            trailing: const Icon(Icons.chevron_right, color: AppTheme.textSecondary, size: 20),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FeedbackScreen())),
+          ),
           Divider(height: 1, color: Colors.grey.shade100),
-          _settingsTile(Icons.info_outline, 'About', 'Petfolioo v1.0.0'),
+          ListTile(
+            leading: const Icon(Icons.star_outline, color: AppTheme.primary),
+            title: const Text('Rate Us', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
+            subtitle: const Text('Love Petfolioo? Leave a review!', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+            trailing: const Icon(Icons.chevron_right, color: AppTheme.textSecondary, size: 20),
+            onTap: _requestReview,
+          ),
+          Divider(height: 1, color: Colors.grey.shade100),
+          ListTile(
+            leading: const Icon(Icons.language, color: AppTheme.primary),
+            title: const Text('Language', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
+            subtitle: Text(
+              localeNotifier.value.languageCode == 'sv' ? 'Svenska' : 'English',
+              style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+            ),
+            trailing: const Icon(Icons.chevron_right, color: AppTheme.textSecondary, size: 20),
+            onTap: _showLanguagePicker,
+          ),
+          Divider(height: 1, color: Colors.grey.shade100),
+          _settingsTile(Icons.info_outline, 'About', 'Petfolioo v1.0.1'),
         ],
       ),
     );
@@ -469,6 +549,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (count == 3) return 'You\'ll get 3 reminders: early, mid, and close to the event';
     if (count == 4) return 'You\'ll get 4 reminders spread evenly before the event';
     return 'You\'ll get 5 reminders (maximum) spread before the event';
+  }
+
+  void _showLanguagePicker() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Select Language', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 20),
+            _buildLanguageOption(ctx, 'English', 'en'),
+            const SizedBox(height: 8),
+            _buildLanguageOption(ctx, 'Svenska', 'sv'),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageOption(BuildContext ctx, String label, String code) {
+    final isSelected = localeNotifier.value.languageCode == code;
+    return GestureDetector(
+      onTap: () async {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('app_locale', code);
+        localeNotifier.value = Locale(code);
+        if (mounted) setState(() {});
+        Navigator.pop(ctx);
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.primary.withOpacity(0.08) : Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppTheme.primary : Colors.grey.shade200,
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Text(label, style: TextStyle(fontSize: 16, fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500)),
+            const Spacer(),
+            if (isSelected) const Icon(Icons.check_circle, color: AppTheme.primary, size: 22),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _settingsTile(IconData icon, String title, String subtitle) {

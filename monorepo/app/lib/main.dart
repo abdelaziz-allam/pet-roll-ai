@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/generated/app_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/theme/app_theme.dart';
 import 'core/services/api_service.dart';
 import 'core/services/notification_service.dart';
 import 'features/home/home_screen.dart';
+import 'features/auth/login_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.dark,
@@ -14,8 +20,46 @@ void main() {
   runApp(const PetfoliooApp());
 }
 
-class PetfoliooApp extends StatelessWidget {
+class LocaleNotifier extends ValueNotifier<Locale> {
+  LocaleNotifier(super.value);
+
+  static const _key = 'app_locale';
+
+  static Future<LocaleNotifier> create() async {
+    final prefs = await SharedPreferences.getInstance();
+    final code = prefs.getString(_key) ?? 'en';
+    return LocaleNotifier(Locale(code));
+  }
+
+  Future<void> setLocale(Locale locale) async {
+    value = locale;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_key, locale.languageCode);
+  }
+}
+
+final localeNotifier = ValueNotifier<Locale>(const Locale('en'));
+
+class PetfoliooApp extends StatefulWidget {
   const PetfoliooApp({super.key});
+
+  @override
+  State<PetfoliooApp> createState() => _PetfoliooAppState();
+}
+
+class _PetfoliooAppState extends State<PetfoliooApp> {
+  @override
+  void initState() {
+    super.initState();
+    _loadLocale();
+    localeNotifier.addListener(() => setState(() {}));
+  }
+
+  Future<void> _loadLocale() async {
+    final prefs = await SharedPreferences.getInstance();
+    final code = prefs.getString('app_locale') ?? 'en';
+    localeNotifier.value = Locale(code);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +67,17 @@ class PetfoliooApp extends StatelessWidget {
       title: 'Petfolioo',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.theme,
+      locale: localeNotifier.value,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'),
+        Locale('sv'),
+      ],
       home: const SplashLoader(),
     );
   }
@@ -48,18 +103,13 @@ class _SplashLoaderState extends State<SplashLoader> {
     await notifService.requestPermissions();
 
     final api = ApiService();
-    if (!api.isLoggedIn) {
-      try {
-        final loginData = await api.post('/auth/test-login', {
-          'email': 'petrolluser1@gmail.com',
-          'secret': 'petroll-prod-jwt-secret-NHSxYY8CmoRzDoSmIKa2rB0TPZBIolF8',
-        });
-        api.setToken(loginData['accessToken']);
-      } catch (_) {}
-    }
+    await api.loadToken();
+
     if (mounted) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(
+          builder: (_) => api.isLoggedIn ? const HomeScreen() : const AppLoginScreen(),
+        ),
       );
     }
   }

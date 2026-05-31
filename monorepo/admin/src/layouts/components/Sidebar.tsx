@@ -15,6 +15,7 @@ import {
   AppstoreOutlined,
   MedicineBoxOutlined,
   ExperimentOutlined,
+  CommentOutlined,
 } from '@ant-design/icons';
 import { usePermission } from '@/hooks/usePermission';
 
@@ -68,6 +69,10 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
 
     if (canAccessPage('pets')) {
       items.push({ key: '/categories', icon: <AppstoreOutlined />, label: 'Pet Categories' });
+    }
+
+    if (canAccessPage('settings')) {
+      items.push({ key: '/feedback', icon: <CommentOutlined />, label: 'Feedback' });
     }
 
     if (canAccessPage('admin_users')) {

@@ -74,6 +74,14 @@
           }
         },
         {
+          "client_id": "834040996278-o9lj5b2kipu7amdm59foi47d2i7himtn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.petroll.pet_roll",
+            "certificate_hash": "dbcd360f182488fbf3a65c3583eede3ca79aa6a7"
+          }
+        },
+        {
           "client_id": "834040996278-0lmec5vdgu349d8fktcog17qmd2ae3tt.apps.googleusercontent.com",
           "client_type": 3
         }
