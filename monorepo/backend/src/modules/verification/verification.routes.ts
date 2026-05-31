@@ -23,8 +23,22 @@ export async function verificationRoutes(fastify: FastifyInstance) {
       'application/pdf',
       'image/gif',
     ];
-    if (!allowedTypes.includes(data.mimetype)) {
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'pdf'];
+    const ext = data.filename.split('.').pop()?.toLowerCase() || '';
+    const isValidType = allowedTypes.includes(data.mimetype) || allowedExtensions.includes(ext);
+
+    if (!isValidType) {
       return reply.code(400).send({ error: 'Invalid file type. Allowed: JPEG, PNG, WebP, GIF, PDF' });
+    }
+
+    // Resolve correct MIME type from extension if the reported type is generic
+    let resolvedMime = data.mimetype;
+    if (resolvedMime === 'application/octet-stream') {
+      const extToMime: Record<string, string> = {
+        jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+        webp: 'image/webp', gif: 'image/gif', pdf: 'application/pdf',
+      };
+      resolvedMime = extToMime[ext] || resolvedMime;
     }
 
     const timestamp = Date.now();
@@ -33,14 +47,14 @@ export async function verificationRoutes(fastify: FastifyInstance) {
 
     if (env.USE_MEMORY_STORE) {
       const fakeUrl = `https://storage.example.com/${storagePath}`;
-      return reply.code(200).send({ url: fakeUrl, path: storagePath, name: data.filename, type: data.mimetype });
+      return reply.code(200).send({ url: fakeUrl, path: storagePath, name: data.filename, type: resolvedMime });
     }
 
     const bucket = storage.bucket(env.GCS_BUCKET);
     const file = bucket.file(storagePath);
 
     const stream = file.createWriteStream({
-      metadata: { contentType: data.mimetype },
+      metadata: { contentType: resolvedMime },
       resumable: false,
     });
 
@@ -53,7 +67,7 @@ export async function verificationRoutes(fastify: FastifyInstance) {
     await file.makePublic();
 
     const publicUrl = `https://storage.googleapis.com/${env.GCS_BUCKET}/${storagePath}`;
-    return reply.code(200).send({ url: publicUrl, path: storagePath, name: data.filename, type: data.mimetype });
+    return reply.code(200).send({ url: publicUrl, path: storagePath, name: data.filename, type: resolvedMime });
   });
 
   // POST /verification/submit — Submit a new verification request
