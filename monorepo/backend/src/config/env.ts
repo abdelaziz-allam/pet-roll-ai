@@ -15,7 +15,7 @@ const envSchema = z.object({
   CORS_ORIGINS: z.string().default('http://localhost:5173'),
   RATE_LIMIT_MAX: z.coerce.number().default(100),
   RATE_LIMIT_WINDOW: z.coerce.number().default(60000),
-  GCS_BUCKET: z.string().default('petroll-mvp.appspot.com'),
+  GCS_BUCKET: z.string().default('petroll-production-storage'),
   USE_MEMORY_STORE: z.coerce.boolean().default(false),
 });
 
