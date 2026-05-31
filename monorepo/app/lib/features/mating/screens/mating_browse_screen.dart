@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import 'pet_mating_profile_screen.dart';
 
 class MatingBrowseScreen extends StatefulWidget {
@@ -70,6 +71,7 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
   }
 
   Future<void> _sendMatingRequest(dynamic listing) async {
+    final l10n = AppLocalizations.of(context)!;
     final listingId = listing['id'] ?? '';
     if (listingId.isEmpty) return;
 
@@ -79,7 +81,7 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
       if (pets.isEmpty) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No eligible pets available for mating. Mark a pet as available for mating first.'), backgroundColor: AppTheme.warning),
+            SnackBar(content: Text(l10n.selectPet), backgroundColor: AppTheme.warning),
           );
         }
         return;
@@ -101,14 +103,14 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Send Mating Request', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                Text(l10n.sendMatchRequest, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 8),
                 Text(
                   'Request to mate with ${listing['breed'] ?? listing['species'] ?? 'this pet'}',
                   style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
                 ),
                 const SizedBox(height: 16),
-                const Text('Select your pet:', style: TextStyle(fontWeight: FontWeight.w600)),
+                Text(l10n.selectPet, style: const TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 ...pets.map((pet) {
                   final isSelected = selectedPetId == pet['id'];
@@ -145,10 +147,10 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
                 TextField(
                   controller: messageCtrl,
                   maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: 'Message (optional)',
-                    hintText: 'Introduce your pet...',
-                    prefixIcon: Icon(Icons.message),
+                  decoration: InputDecoration(
+                    labelText: l10n.message,
+                    hintText: l10n.message,
+                    prefixIcon: const Icon(Icons.message),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -158,7 +160,7 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
                     onPressed: selectedPetId == null
                         ? null
                         : () => Navigator.pop(ctx, true),
-                    child: const Text('Send Request'),
+                    child: Text(l10n.sendRequest),
                   ),
                 ),
               ],
@@ -177,19 +179,20 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Mating request sent!'), backgroundColor: AppTheme.success),
+          SnackBar(content: Text(l10n.requestSent), backgroundColor: AppTheme.success),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.error),
+          SnackBar(content: Text('${l10n.error}: $e'), backgroundColor: AppTheme.error),
         );
       }
     }
   }
 
   void _showFilterSheet() {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
@@ -202,7 +205,7 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
             children: [
               Row(
                 children: [
-                  const Text('Filters', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                  Text(l10n.filterBySpecies, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                   const Spacer(),
                   TextButton(
                     onPressed: () {
@@ -239,7 +242,7 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
               ),
               if (!_useSmartMatch) ...[
                 const SizedBox(height: 16),
-                const Text('Species', style: TextStyle(fontWeight: FontWeight.w600)),
+                Text(l10n.species, style: const TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -247,7 +250,7 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
                   children: [null, 'dog', 'cat', 'horse', 'bird', 'rabbit'].map((s) {
                     final selected = _speciesFilter == s;
                     return FilterChip(
-                      label: Text(s ?? 'All'),
+                      label: Text(s ?? l10n.allSpecies),
                       selected: selected,
                       selectedColor: AppTheme.primary.withOpacity(0.2),
                       checkmarkColor: AppTheme.primary,
@@ -257,14 +260,14 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
                 ),
               ],
               const SizedBox(height: 16),
-              const Text('Gender', style: TextStyle(fontWeight: FontWeight.w600)),
+              Text(l10n.gender, style: const TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
                 children: [null, 'male', 'female'].map((g) {
                   final selected = _genderFilter == g;
                   return FilterChip(
-                    label: Text(g ?? 'Any'),
+                    label: Text(g ?? l10n.allSpecies),
                     selected: selected,
                     selectedColor: AppTheme.primary.withOpacity(0.2),
                     checkmarkColor: AppTheme.primary,
@@ -274,7 +277,7 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
               ),
               const SizedBox(height: 12),
               SwitchListTile(
-                title: const Text('Health Certified Only'),
+                title: Text(l10n.healthRecords),
                 value: _healthCertifiedOnly,
                 onChanged: (v) => setSheetState(() => _healthCertifiedOnly = v),
                 activeColor: AppTheme.primary,
@@ -289,7 +292,7 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
                     setState(() {});
                     _loadListings();
                   },
-                  child: const Text('Apply Filters'),
+                  child: Text(l10n.search),
                 ),
               ),
               const SizedBox(height: 8),
@@ -302,6 +305,7 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Padding(
@@ -400,7 +404,7 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
   }
 
   Widget _buildEmptyState() {
-    final isSmartActive = _useSmartMatch && _appliedFilters != null;
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -421,14 +425,12 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              _useSmartMatch ? 'No nearby matches yet' : 'No listings found',
+              l10n.noListingsFound,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             Text(
-              _useSmartMatch
-                  ? 'No pets from the same category and breed were found in your city. Try browsing all listings or check back later.'
-                  : 'Try adjusting your filters or check back later.',
+              l10n.noResultsFound,
               textAlign: TextAlign.center,
               style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
             ),
@@ -440,7 +442,7 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
                   _loadListings();
                 },
                 icon: const Icon(Icons.explore, size: 18),
-                label: const Text('Browse All Listings'),
+                label: Text(l10n.browse),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.primary,
                   side: const BorderSide(color: AppTheme.primary),
@@ -455,6 +457,7 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
   }
 
   Widget _buildListingCard(dynamic listing) {
+    final l10n = AppLocalizations.of(context)!;
     final species = listing['species'] ?? 'dog';
     final photos = listing['photos'] as List?;
     final photoUrl = (photos != null && photos.isNotEmpty)
@@ -528,7 +531,7 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
                       _chip(Icons.verified, 'Health ✓', AppTheme.success),
                     if (listing['location'] != null)
                       _chip(Icons.location_on, '${listing['location']['city'] ?? ''}, ${listing['location']['country'] ?? ''}', Colors.blue),
-                    _chip(Icons.visibility, '${listing['viewCount'] ?? 0} views', Colors.grey),
+                    _chip(Icons.visibility, '${listing['viewCount'] ?? 0} ${l10n.viewsCount}', Colors.grey),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -554,12 +557,12 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           side: const BorderSide(color: AppTheme.primary),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.pets, size: 18, color: AppTheme.primary),
-                            SizedBox(width: 6),
-                            Text('View Profile', style: TextStyle(color: AppTheme.primary)),
+                            const Icon(Icons.pets, size: 18, color: AppTheme.primary),
+                            const SizedBox(width: 6),
+                            Text(l10n.matingProfile, style: const TextStyle(color: AppTheme.primary)),
                           ],
                         ),
                       ),
@@ -571,12 +574,12 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.favorite, size: 18),
-                            SizedBox(width: 6),
-                            Text('Request'),
+                            const Icon(Icons.favorite, size: 18),
+                            const SizedBox(width: 6),
+                            Text(l10n.sendRequest),
                           ],
                         ),
                       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 class VaccinationScreen extends StatefulWidget {
   final String petId;
@@ -33,6 +34,7 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
   }
 
   void _showAddDialog() {
+    final l10n = AppLocalizations.of(context)!;
     final nameCtrl = TextEditingController();
     final manufacturerCtrl = TextEditingController();
     final batchCtrl = TextEditingController();
@@ -53,21 +55,21 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Add Vaccination', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                Text(l10n.addVaccination, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 16),
-                TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Vaccine Name *', prefixIcon: Icon(Icons.vaccines))),
+                TextField(controller: nameCtrl, decoration: InputDecoration(labelText: '${l10n.vaccineName} *', prefixIcon: const Icon(Icons.vaccines))),
                 const SizedBox(height: 12),
-                TextField(controller: manufacturerCtrl, decoration: const InputDecoration(labelText: 'Manufacturer', prefixIcon: Icon(Icons.factory))),
+                TextField(controller: manufacturerCtrl, decoration: InputDecoration(labelText: l10n.manufacturer, prefixIcon: const Icon(Icons.factory))),
                 const SizedBox(height: 12),
-                TextField(controller: batchCtrl, decoration: const InputDecoration(labelText: 'Batch Number', prefixIcon: Icon(Icons.qr_code))),
+                TextField(controller: batchCtrl, decoration: InputDecoration(labelText: l10n.batchNumber, prefixIcon: const Icon(Icons.qr_code))),
                 const SizedBox(height: 12),
-                TextField(controller: vetCtrl, decoration: const InputDecoration(labelText: 'Veterinarian', prefixIcon: Icon(Icons.person))),
+                TextField(controller: vetCtrl, decoration: InputDecoration(labelText: l10n.veterinarian, prefixIcon: const Icon(Icons.person))),
                 const SizedBox(height: 16),
 
                 // First Dose Date
                 _buildDateSelector(
                   ctx: ctx,
-                  label: 'First Dose Date *',
+                  label: '${l10n.firstDoseDate} *',
                   icon: Icons.calendar_today,
                   color: Colors.blue,
                   date: firstDoseDate,
@@ -91,13 +93,13 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
                 // Total Doses
                 Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Total Doses', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                          SizedBox(height: 2),
-                          Text('How many doses in total?', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                          Text(l10n.totalDoses, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 2),
+                          Text(l10n.howManyDosesInTotal, style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
                         ],
                       ),
                     ),
@@ -129,9 +131,9 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
                 // Next dose date pickers (for doses 2+)
                 if (totalDoses > 1) ...[
                   const SizedBox(height: 16),
-                  const Text('Schedule Next Doses', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                  Text(l10n.scheduleNextDoses, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 4),
-                  const Text('Set dates to receive reminders for each dose', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                  Text(l10n.setDatesToReceiveReminders, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
                   const SizedBox(height: 12),
                   ...List.generate(totalDoses - 1, (i) {
                     final doseNum = i + 2;
@@ -197,7 +199,7 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
                     onPressed: () async {
                       if (nameCtrl.text.isEmpty || firstDoseDate == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Vaccine name and first dose date are required'), backgroundColor: AppTheme.warning),
+                          SnackBar(content: Text(l10n.vaccineNameAndDateRequired), backgroundColor: AppTheme.warning),
                         );
                         return;
                       }
@@ -237,7 +239,7 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
                         );
                       }
                     },
-                    child: const Text('Save Vaccination'),
+                    child: Text(l10n.saveVaccination),
                   ),
                 ),
               ],
@@ -309,8 +311,9 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Vaccinations', style: TextStyle(fontWeight: FontWeight.w700))),
+      appBar: AppBar(title: Text(l10n.vaccinations, style: const TextStyle(fontWeight: FontWeight.w700))),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddDialog,
         backgroundColor: AppTheme.primary,
@@ -325,9 +328,9 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
                     children: [
                       Icon(Icons.vaccines, size: 48, color: Colors.grey[300]),
                       const SizedBox(height: 12),
-                      const Text('No vaccinations recorded', style: TextStyle(color: AppTheme.textSecondary)),
+                      Text(l10n.noVaccinationsRecorded, style: const TextStyle(color: AppTheme.textSecondary)),
                       const SizedBox(height: 4),
-                      const Text('Tap + to add a vaccination', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                      Text(l10n.tapPlusToAddVaccination, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
                     ],
                   ),
                 )
@@ -416,7 +419,7 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                Text('$currentDose/$totalDoses doses', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                Text('$currentDose/$totalDoses ${AppLocalizations.of(context)!.doses}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
               ],
             ),
             const SizedBox(height: 10),

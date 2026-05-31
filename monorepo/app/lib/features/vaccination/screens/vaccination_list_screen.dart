@@ -9,6 +9,7 @@ import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../../../core/router/route_names.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../models/vaccination_model.dart';
 import '../providers/vaccination_provider.dart';
 
@@ -26,11 +27,12 @@ class VaccinationListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final vaccinationsAsync = ref.watch(vaccinationsProvider(petId));
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Vaccinations', style: AppTypography.heading2),
+        title: Text(l10n.vaccinations, style: AppTypography.heading2),
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 80),
@@ -52,8 +54,8 @@ class VaccinationListScreen extends ConsumerWidget {
         data: (vaccinations) {
           if (vaccinations.isEmpty) {
             return EmptyState(
-              title: 'No vaccinations logged',
-              subtitle: 'Keep track of your pet\'s vaccination history',
+              title: l10n.noVaccinationsRecorded,
+              subtitle: l10n.tapPlusToAddVaccination,
               icon: Icons.vaccines_outlined,
             );
           }
@@ -130,11 +132,12 @@ class VaccinationListScreen extends ConsumerWidget {
             ? AppColors.warning
             : AppColors.accentGreen;
 
+    final l10n = AppLocalizations.of(context)!;
     final statusText = isOverdue
-        ? 'Overdue'
+        ? l10n.overdue
         : isUpcoming
-            ? 'Due Soon'
-            : 'Completed';
+            ? l10n.dueSoon
+            : l10n.completed;
 
     return GestureDetector(
       onTap: () => _openDetail(context, vaccination.id),

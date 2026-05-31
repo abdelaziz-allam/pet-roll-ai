@@ -10,6 +10,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../../../core/widgets/error_view.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../notifications/services/birthday_notification_service.dart';
 import '../models/pet_model.dart';
 import '../providers/pet_provider.dart';
@@ -81,12 +82,13 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final petAsync = ref.watch(petDetailProvider(widget.petId));
 
     return Scaffold(
       backgroundColor: AppColors.bgSecondary,
       appBar: AppBar(
-        title: const Text('Edit Pet'),
+        title: Text(l10n.editPet),
         backgroundColor: AppColors.bgPrimary,
       ),
       body: petAsync.when(
@@ -104,6 +106,7 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
   }
 
   Widget _buildForm() {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Expanded(
@@ -118,21 +121,21 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
                   const SizedBox(height: 24),
                   AppTextField(
                     controller: _nameController,
-                    label: 'Pet Name',
-                    hint: 'Enter pet name',
+                    label: l10n.petName,
+                    hint: l10n.enterPetName,
                     validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Name is required' : null,
+                        (v == null || v.trim().isEmpty) ? l10n.petNameRequired : null,
                   ),
                   const SizedBox(height: 20),
                   _buildSpeciesSelector(),
                   const SizedBox(height: 20),
                   AppTextField(
                     controller: _breedController,
-                    label: 'Breed',
-                    hint: 'Enter breed',
+                    label: l10n.breed,
+                    hint: l10n.enterBreed,
                   ),
                   const SizedBox(height: 20),
-                  Text('Date of Birth', style: AppTypography.label.copyWith(color: AppColors.textPrimary)),
+                  Text(l10n.dateOfBirth, style: AppTypography.label.copyWith(color: AppColors.textPrimary)),
                   const SizedBox(height: 8),
                   GestureDetector(
                     onTap: () async {
@@ -159,7 +162,7 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
                           Text(
                             _dateOfBirth != null
                                 ? DateFormat('dd MMM yyyy').format(_dateOfBirth!)
-                                : 'Select date of birth',
+                                : l10n.selectDateOfBirth,
                             style: AppTypography.body.copyWith(
                               color: _dateOfBirth != null ? AppColors.textPrimary : AppColors.textHint,
                             ),
@@ -175,7 +178,7 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  Text('Gender', style: AppTypography.label.copyWith(color: AppColors.textPrimary)),
+                  Text(l10n.gender, style: AppTypography.label.copyWith(color: AppColors.textPrimary)),
                   const SizedBox(height: 8),
                   Row(
                     children: _genderOptions.map((g) {
@@ -198,21 +201,21 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
                   const SizedBox(height: 20),
                   AppTextField(
                     controller: _weightController,
-                    label: 'Weight (kg)',
-                    hint: 'Enter weight',
+                    label: l10n.weightKg,
+                    hint: l10n.enterWeight,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   ),
                   const SizedBox(height: 20),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text('Neutered', style: AppTypography.body.copyWith(color: AppColors.textPrimary)),
+                    title: Text(l10n.neutered, style: AppTypography.body.copyWith(color: AppColors.textPrimary)),
                     value: _isNeutered,
                     activeColor: AppColors.brandPrimary,
                     onChanged: (v) => setState(() => _isNeutered = v),
                   ),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text('Available for Mating', style: AppTypography.body.copyWith(color: AppColors.textPrimary)),
+                    title: Text(l10n.availableForMating, style: AppTypography.body.copyWith(color: AppColors.textPrimary)),
                     value: _isAvailableForMating,
                     activeColor: AppColors.brandPrimary,
                     onChanged: (v) => setState(() => _isAvailableForMating = v),
@@ -238,7 +241,7 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
           child: SafeArea(
             top: false,
             child: AppButton(
-              label: 'Save Changes',
+              label: l10n.save,
               isLoading: _isSaving,
               onPressed: _save,
             ),
@@ -249,12 +252,13 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
   }
 
   Widget _buildPhotoSection() {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Text('Photos', style: AppTypography.label.copyWith(color: AppColors.textPrimary)),
+            Text(l10n.photos, style: AppTypography.label.copyWith(color: AppColors.textPrimary)),
             const SizedBox(width: 8),
             Text(
               '(${_photos.length}/50)',
@@ -267,7 +271,7 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
                 icon: _isUploadingPhoto
                     ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
                     : const Icon(Icons.add_a_photo_rounded, size: 18),
-                label: Text(_isUploadingPhoto ? 'Uploading...' : 'Add Photo'),
+                label: Text(_isUploadingPhoto ? l10n.uploading : l10n.addPhoto),
                 style: TextButton.styleFrom(foregroundColor: AppColors.brandPrimary),
               ),
           ],
@@ -288,7 +292,7 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
                 Icon(Icons.photo_library_rounded, size: 36, color: AppColors.textHint),
                 const SizedBox(height: 8),
                 Text(
-                  'No photos yet. Add one!',
+                  l10n.noPhotosYet,
                   style: AppTypography.bodySmall.copyWith(color: AppColors.textHint),
                 ),
               ],
@@ -377,7 +381,7 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              'Tap a photo to set it as profile image',
+              l10n.tapPhotoToSetProfile,
               style: AppTypography.caption.copyWith(color: AppColors.textHint),
             ),
           ),
@@ -386,10 +390,11 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
   }
 
   Widget _buildSpeciesSelector() {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Species', style: AppTypography.label.copyWith(color: AppColors.textPrimary)),
+        Text(l10n.species, style: AppTypography.label.copyWith(color: AppColors.textPrimary)),
         const SizedBox(height: 8),
         GestureDetector(
           onTap: _showSpeciesBottomSheet,
@@ -417,6 +422,7 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
   }
 
   void _showSpeciesBottomSheet() {
+    final l10n = AppLocalizations.of(context)!;
     _speciesSearchController.clear();
     showModalBottomSheet(
       context: context,
@@ -450,7 +456,7 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
                   Padding(
                     padding: const EdgeInsets.all(16),
                     child: Text(
-                      'Select Species',
+                      l10n.selectSpecies,
                       style: AppTypography.heading3.copyWith(color: AppColors.textPrimary),
                     ),
                   ),
@@ -459,7 +465,7 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
                     child: TextField(
                       controller: _speciesSearchController,
                       decoration: InputDecoration(
-                        hintText: 'Search species...',
+                        hintText: l10n.searchSpecies,
                         prefixIcon: const Icon(Icons.search_rounded),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -535,8 +541,9 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
       ref.invalidate(userPetsProvider);
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to upload photo: $e')),
+          SnackBar(content: Text('${l10n.failedToUploadPhoto}: $e')),
         );
       }
     } finally {
@@ -545,18 +552,19 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
   }
 
   Future<void> _removePhoto(int index) async {
+    final l10n = AppLocalizations.of(context)!;
     final photo = _photos[index];
 
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Remove Photo'),
-        content: const Text('Are you sure you want to remove this photo?'),
+        title: Text(l10n.removePhoto),
+        content: Text(l10n.removePhotoConfirm),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Remove', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -578,7 +586,7 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to remove photo: $e')),
+          SnackBar(content: Text('${l10n.failedToRemovePhoto}: $e')),
         );
       }
     }
@@ -632,15 +640,17 @@ class _EditPetScreenState extends ConsumerState<EditPetScreen> {
       ref.invalidate(userPetsProvider);
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Pet updated successfully!')),
+          SnackBar(content: Text(l10n.petUpdatedSuccessfully)),
         );
         context.pop();
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update: $e')),
+          SnackBar(content: Text('${l10n.failedToUpdate}: $e')),
         );
       }
     } finally {

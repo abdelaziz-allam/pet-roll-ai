@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 class WeddingCardView extends StatefulWidget {
   final Map<String, dynamic> card;
@@ -73,6 +74,7 @@ class _WeddingCardViewState extends State<WeddingCardView>
   }
 
   Future<void> _shareCard() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _sharing = true);
     try {
       final boundary = _cardKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
@@ -97,7 +99,7 @@ class _WeddingCardViewState extends State<WeddingCardView>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not share: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('${l10n.error}: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -107,6 +109,7 @@ class _WeddingCardViewState extends State<WeddingCardView>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final senderPet = widget.card['senderPet'] as Map<String, dynamic>? ?? {};
     final receiverPet = widget.card['receiverPet'] as Map<String, dynamic>? ?? {};
     final senderOwner = widget.card['senderOwner'] as Map<String, dynamic>? ?? {};
@@ -123,9 +126,9 @@ class _WeddingCardViewState extends State<WeddingCardView>
           icon: const Icon(Icons.arrow_back, color: Color(0xFF1E1A2E)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Wedding Card',
-          style: TextStyle(color: Color(0xFF1E1A2E), fontWeight: FontWeight.w700),
+        title: Text(
+          l10n.weddingCard,
+          style: const TextStyle(color: Color(0xFF1E1A2E), fontWeight: FontWeight.w700),
         ),
         actions: [
           IconButton(
@@ -189,9 +192,9 @@ class _WeddingCardViewState extends State<WeddingCardView>
                             children: [
                               const Text('💒', style: TextStyle(fontSize: 40)),
                               const SizedBox(height: 10),
-                              const Text(
-                                'Match Confirmed!',
-                                style: TextStyle(
+                              Text(
+                                l10n.matchConfirmed,
+                                style: const TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w800,
                                   color: Colors.white,
@@ -258,7 +261,7 @@ class _WeddingCardViewState extends State<WeddingCardView>
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 12),
                                     child: Text(
-                                      '🎊 Congratulations 🎊',
+                                      '🎊 ${l10n.congratulations} 🎊',
                                       style: TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w600,
@@ -360,7 +363,7 @@ class _WeddingCardViewState extends State<WeddingCardView>
                             child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                           )
                         : const Icon(Icons.share_rounded, size: 20),
-                    label: Text(_sharing ? 'Preparing...' : 'Share Wedding Card'),
+                    label: Text(_sharing ? l10n.preparingShare : l10n.shareWeddingCard),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFF1379D),
                       foregroundColor: Colors.white,

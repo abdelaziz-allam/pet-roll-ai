@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../models/verification_request.dart';
 
 class VerificationStatusScreen extends StatefulWidget {
@@ -51,9 +52,10 @@ class _VerificationStatusScreenState extends State<VerificationStatusScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Breeder Verification', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: Text(l10n.verificationStatus, style: const TextStyle(fontWeight: FontWeight.w700)),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator(color: AppTheme.primary))
@@ -90,7 +92,7 @@ class _VerificationStatusScreenState extends State<VerificationStatusScreen> {
               backgroundColor: AppTheme.primary,
               icon: const Icon(Icons.add, color: Colors.white),
               label: Text(
-                _history.isEmpty ? 'Apply for Verification' : 'Resubmit',
+                _history.isEmpty ? l10n.submitVerification : l10n.resubmit,
                 style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
               ),
             )
@@ -99,12 +101,13 @@ class _VerificationStatusScreenState extends State<VerificationStatusScreen> {
   }
 
   Widget _buildCertificateButton() {
+    final l10n = AppLocalizations.of(context)!;
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: _navigateToCertificate,
         icon: const Icon(Icons.card_membership, color: Colors.white),
-        label: const Text('View Certificate Card', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15)),
+        label: Text(l10n.breederCertificate, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15)),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppTheme.success,
           padding: const EdgeInsets.symmetric(vertical: 14),
@@ -140,11 +143,12 @@ class _VerificationStatusScreenState extends State<VerificationStatusScreen> {
   }
 
   Widget _buildStatusBanner() {
+    final l10n = AppLocalizations.of(context)!;
     if (_isRevoked) {
       return _buildBannerCard(
         icon: Icons.block,
         iconColor: Colors.red[800]!,
-        title: 'Verification Revoked',
+        title: l10n.revoked,
         subtitle: _history.first.revokeReason != null
             ? 'Reason: ${_history.first.revokeReason}\nYou may resubmit a new application.'
             : 'Your verified breeder status has been revoked. You may resubmit.',
@@ -154,13 +158,13 @@ class _VerificationStatusScreenState extends State<VerificationStatusScreen> {
     if (_isVerified) {
       final approved = _history.firstWhere((r) => r.isApproved);
       final expiryInfo = approved.expiryDate != null
-          ? '\nValid until: ${_formatDate(approved.expiryDate!)}'
+          ? '\n${l10n.expiresOn}: ${_formatDate(approved.expiryDate!)}'
           : '';
       return _buildBannerCard(
         icon: Icons.verified,
         iconColor: AppTheme.success,
-        title: 'Verified Breeder',
-        subtitle: 'Your breeder status has been verified.$expiryInfo',
+        title: l10n.verificationApproved,
+        subtitle: '${l10n.verifiedSince}$expiryInfo',
         backgroundColor: AppTheme.success.withOpacity(0.08),
       );
     }
@@ -168,7 +172,7 @@ class _VerificationStatusScreenState extends State<VerificationStatusScreen> {
       return _buildBannerCard(
         icon: Icons.hourglass_top,
         iconColor: Colors.orange,
-        title: 'Verification Pending',
+        title: l10n.verificationPending,
         subtitle: 'Your application is being reviewed by our team.',
         backgroundColor: Colors.orange.withOpacity(0.08),
       );
@@ -177,7 +181,7 @@ class _VerificationStatusScreenState extends State<VerificationStatusScreen> {
       return _buildBannerCard(
         icon: Icons.info_outline,
         iconColor: AppTheme.error,
-        title: 'Verification Rejected',
+        title: l10n.verificationRejected,
         subtitle: 'Please review the feedback and resubmit with additional documents.',
         backgroundColor: AppTheme.error.withOpacity(0.08),
       );
@@ -185,7 +189,7 @@ class _VerificationStatusScreenState extends State<VerificationStatusScreen> {
     return _buildBannerCard(
       icon: Icons.shield_outlined,
       iconColor: AppTheme.primary,
-      title: 'Become a Verified Breeder',
+      title: l10n.submitVerification,
       subtitle: 'Submit your credentials to get verified breeder status.',
       backgroundColor: AppTheme.primary.withOpacity(0.08),
     );
@@ -314,7 +318,7 @@ class _VerificationStatusScreenState extends State<VerificationStatusScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Feedback:', style: TextStyle(fontWeight: FontWeight.w600, color: AppTheme.error)),
+                        Text('${AppLocalizations.of(context)!.verificationRejected}:', style: const TextStyle(fontWeight: FontWeight.w600, color: AppTheme.error)),
                         const SizedBox(height: 4),
                         Text(request.rejectionReason!, style: const TextStyle(fontSize: 13)),
                       ],
@@ -343,7 +347,7 @@ class _VerificationStatusScreenState extends State<VerificationStatusScreen> {
                 ],
                 if (request.documents.isNotEmpty) ...[
                   const SizedBox(height: 12),
-                  const Text('Submitted Documents:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                  Text('${AppLocalizations.of(context)!.uploadDocuments}:', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                   const SizedBox(height: 8),
                   ...request.documents.map((doc) => _buildDocumentTile(doc)),
                 ],
@@ -570,7 +574,7 @@ class _VerificationSubmitScreenState extends State<VerificationSubmitScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Verification submitted successfully!'), backgroundColor: AppTheme.success),
+          SnackBar(content: Text(AppLocalizations.of(context)!.verificationSubmitted), backgroundColor: AppTheme.success),
         );
         Navigator.of(context).pop(true);
       }
@@ -587,11 +591,12 @@ class _VerificationSubmitScreenState extends State<VerificationSubmitScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isResubmit = widget.previousSubmission != null;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isResubmit ? 'Resubmit Verification' : 'Submit Verification', style: const TextStyle(fontWeight: FontWeight.w700)),
+        title: Text(isResubmit ? l10n.resubmit : l10n.submitVerification, style: const TextStyle(fontWeight: FontWeight.w700)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -678,7 +683,7 @@ class _VerificationSubmitScreenState extends State<VerificationSubmitScreen> {
               TextFormField(
                 controller: _kennelNameController,
                 decoration: InputDecoration(
-                  labelText: 'Kennel / Cattery Name',
+                  labelText: l10n.kennelName,
                   hintText: 'Enter your kennel or cattery name',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   prefixIcon: const Icon(Icons.home_work),
@@ -691,7 +696,7 @@ class _VerificationSubmitScreenState extends State<VerificationSubmitScreen> {
               TextFormField(
                 controller: _experienceController,
                 decoration: InputDecoration(
-                  labelText: 'Breeding Experience',
+                  labelText: l10n.yearsOfExperience,
                   hintText: 'Describe your breeding experience, years, specializations...',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   prefixIcon: const Icon(Icons.workspace_premium),
@@ -708,7 +713,7 @@ class _VerificationSubmitScreenState extends State<VerificationSubmitScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Documents', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                      Text(l10n.uploadDocuments, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                       Text('${_documents.length}/10 uploaded', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
                     ],
                   ),
@@ -771,7 +776,7 @@ class _VerificationSubmitScreenState extends State<VerificationSubmitScreen> {
                   ),
                   child: _submitting
                       ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : Text(isResubmit ? 'Resubmit for Review' : 'Submit for Review', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      : Text(isResubmit ? l10n.resubmit : l10n.submitVerification, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                 ),
               ),
               const SizedBox(height: 24),
@@ -906,10 +911,11 @@ class _BreederCertificateScreenState extends State<BreederCertificateScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Breeder Certificate', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: Text(l10n.breederCertificate, style: const TextStyle(fontWeight: FontWeight.w700)),
         actions: [
           if (_certificate != null)
             IconButton(
@@ -930,7 +936,7 @@ class _BreederCertificateScreenState extends State<BreederCertificateScreen> {
                       children: [
                         Icon(Icons.card_membership, size: 64, color: Colors.grey[400]),
                         const SizedBox(height: 16),
-                        Text('No Certificate Available', style: TextStyle(fontSize: 18, color: Colors.grey[600], fontWeight: FontWeight.w600)),
+                        Text(l10n.breederCertificate, style: TextStyle(fontSize: 18, color: Colors.grey[600], fontWeight: FontWeight.w600)),
                         const SizedBox(height: 8),
                         Text('You need an approved verification to view your certificate.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey[500])),
                       ],
@@ -952,7 +958,7 @@ class _BreederCertificateScreenState extends State<BreederCertificateScreen> {
                         child: ElevatedButton.icon(
                           onPressed: _shareCertificate,
                           icon: const Icon(Icons.share, color: Colors.white),
-                          label: const Text('Share Certificate', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+                          label: Text(l10n.share, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.primary,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -967,6 +973,7 @@ class _BreederCertificateScreenState extends State<BreederCertificateScreen> {
   }
 
   Widget _buildCertificateCard() {
+    final l10n = AppLocalizations.of(context)!;
     final cert = _certificate!;
     final isExpired = cert.isExpired;
 
@@ -1065,12 +1072,12 @@ class _BreederCertificateScreenState extends State<BreederCertificateScreen> {
                       color: Colors.red.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.warning_amber, color: Colors.white, size: 18),
-                        SizedBox(width: 8),
-                        Text('EXPIRED', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14)),
+                        const Icon(Icons.warning_amber, color: Colors.white, size: 18),
+                        const SizedBox(width: 8),
+                        Text(l10n.verificationExpired, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14)),
                       ],
                     ),
                   ),

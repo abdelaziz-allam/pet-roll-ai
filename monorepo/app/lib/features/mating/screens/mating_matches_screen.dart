@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../widgets/wedding_card_dialog.dart';
 import 'mating_request_detail_screen.dart';
 
@@ -52,6 +53,7 @@ class _MatingMatchesScreenState extends State<MatingMatchesScreen> with SingleTi
   }
 
   Future<void> _respondToRequest(String requestId, String status, {Map<String, dynamic>? request}) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       await ApiService().put('/mating/requests/$requestId/respond', {'status': status});
 
@@ -76,7 +78,7 @@ class _MatingMatchesScreenState extends State<MatingMatchesScreen> with SingleTi
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(status == 'accepted' ? 'Request accepted!' : 'Request rejected'),
+            content: Text(status == 'accepted' ? l10n.accepted : l10n.rejected),
             backgroundColor: status == 'accepted' ? AppTheme.success : AppTheme.textSecondary,
           ),
         );
@@ -85,7 +87,7 @@ class _MatingMatchesScreenState extends State<MatingMatchesScreen> with SingleTi
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.error),
+          SnackBar(content: Text('${l10n.error}: $e'), backgroundColor: AppTheme.error),
         );
       }
     }
@@ -93,6 +95,7 @@ class _MatingMatchesScreenState extends State<MatingMatchesScreen> with SingleTi
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Container(
@@ -112,8 +115,8 @@ class _MatingMatchesScreenState extends State<MatingMatchesScreen> with SingleTi
             indicatorSize: TabBarIndicatorSize.tab,
             dividerHeight: 0,
             tabs: [
-              Tab(text: 'Sent (${_sentRequests.length})'),
-              Tab(text: 'Received (${_receivedRequests.length})'),
+              Tab(text: '${l10n.sent} (${_sentRequests.length})'),
+              Tab(text: '${l10n.received} (${_receivedRequests.length})'),
             ],
           ),
         ),
@@ -133,6 +136,7 @@ class _MatingMatchesScreenState extends State<MatingMatchesScreen> with SingleTi
   }
 
   Widget _buildRequestsList(List<dynamic> requests, {required bool isSent}) {
+    final l10n = AppLocalizations.of(context)!;
     if (requests.isEmpty) {
       return Center(
         child: Padding(
@@ -154,14 +158,12 @@ class _MatingMatchesScreenState extends State<MatingMatchesScreen> with SingleTi
               ),
               const SizedBox(height: 16),
               Text(
-                isSent ? 'No sent requests' : 'No received requests',
+                l10n.noRequestsYet,
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 6),
               Text(
-                isSent
-                    ? 'Browse listings and send mating requests to other pet owners'
-                    : 'When someone sends you a mating request, it will appear here',
+                l10n.noRequestsYet,
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
               ),
@@ -182,6 +184,7 @@ class _MatingMatchesScreenState extends State<MatingMatchesScreen> with SingleTi
   }
 
   Widget _buildRequestCard(dynamic request, {required bool isSent}) {
+    final l10n = AppLocalizations.of(context)!;
     final status = request['status'] ?? 'pending';
     final message = request['message'] as String?;
     final createdAt = request['createdAt'] != null ? _formatDate(request['createdAt']) : '';
@@ -218,17 +221,17 @@ class _MatingMatchesScreenState extends State<MatingMatchesScreen> with SingleTi
       case 'accepted':
         statusColor = AppTheme.success;
         statusIcon = Icons.check_circle;
-        statusLabel = 'Accepted';
+        statusLabel = l10n.accepted;
         break;
       case 'rejected':
         statusColor = AppTheme.error;
         statusIcon = Icons.cancel;
-        statusLabel = 'Rejected';
+        statusLabel = l10n.rejected;
         break;
       default:
         statusColor = Colors.orange;
         statusIcon = Icons.access_time;
-        statusLabel = 'Pending';
+        statusLabel = l10n.pending;
     }
 
     String locationStr = '';
@@ -355,7 +358,7 @@ class _MatingMatchesScreenState extends State<MatingMatchesScreen> with SingleTi
                   children: [
                     _buildDetailChip(
                       icon: isSent ? Icons.arrow_upward : Icons.arrow_downward,
-                      label: isSent ? 'Sent to' : 'From',
+                      label: isSent ? l10n.sent : l10n.received,
                       value: otherPersonName,
                       color: isSent ? AppTheme.primary : Colors.deepPurple,
                     ),
@@ -363,7 +366,7 @@ class _MatingMatchesScreenState extends State<MatingMatchesScreen> with SingleTi
                     if (pet != null)
                       _buildDetailChip(
                         icon: Icons.pets,
-                        label: 'Your Pet',
+                        label: l10n.yourPet,
                         value: myPetName,
                         color: Colors.teal,
                       ),
@@ -407,15 +410,15 @@ class _MatingMatchesScreenState extends State<MatingMatchesScreen> with SingleTi
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Match Confirmed!',
-                                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: AppTheme.success),
+                              Text(
+                                l10n.matchConfirmed,
+                                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: AppTheme.success),
                               ),
                               const SizedBox(height: 3),
                               Text(
                                 isSent
-                                    ? '$otherPersonName accepted your request for $listingPetName'
-                                    : 'You accepted the request from $otherPersonName',
+                                    ? '$otherPersonName ${l10n.accepted} - $listingPetName'
+                                    : '${l10n.accepted} - $otherPersonName',
                                 style: TextStyle(fontSize: 12, color: Colors.grey[700]),
                               ),
                             ],
@@ -435,7 +438,7 @@ class _MatingMatchesScreenState extends State<MatingMatchesScreen> with SingleTi
                         child: OutlinedButton.icon(
                           onPressed: () => _respondToRequest(request['id'], 'rejected', request: request),
                           icon: const Icon(Icons.close, size: 18),
-                          label: const Text('Decline'),
+                          label: Text(l10n.decline),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppTheme.error,
                             side: const BorderSide(color: AppTheme.error),
@@ -448,7 +451,7 @@ class _MatingMatchesScreenState extends State<MatingMatchesScreen> with SingleTi
                         child: ElevatedButton.icon(
                           onPressed: () => _respondToRequest(request['id'], 'accepted', request: request),
                           icon: const Icon(Icons.check, size: 18),
-                          label: const Text('Accept'),
+                          label: Text(l10n.accept),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.success,
                             foregroundColor: Colors.white,

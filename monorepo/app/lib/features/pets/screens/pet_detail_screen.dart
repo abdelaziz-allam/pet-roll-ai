@@ -4,6 +4,7 @@ import '../../../core/services/api_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/birthday_celebration.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../health/screens/health_records_screen.dart';
 import '../../vaccination/screens/vaccination_screen.dart';
 import '../../pregnancy/screens/pregnancy_screen.dart';
@@ -73,6 +74,7 @@ class _PetDetailScreenState extends State<PetDetailScreen> with SingleTickerProv
   }
 
   Future<void> _savePet() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final body = <String, dynamic>{
         'name': _nameCtrl.text,
@@ -97,38 +99,39 @@ class _PetDetailScreenState extends State<PetDetailScreen> with SingleTickerProv
       }
       setState(() { _editing = false; });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pet updated'), backgroundColor: AppTheme.success),
+        SnackBar(content: Text(l10n.petUpdated), backgroundColor: AppTheme.success),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.error),
+        SnackBar(content: Text('${l10n.error}: $e'), backgroundColor: AppTheme.error),
       );
     }
   }
 
   Future<void> _deletePet() async {
-    final confirm = await showDialog<bool>(
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Pet'),
+        title: Text(l10n.deletePet),
         content: Text('Are you sure you want to delete ${_pet['name']}? This cannot be undone.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete', style: TextStyle(color: AppTheme.error)),
+            child: Text(l10n.delete, style: const TextStyle(color: AppTheme.error)),
           ),
         ],
       ),
     );
-    if (confirm != true) return;
+    if (confirmed != true) return;
     try {
       await ApiService().delete('/pets/${_pet['id']}');
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.error),
+          SnackBar(content: Text('${l10n.error}: $e'), backgroundColor: AppTheme.error),
         );
       }
     }
@@ -147,6 +150,7 @@ class _PetDetailScreenState extends State<PetDetailScreen> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final photos = _pet['photos'] as List?;
     final photoUrl = (photos != null && photos.isNotEmpty)
         ? (photos.first is Map ? photos.first['url'] : photos.first)
@@ -247,10 +251,10 @@ class _PetDetailScreenState extends State<PetDetailScreen> with SingleTickerProv
                 unselectedLabelColor: AppTheme.textSecondary,
                 indicatorColor: AppTheme.primary,
                 indicatorWeight: 3,
-                tabs: const [
-                  Tab(text: 'Profile', icon: Icon(Icons.info_outline, size: 20)),
-                  Tab(text: 'Health', icon: Icon(Icons.medical_services_outlined, size: 20)),
-                  Tab(text: 'More', icon: Icon(Icons.more_horiz, size: 20)),
+                tabs: [
+                  Tab(text: l10n.basicInfo, icon: const Icon(Icons.info_outline, size: 20)),
+                  Tab(text: l10n.health, icon: const Icon(Icons.medical_services_outlined, size: 20)),
+                  Tab(text: l10n.more, icon: const Icon(Icons.more_horiz, size: 20)),
                 ],
               ),
             ),
@@ -273,7 +277,7 @@ class _PetDetailScreenState extends State<PetDetailScreen> with SingleTickerProv
                 padding: const EdgeInsets.all(16),
                 child: ElevatedButton(
                   onPressed: _savePet,
-                  child: const Text('Save Changes'),
+                  child: Text(l10n.save),
                 ),
               ),
             )
@@ -283,6 +287,7 @@ class _PetDetailScreenState extends State<PetDetailScreen> with SingleTickerProv
   }
 
   Widget _buildProfileTab() {
+    final l10n = AppLocalizations.of(context)!;
     if (_editing) return _buildEditForm();
     return ListView(
       padding: const EdgeInsets.all(20),
@@ -293,27 +298,27 @@ class _PetDetailScreenState extends State<PetDetailScreen> with SingleTickerProv
             age: _petAge,
             onDismiss: () => setState(() => _showBirthdayBanner = false),
           ),
-        _buildInfoSection('Basic Info', [
-          _infoTile(Icons.pets, 'Species', _pet['species'] ?? '-'),
-          _infoTile(Icons.category, 'Breed', _pet['breed'] ?? '-'),
-          _infoTile(_pet['gender'] == 'male' ? Icons.male : Icons.female, 'Gender', _pet['gender'] ?? '-'),
-          _infoTile(Icons.palette, 'Color', _pet['color'] ?? '-'),
-          _infoTile(Icons.monitor_weight, 'Weight', _pet['weight'] != null ? '${_pet['weight']} kg' : '-'),
+        _buildInfoSection(l10n.basicInfo, [
+          _infoTile(Icons.pets, l10n.species, _pet['species'] ?? '-'),
+          _infoTile(Icons.category, l10n.breed, _pet['breed'] ?? '-'),
+          _infoTile(_pet['gender'] == 'male' ? Icons.male : Icons.female, l10n.gender, _pet['gender'] ?? '-'),
+          _infoTile(Icons.palette, l10n.color, _pet['color'] ?? '-'),
+          _infoTile(Icons.monitor_weight, l10n.weight, _pet['weight'] != null ? '${_pet['weight']} kg' : '-'),
         ]),
         const SizedBox(height: 16),
-        _buildInfoSection('Status', [
-          _infoTile(Icons.check_circle, 'Status', _pet['status'] ?? 'active'),
-          _infoTile(Icons.content_cut, 'Neutered', _isNeutered ? 'Yes' : 'No'),
-          _infoTile(Icons.favorite, 'Available for Mating', _isAvailableForMating ? 'Yes' : 'No'),
+        _buildInfoSection(l10n.status, [
+          _infoTile(Icons.check_circle, l10n.status, _pet['status'] ?? 'active'),
+          _infoTile(Icons.content_cut, l10n.neutered, _isNeutered ? 'Yes' : 'No'),
+          _infoTile(Icons.favorite, l10n.availableForMating, _isAvailableForMating ? 'Yes' : 'No'),
         ]),
         const SizedBox(height: 16),
-        _buildInfoSection('Location', [
-          _infoTile(Icons.flag, 'Country', _pet['country'] ?? _pet['location']?['country'] ?? '-'),
-          _infoTile(Icons.location_city, 'City', _pet['city'] ?? _pet['location']?['city'] ?? '-'),
+        _buildInfoSection(l10n.location, [
+          _infoTile(Icons.flag, l10n.country, _pet['country'] ?? _pet['location']?['country'] ?? '-'),
+          _infoTile(Icons.location_city, l10n.city, _pet['city'] ?? _pet['location']?['city'] ?? '-'),
         ]),
         if (_pet['notes'] != null && (_pet['notes'] as String).isNotEmpty) ...[
           const SizedBox(height: 16),
-          _buildInfoSection('Notes', [
+          _buildInfoSection(l10n.notes, [
             Padding(
               padding: const EdgeInsets.all(12),
               child: Text(_pet['notes'], style: const TextStyle(color: AppTheme.textSecondary)),
@@ -325,15 +330,16 @@ class _PetDetailScreenState extends State<PetDetailScreen> with SingleTickerProv
   }
 
   Widget _buildEditForm() {
+    final l10n = AppLocalizations.of(context)!;
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        _buildField('Name', _nameCtrl),
-        _buildField('Breed', _breedCtrl),
+        _buildField(l10n.petName, _nameCtrl),
+        _buildField(l10n.breed, _breedCtrl),
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
           value: _species,
-          decoration: const InputDecoration(labelText: 'Species'),
+          decoration: InputDecoration(labelText: l10n.species),
           items: ['dog', 'cat', 'bird', 'horse', 'rabbit', 'fish', 'reptile', 'hamster']
               .map((s) => DropdownMenuItem(value: s, child: Text(s)))
               .toList(),
@@ -342,33 +348,34 @@ class _PetDetailScreenState extends State<PetDetailScreen> with SingleTickerProv
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
           value: _gender,
-          decoration: const InputDecoration(labelText: 'Gender'),
+          decoration: InputDecoration(labelText: l10n.gender),
           items: ['male', 'female'].map((g) => DropdownMenuItem(value: g, child: Text(g))).toList(),
           onChanged: (v) => setState(() => _gender = v),
         ),
         const SizedBox(height: 12),
-        _buildField('Weight (kg)', _weightCtrl, keyboard: TextInputType.number),
-        _buildField('Color', _colorCtrl),
+        _buildField(l10n.weightKg, _weightCtrl, keyboard: TextInputType.number),
+        _buildField(l10n.color, _colorCtrl),
         const SizedBox(height: 12),
         SwitchListTile(
-          title: const Text('Neutered'),
+          title: Text(l10n.neutered),
           value: _isNeutered,
           onChanged: (v) => setState(() => _isNeutered = v),
           activeColor: AppTheme.primary,
         ),
         SwitchListTile(
-          title: const Text('Available for Mating'),
+          title: Text(l10n.availableForMating),
           value: _isAvailableForMating,
           onChanged: (v) => setState(() => _isAvailableForMating = v),
           activeColor: AppTheme.primary,
         ),
         const SizedBox(height: 12),
-        _buildField('Notes', _notesCtrl, maxLines: 3),
+        _buildField(l10n.notes, _notesCtrl, maxLines: 3),
       ],
     );
   }
 
   Widget _buildMoreTab() {
+    final l10n = AppLocalizations.of(context)!;
     final birthDateStr = _pet['dateOfBirth'];
     final birthDate = birthDateStr != null ? DateTime.tryParse(birthDateStr) : null;
     String birthdaySubtitle = 'Not set - Tap to add';
@@ -383,23 +390,23 @@ class _PetDetailScreenState extends State<PetDetailScreen> with SingleTickerProv
       children: [
         _buildActionCard(
           Icons.vaccines,
-          'Vaccinations',
-          'Track vaccines, doses & schedules',
+          l10n.vaccinations,
+          l10n.trackVaccinesDosesSchedules,
           Colors.blue,
           () => Navigator.push(context, MaterialPageRoute(builder: (_) => VaccinationScreen(petId: _pet['id'], ownerId: _pet['ownerId'] ?? ''))),
         ),
         const SizedBox(height: 12),
         _buildActionCard(
           Icons.pregnant_woman,
-          'Pregnancy',
-          'Track pregnancies & due dates',
+          l10n.pregnancy,
+          l10n.trackPregnanciesDueDates,
           Colors.purple,
           () => Navigator.push(context, MaterialPageRoute(builder: (_) => PregnancyScreen(petId: _pet['id'], ownerId: _pet['ownerId'] ?? ''))),
         ),
         const SizedBox(height: 12),
         _buildActionCard(
           Icons.verified_user,
-          'Health Certification',
+          l10n.healthCertification,
           _pet['healthCertified'] == true ? 'Certified' : 'Request health certification',
           _pet['healthCertified'] == true ? Colors.green : Colors.teal,
           () async {
@@ -416,7 +423,7 @@ class _PetDetailScreenState extends State<PetDetailScreen> with SingleTickerProv
         const SizedBox(height: 12),
         _buildActionCard(
           Icons.cake,
-          'Birthday',
+          l10n.dateOfBirth,
           birthdaySubtitle,
           Colors.orange,
           _showBirthdayPicker,
@@ -424,8 +431,8 @@ class _PetDetailScreenState extends State<PetDetailScreen> with SingleTickerProv
         const SizedBox(height: 12),
         _buildActionCard(
           Icons.photo_library,
-          'Photo Gallery',
-          '${((_pet['photos'] as List?) ?? []).length} photos',
+          l10n.photoGallery,
+          '${((_pet['photos'] as List?) ?? []).length} ${l10n.photos}',
           Colors.green,
           () {},
         ),
@@ -478,8 +485,9 @@ class _PetDetailScreenState extends State<PetDetailScreen> with SingleTickerProv
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.error),
+          SnackBar(content: Text('${l10n.error}: $e'), backgroundColor: AppTheme.error),
         );
       }
     }

@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 class HealthCertificationScreen extends StatefulWidget {
   final String petId;
@@ -108,15 +109,17 @@ class _HealthCertificationScreenState extends State<HealthCertificationScreen> {
       });
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         Navigator.pop(context, true);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Health certification submitted for review!'), backgroundColor: AppTheme.success),
+          SnackBar(content: Text(l10n.submitCertification), backgroundColor: AppTheme.success),
         );
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.error),
+          SnackBar(content: Text('${l10n.error}: $e'), backgroundColor: AppTheme.error),
         );
       }
     } finally {
@@ -134,9 +137,10 @@ class _HealthCertificationScreenState extends State<HealthCertificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Health Certification', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: Text(l10n.healthCertification, style: const TextStyle(fontWeight: FontWeight.w700)),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator(color: AppTheme.primary))
@@ -158,6 +162,7 @@ class _HealthCertificationScreenState extends State<HealthCertificationScreen> {
   }
 
   Widget _buildPetHeader() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -182,9 +187,9 @@ class _HealthCertificationScreenState extends State<HealthCertificationScreen> {
               children: [
                 Text(widget.petName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 4),
-                const Text(
-                  'Submit vet documents to certify your pet\'s health status',
-                  style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                Text(
+                  l10n.uploadHealthCertificate,
+                  style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
                 ),
               ],
             ),
@@ -195,6 +200,7 @@ class _HealthCertificationScreenState extends State<HealthCertificationScreen> {
   }
 
   Widget _buildExistingStatus() {
+    final l10n = AppLocalizations.of(context)!;
     final status = _existingCert!['status'] ?? 'pending';
     Color color;
     IconData icon;
@@ -205,19 +211,19 @@ class _HealthCertificationScreenState extends State<HealthCertificationScreen> {
       case 'approved':
         color = AppTheme.success;
         icon = Icons.check_circle;
-        label = 'Certified';
+        label = l10n.certificationApproved;
         description = 'Your pet is health certified! This badge is shown on mating listings.';
         break;
       case 'rejected':
         color = AppTheme.error;
         icon = Icons.cancel;
-        label = 'Rejected';
+        label = l10n.certificationRejected;
         description = _existingCert!['rejectionReason'] ?? 'Your submission was not approved. Please resubmit with correct documents.';
         break;
       default:
         color = Colors.orange;
         icon = Icons.access_time;
-        label = 'Under Review';
+        label = l10n.certificationPending;
         description = 'Your certification is being reviewed by our team. This usually takes 1-2 business days.';
     }
 
@@ -335,6 +341,7 @@ class _HealthCertificationScreenState extends State<HealthCertificationScreen> {
   }
 
   Widget _buildForm() {
+    final l10n = AppLocalizations.of(context)!;
     return Form(
       key: _formKey,
       child: Column(
@@ -410,9 +417,9 @@ class _HealthCertificationScreenState extends State<HealthCertificationScreen> {
           TextFormField(
             controller: _notesCtrl,
             maxLines: 3,
-            decoration: const InputDecoration(
-              labelText: 'Additional Notes',
-              prefixIcon: Icon(Icons.notes),
+            decoration: InputDecoration(
+              labelText: l10n.notes,
+              prefixIcon: const Icon(Icons.notes),
               alignLabelWithHint: true,
             ),
           ),
@@ -426,7 +433,7 @@ class _HealthCertificationScreenState extends State<HealthCertificationScreen> {
               icon: _submitting
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                   : const Icon(Icons.send),
-              label: Text(_submitting ? 'Submitting...' : 'Submit for Review', style: const TextStyle(fontSize: 16)),
+              label: Text(_submitting ? l10n.loading : l10n.submitCertification, style: const TextStyle(fontSize: 16)),
             ),
           ),
           const SizedBox(height: 40),
@@ -494,6 +501,7 @@ class _HealthCertificationScreenState extends State<HealthCertificationScreen> {
   }
 
   Widget _buildAddDocButton() {
+    final l10n = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: _pickDocument,
       child: Container(
@@ -504,12 +512,12 @@ class _HealthCertificationScreenState extends State<HealthCertificationScreen> {
           border: Border.all(color: AppTheme.primary, width: 2),
           color: AppTheme.primary.withOpacity(0.05),
         ),
-        child: const Column(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.upload_file, color: AppTheme.primary, size: 28),
-            SizedBox(height: 4),
-            Text('Upload', style: TextStyle(color: AppTheme.primary, fontSize: 12, fontWeight: FontWeight.w600)),
+            const Icon(Icons.upload_file, color: AppTheme.primary, size: 28),
+            const SizedBox(height: 4),
+            Text(l10n.uploadHealthCertificate, style: const TextStyle(color: AppTheme.primary, fontSize: 12, fontWeight: FontWeight.w600)),
           ],
         ),
       ),

@@ -10,6 +10,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../models/health_record_model.dart';
 import '../providers/health_provider.dart';
 import '../services/health_service.dart';
@@ -155,9 +156,10 @@ class _AddHealthRecordScreenState extends ConsumerState<AddHealthRecordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Health Record', style: AppTypography.heading2),
+        title: Text(l10n.addHealthRecord, style: AppTypography.heading2),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
@@ -166,7 +168,7 @@ class _AddHealthRecordScreenState extends ConsumerState<AddHealthRecordScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Record Type', style: AppTypography.label),
+              Text(l10n.type, style: AppTypography.label),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -187,25 +189,25 @@ class _AddHealthRecordScreenState extends ConsumerState<AddHealthRecordScreen> {
               ),
               const SizedBox(height: 24),
               AppTextField(
-                label: 'Title',
+                label: l10n.addHealthRecord,
                 hint: 'Enter record title',
                 controller: _titleController,
                 textInputAction: TextInputAction.next,
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'Title is required';
+                  if (value == null || value.isEmpty) return l10n.titleAndVisitDateRequired;
                   return null;
                 },
               ),
               const SizedBox(height: 16),
               AppTextField(
-                label: 'Description',
+                label: l10n.description,
                 hint: 'Add details about this record',
                 controller: _descriptionController,
                 maxLines: 3,
                 textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 16),
-              Text('Date', style: AppTypography.label),
+              Text(l10n.visitDate, style: AppTypography.label),
               const SizedBox(height: 6),
               InkWell(
                 onTap: _pickDate,
@@ -231,7 +233,7 @@ class _AddHealthRecordScreenState extends ConsumerState<AddHealthRecordScreen> {
               ),
               const SizedBox(height: 16),
               AppTextField(
-                label: 'Veterinarian',
+                label: l10n.veterinarian,
                 hint: 'Vet name (optional)',
                 controller: _vetController,
                 textInputAction: TextInputAction.next,
@@ -239,7 +241,7 @@ class _AddHealthRecordScreenState extends ConsumerState<AddHealthRecordScreen> {
               ),
               const SizedBox(height: 16),
               AppTextField(
-                label: 'Clinic',
+                label: l10n.clinic,
                 hint: 'Clinic name (optional)',
                 controller: _clinicController,
                 textInputAction: TextInputAction.done,
@@ -307,7 +309,7 @@ class _AddHealthRecordScreenState extends ConsumerState<AddHealthRecordScreen> {
               ),
               const SizedBox(height: 32),
               AppButton(
-                label: 'Save Record',
+                label: l10n.saveRecord,
                 onPressed: _handleSave,
                 isLoading: _isLoading,
               ),

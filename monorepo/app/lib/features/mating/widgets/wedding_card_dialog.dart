@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 class WeddingCardDialog extends StatefulWidget {
   final String myPetName;
@@ -104,6 +105,7 @@ class _WeddingCardDialogState extends State<WeddingCardDialog>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Stack(
         alignment: Alignment.center,
@@ -158,9 +160,9 @@ class _WeddingCardDialogState extends State<WeddingCardDialog>
                         style: TextStyle(fontSize: 36),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Match Confirmed!',
-                        style: TextStyle(
+                      Text(
+                        l10n.matchConfirmed,
+                        style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
@@ -169,7 +171,7 @@ class _WeddingCardDialogState extends State<WeddingCardDialog>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'A perfect pair has been found',
+                        l10n.perfectPairFound,
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.white.withOpacity(0.9),
@@ -288,9 +290,9 @@ class _WeddingCardDialogState extends State<WeddingCardDialog>
                         ),
                         child: Column(
                           children: [
-                            const Text(
-                              '🎊 Congratulations! 🎊',
-                              style: TextStyle(
+                            Text(
+                              '🎊 ${l10n.congratulations} 🎊',
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
                                 color: Color(0xFFF1379D),
@@ -327,9 +329,9 @@ class _WeddingCardDialogState extends State<WeddingCardDialog>
                             ),
                             elevation: 0,
                           ),
-                          child: const Text(
-                            'Wonderful! 🎉',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                          child: Text(
+                            '${l10n.wonderful}! 🎉',
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                           ),
                         ),
                       ),

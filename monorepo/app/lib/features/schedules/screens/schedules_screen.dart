@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_indicator.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../models/schedule_model.dart';
 import '../providers/schedule_provider.dart';
 import '../services/schedule_service.dart';
@@ -37,16 +38,16 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen> {
     }
   }
 
-  String _frequencyLabel(ScheduleFrequency frequency) {
+  String _frequencyLabel(ScheduleFrequency frequency, AppLocalizations l10n) {
     switch (frequency) {
       case ScheduleFrequency.daily:
-        return 'Daily';
+        return l10n.daily;
       case ScheduleFrequency.twiceDaily:
-        return 'Twice Daily';
+        return l10n.twiceDaily;
       case ScheduleFrequency.weekly:
-        return 'Weekly';
+        return l10n.weekly;
       case ScheduleFrequency.custom:
-        return 'Custom';
+        return l10n.custom;
     }
   }
 
@@ -65,10 +66,11 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final schedulesAsync = ref.watch(schedulesProvider(widget.petId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Schedules')),
+      appBar: AppBar(title: Text(l10n.schedules)),
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToAdd,
         backgroundColor: AppColors.brandPrimary,
@@ -86,6 +88,7 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen> {
   }
 
   Widget _buildContent(List<Schedule> schedules) {
+    final l10n = AppLocalizations.of(context)!;
     final todayTasks = schedules.where((s) => s.active).toList();
     final completedToday = todayTasks.where((s) => s.isCompletedToday).toList();
     final pendingToday = todayTasks.where((s) => !s.isCompletedToday).toList();
@@ -93,13 +96,13 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Text("Today's Tasks", style: AppTypography.heading2),
+        Text(l10n.todaysTasks, style: AppTypography.heading2),
         const SizedBox(height: 12),
         if (pendingToday.isEmpty && completedToday.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
             child: Text(
-              'No schedules yet. Tap + to add one.',
+              l10n.noSchedulesYet,
               style: AppTypography.body.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
@@ -129,7 +132,7 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen> {
         const SizedBox(height: 24),
         const Divider(),
         const SizedBox(height: 16),
-        Text('All Active Schedules', style: AppTypography.heading2),
+        Text(l10n.allActiveSchedules, style: AppTypography.heading2),
         const SizedBox(height: 12),
         ...todayTasks.map(_buildScheduleCard),
       ],
@@ -163,6 +166,7 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen> {
   }
 
   Widget _buildScheduleCard(Schedule schedule) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
@@ -172,7 +176,7 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen> {
         ),
         title: Text(schedule.title, style: AppTypography.label),
         subtitle: Text(
-          '${_frequencyLabel(schedule.frequency)} - ${schedule.times.join(", ")}',
+          '${_frequencyLabel(schedule.frequency, l10n)} - ${schedule.times.join(", ")}',
           style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
         ),
         trailing: Icon(

@@ -6,6 +6,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/avatar_widget.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_indicator.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../models/chat_model.dart';
 import '../providers/chat_provider.dart';
 import '../services/chat_service.dart';
@@ -57,13 +58,14 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final messagesAsync = ref.watch(chatMessagesProvider(widget.roomId));
 
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 0,
         title: _isLoadingRoom
-            ? const Text('Chat')
+            ? Text(l10n.chat)
             : Row(
                 children: [
                   AvatarWidget(
@@ -74,7 +76,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    _room?.otherUserName ?? 'Chat',
+                    _room?.otherUserName ?? l10n.chat,
                     style: AppTypography.heading3
                         .copyWith(color: AppColors.textPrimary),
                   ),
@@ -98,10 +100,10 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
 
   Widget _buildMessageList(List<ChatMessage> messages) {
     if (messages.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
-          'No messages yet. Say hello!',
-          style: TextStyle(color: AppColors.textSecondary),
+          AppLocalizations.of(context)!.noMessagesSayHello,
+          style: const TextStyle(color: AppColors.textSecondary),
         ),
       );
     }
@@ -149,11 +151,11 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
     if (date.year == now.year &&
         date.month == now.month &&
         date.day == now.day) {
-      label = 'Today';
+      label = AppLocalizations.of(context)!.today;
     } else if (date.year == now.year &&
         date.month == now.month &&
         date.day == now.day - 1) {
-      label = 'Yesterday';
+      label = AppLocalizations.of(context)!.yesterday;
     } else {
       label = '${date.day}/${date.month}/${date.year}';
     }
@@ -204,7 +206,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => _sendTextMessage(),
               decoration: InputDecoration(
-                hintText: 'Type a message...',
+                hintText: l10n.typeAMessage,
                 hintStyle: AppTypography.body
                     .copyWith(color: AppColors.textHint),
                 border: OutlineInputBorder(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../widgets/wedding_card_view.dart';
 
 class WeddingCardsScreen extends StatefulWidget {
@@ -38,6 +39,7 @@ class _WeddingCardsScreenState extends State<WeddingCardsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (_loading) {
       return const Center(child: CircularProgressIndicator(color: AppTheme.primary));
     }
@@ -62,15 +64,15 @@ class _WeddingCardsScreenState extends State<WeddingCardsScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                'No Wedding Cards Yet',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              Text(
+                l10n.noWeddingCardsYet,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'When a mating match is confirmed, a beautiful wedding card will appear here that you can view and share anytime!',
+              Text(
+                l10n.noWeddingCardsYet,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: AppTheme.textSecondary, fontSize: 14, height: 1.5),
+                style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14, height: 1.5),
               ),
             ],
           ),

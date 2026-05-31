@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../models/schedule_model.dart';
 import '../providers/schedule_provider.dart';
 import '../services/schedule_service.dart';
@@ -96,8 +97,9 @@ class _AddScheduleScreenState extends ConsumerState<AddScheduleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Schedule')),
+      appBar: AppBar(title: Text(l10n.addSchedule)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -106,18 +108,18 @@ class _AddScheduleScreenState extends ConsumerState<AddScheduleScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AppTextField(
-                label: 'Title',
+                label: l10n.addSchedule,
                 hint: 'e.g., Morning Feed',
                 controller: _titleController,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a title';
+                    return l10n.pleaseEnterTitle;
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 20),
-              Text('Type', style: AppTypography.label),
+              Text(l10n.type, style: AppTypography.label),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -136,7 +138,7 @@ class _AddScheduleScreenState extends ConsumerState<AddScheduleScreen> {
                 }).toList(),
               ),
               const SizedBox(height: 20),
-              Text('Frequency', style: AppTypography.label),
+              Text(l10n.frequency, style: AppTypography.label),
               const SizedBox(height: 8),
               DropdownButtonFormField<ScheduleFrequency>(
                 value: _selectedFrequency,
@@ -157,11 +159,11 @@ class _AddScheduleScreenState extends ConsumerState<AddScheduleScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Times', style: AppTypography.label),
+                  Text(l10n.times, style: AppTypography.label),
                   TextButton.icon(
                     onPressed: _addTimeSlot,
                     icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Add Time'),
+                    label: Text(l10n.addTime),
                   ),
                 ],
               ),
@@ -201,14 +203,14 @@ class _AddScheduleScreenState extends ConsumerState<AddScheduleScreen> {
               }),
               const SizedBox(height: 20),
               AppTextField(
-                label: 'Notes',
-                hint: 'Optional notes',
+                label: l10n.optionalNotes,
+                hint: l10n.optionalNotes,
                 controller: _notesController,
                 maxLines: 3,
               ),
               const SizedBox(height: 32),
               AppButton(
-                label: 'Save Schedule',
+                label: l10n.saveSchedule,
                 onPressed: _submit,
                 isLoading: _isLoading,
               ),
@@ -220,15 +222,16 @@ class _AddScheduleScreenState extends ConsumerState<AddScheduleScreen> {
   }
 
   String _frequencyLabel(ScheduleFrequency frequency) {
+    final l10n = AppLocalizations.of(context)!;
     switch (frequency) {
       case ScheduleFrequency.daily:
-        return 'Daily';
+        return l10n.daily;
       case ScheduleFrequency.twiceDaily:
-        return 'Twice Daily';
+        return l10n.twiceDaily;
       case ScheduleFrequency.weekly:
-        return 'Weekly';
+        return l10n.weekly;
       case ScheduleFrequency.custom:
-        return 'Custom';
+        return l10n.custom;
     }
   }
 }

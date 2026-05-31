@@ -10,6 +10,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/avatar_widget.dart';
 import '../../../core/utils/timezone_country_map.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../auth/services/auth_service.dart';
 
@@ -82,10 +83,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Edit Profile',
+          l10n.editProfile,
           style: AppTypography.heading2.copyWith(color: AppColors.textPrimary),
         ),
         backgroundColor: AppColors.bgPrimary,
@@ -102,11 +104,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               const SizedBox(height: 32),
               AppTextField(
                 controller: _displayNameController,
-                label: 'Display Name',
-                hint: 'Enter your display name',
+                label: l10n.displayName,
+                hint: l10n.enterDisplayName,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Display name is required';
+                    return l10n.displayNameRequired;
                   }
                   return null;
                 },
@@ -118,12 +120,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               const SizedBox(height: 20),
               AppTextField(
                 controller: _cityController,
-                label: 'City (Optional)',
-                hint: 'Enter your city',
+                label: l10n.cityOptional,
+                hint: l10n.enterYourCity,
               ),
               const SizedBox(height: 40),
               AppButton(
-                label: 'Save Changes',
+                label: l10n.save,
                 isLoading: _isSaving,
                 onPressed: _save,
               ),
@@ -169,12 +171,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Widget _buildCountrySelector() {
+    final l10n = AppLocalizations.of(context)!;
     final countries = allCountries;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Country',
+          l10n.country,
           style: AppTypography.label.copyWith(color: AppColors.textPrimary),
         ),
         const SizedBox(height: 8),
@@ -182,7 +185,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           value: countries.contains(_selectedCountry) ? _selectedCountry : null,
           isExpanded: true,
           decoration: InputDecoration(
-            hintText: 'Select your country',
+            hintText: l10n.selectYourCountry,
             hintStyle: AppTypography.body.copyWith(color: AppColors.textHint),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -208,12 +211,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Widget _buildTimezoneSelector() {
+    final l10n = AppLocalizations.of(context)!;
     final timezones = allTimezones;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Timezone',
+          l10n.timezone,
           style: AppTypography.label.copyWith(color: AppColors.textPrimary),
         ),
         const SizedBox(height: 8),
@@ -221,7 +225,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           value: timezones.contains(_selectedTimezone) ? _selectedTimezone : null,
           isExpanded: true,
           decoration: InputDecoration(
-            hintText: 'Select timezone',
+            hintText: l10n.selectTimezone,
             hintStyle: AppTypography.body.copyWith(color: AppColors.textHint),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -285,14 +289,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated successfully')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.profileUpdatedSuccessfully)),
         );
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update profile: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.failedToUpdateProfile)),
         );
       }
     } finally {

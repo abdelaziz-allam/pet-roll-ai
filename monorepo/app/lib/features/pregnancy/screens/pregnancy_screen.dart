@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 class PregnancyScreen extends StatefulWidget {
   final String petId;
@@ -37,6 +38,7 @@ class _PregnancyScreenState extends State<PregnancyScreen> {
   final _picker = ImagePicker();
 
   void _showAddDialog() {
+    final l10n = AppLocalizations.of(context)!;
     DateTime? matingDate;
     DateTime? expectedDeliveryDate;
     final notesCtrl = TextEditingController();
@@ -82,13 +84,13 @@ class _PregnancyScreenState extends State<PregnancyScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Track Pregnancy', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
-                          SizedBox(height: 2),
-                          Text('Set dates to receive delivery reminders', style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+                          Text(l10n.trackPregnancy, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                          const SizedBox(height: 2),
+                          Text(l10n.notificationSchedule, style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
                         ],
                       ),
                     ),
@@ -102,11 +104,11 @@ class _PregnancyScreenState extends State<PregnancyScreen> {
 
                 _buildDateSelector(
                   ctx: ctx,
-                  label: 'Mating Date *',
+                  label: '${l10n.matingDate} *',
                   icon: Icons.favorite,
                   color: Colors.purple,
                   date: matingDate,
-                  hint: 'When did mating occur?',
+                  hint: l10n.whenDidMatingOccur,
                   onTap: () async {
                     final picked = await showDatePicker(
                       context: ctx,
@@ -128,11 +130,11 @@ class _PregnancyScreenState extends State<PregnancyScreen> {
 
                 _buildDateSelector(
                   ctx: ctx,
-                  label: 'Expected Delivery Date *',
+                  label: '${l10n.expectedDeliveryDate} *',
                   icon: Icons.child_friendly,
                   color: AppTheme.primary,
                   date: expectedDeliveryDate,
-                  hint: autoCalc && matingDate == null ? 'Auto-calculated from mating date' : 'Tap to set manually',
+                  hint: autoCalc && matingDate == null ? l10n.autoCalculatedFromMatingDate : l10n.tapToSetManually,
                   onTap: () async {
                     final initial = expectedDeliveryDate ?? (matingDate != null
                         ? matingDate!.add(const Duration(days: 63))
@@ -156,7 +158,7 @@ class _PregnancyScreenState extends State<PregnancyScreen> {
                   Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(
-                      '* Auto-calculated: 63 days from mating date',
+                      '* ${l10n.autoCalculated63Days}',
                       style: TextStyle(fontSize: 11, color: Colors.purple.withOpacity(0.7), fontStyle: FontStyle.italic),
                     ),
                   ),
@@ -176,15 +178,15 @@ class _PregnancyScreenState extends State<PregnancyScreen> {
                         children: [
                           Icon(Icons.male, color: Colors.blue, size: 20),
                           const SizedBox(width: 8),
-                          const Text('Father Details', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                          Text(l10n.fatherDetails, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
                         ],
                       ),
                       const SizedBox(height: 4),
-                      const Text('Info about the sire for your records', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                      Text(l10n.infoAboutSire, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
                       const SizedBox(height: 12),
                       TextField(
                         controller: fatherNameCtrl,
-                        decoration: const InputDecoration(labelText: 'Father Name *', prefixIcon: Icon(Icons.pets), isDense: true),
+                        decoration: InputDecoration(labelText: '${l10n.fatherName} *', prefixIcon: const Icon(Icons.pets), isDense: true),
                       ),
                       const SizedBox(height: 10),
                       Row(
@@ -217,7 +219,7 @@ class _PregnancyScreenState extends State<PregnancyScreen> {
                           Expanded(
                             child: TextField(
                               controller: fatherOwnerCtrl,
-                              decoration: const InputDecoration(labelText: 'Owner Name', prefixIcon: Icon(Icons.person), isDense: true),
+                              decoration: InputDecoration(labelText: l10n.ownerName, prefixIcon: const Icon(Icons.person), isDense: true),
                             ),
                           ),
                         ],
@@ -226,10 +228,10 @@ class _PregnancyScreenState extends State<PregnancyScreen> {
                       TextField(
                         controller: fatherNotesCtrl,
                         maxLines: 2,
-                        decoration: const InputDecoration(labelText: 'Notes about father', prefixIcon: Icon(Icons.notes), isDense: true),
+                        decoration: InputDecoration(labelText: l10n.notesAboutFather, prefixIcon: const Icon(Icons.notes), isDense: true),
                       ),
                       const SizedBox(height: 12),
-                      const Text('Photos (up to 10)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                      Text(l10n.photosUpTo10, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
                       SizedBox(
                         height: 80,
@@ -290,7 +292,7 @@ class _PregnancyScreenState extends State<PregnancyScreen> {
                 ),
 
                 const SizedBox(height: 12),
-                TextField(controller: notesCtrl, maxLines: 2, decoration: const InputDecoration(labelText: 'General Notes', prefixIcon: Icon(Icons.notes))),
+                TextField(controller: notesCtrl, maxLines: 2, decoration: InputDecoration(labelText: l10n.generalNotes, prefixIcon: const Icon(Icons.notes))),
 
                 if (expectedDeliveryDate != null) ...[
                   const SizedBox(height: 16),
@@ -308,13 +310,13 @@ class _PregnancyScreenState extends State<PregnancyScreen> {
                           children: [
                             Icon(Icons.notifications_active, size: 16, color: AppTheme.success),
                             const SizedBox(width: 8),
-                            const Text('Notification Schedule', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                            Text(l10n.notificationSchedule, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
                           ],
                         ),
                         const SizedBox(height: 8),
-                        Text('• Reminders before delivery date', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-                        Text('• Delivery week daily alerts', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-                        Text('• Delivery day notification', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                        Text('• ${l10n.remindersBeforeDeliveryDate}', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                        Text('• ${l10n.deliveryWeekDailyAlerts}', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                        Text('• ${l10n.deliveryDayNotification}', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
                       ],
                     ),
                   ),
@@ -327,7 +329,7 @@ class _PregnancyScreenState extends State<PregnancyScreen> {
                     onPressed: () async {
                       if (matingDate == null || expectedDeliveryDate == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Please set both mating and delivery dates'), backgroundColor: AppTheme.warning),
+                          SnackBar(content: Text(l10n.setBothDates), backgroundColor: AppTheme.warning),
                         );
                         return;
                       }
@@ -379,7 +381,7 @@ class _PregnancyScreenState extends State<PregnancyScreen> {
                         );
                       }
                     },
-                    child: const Text('Start Tracking'),
+                    child: Text(l10n.startTracking),
                   ),
                 ),
               ],
@@ -437,8 +439,9 @@ class _PregnancyScreenState extends State<PregnancyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Pregnancy Tracker', style: TextStyle(fontWeight: FontWeight.w700))),
+      appBar: AppBar(title: Text(l10n.pregnancyTracker, style: const TextStyle(fontWeight: FontWeight.w700))),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddDialog,
         backgroundColor: AppTheme.primary,
@@ -453,9 +456,9 @@ class _PregnancyScreenState extends State<PregnancyScreen> {
                     children: [
                       Icon(Icons.child_friendly, size: 48, color: Colors.grey[300]),
                       const SizedBox(height: 12),
-                      const Text('No pregnancy records', style: TextStyle(color: AppTheme.textSecondary)),
+                      Text(l10n.noPregnancyRecords, style: const TextStyle(color: AppTheme.textSecondary)),
                       const SizedBox(height: 4),
-                      const Text('Tap + to track a pregnancy', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                      Text(l10n.tapPlusToTrackPregnancy, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
                     ],
                   ),
                 )
@@ -471,6 +474,7 @@ class _PregnancyScreenState extends State<PregnancyScreen> {
   }
 
   Widget _buildPregnancyCard(dynamic preg) {
+    final l10n = AppLocalizations.of(context)!;
     final status = preg['status'] ?? 'active';
     final isActive = status == 'active';
     final startDate = preg['startDate'] != null ? DateTime.tryParse(preg['startDate']) : null;
@@ -516,10 +520,10 @@ class _PregnancyScreenState extends State<PregnancyScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(isActive ? 'Active Pregnancy' : 'Completed', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                    Text(isActive ? l10n.activePregnancy : l10n.completed, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
                     if (daysRemaining != null && isActive)
                       Text(
-                        daysRemaining <= 0 ? 'Due today or overdue!' : '$daysRemaining days remaining',
+                        daysRemaining <= 0 ? l10n.dueTodayOrOverdue : l10n.daysRemaining(daysRemaining),
                         style: TextStyle(
                           color: daysRemaining <= 7 ? AppTheme.error : AppTheme.textSecondary,
                           fontSize: 13,
@@ -540,7 +544,7 @@ class _PregnancyScreenState extends State<PregnancyScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  isDeliveryWeek ? '⚠️ Due Soon' : status,
+                  isDeliveryWeek ? l10n.dueSoon : status,
                   style: TextStyle(
                     color: isDeliveryWeek ? AppTheme.error : isActive ? Colors.purple : AppTheme.success,
                     fontWeight: FontWeight.w600,
@@ -592,7 +596,7 @@ class _PregnancyScreenState extends State<PregnancyScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Delivery week! Prepare for the arrival.',
+                      l10n.deliveryWeekPrepare,
                       style: TextStyle(fontSize: 12, color: AppTheme.error, fontWeight: FontWeight.w600),
                     ),
                   ),
@@ -610,7 +614,7 @@ class _PregnancyScreenState extends State<PregnancyScreen> {
           ],
           if (preg['litterSize'] != null) ...[
             const SizedBox(height: 8),
-            Text('Litter size: ${preg['litterSize']}', style: const TextStyle(fontWeight: FontWeight.w500)),
+            Text('${l10n.litterSize}: ${preg['litterSize']}', style: const TextStyle(fontWeight: FontWeight.w500)),
           ],
         ],
       ),

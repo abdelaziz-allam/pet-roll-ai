@@ -10,6 +10,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_indicator.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../providers/report_provider.dart';
 
 class ReportsScreen extends ConsumerStatefulWidget {
@@ -26,12 +27,13 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final reportsAsync = ref.watch(petReportsProvider(widget.petId));
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Reports',
+          l10n.reports,
           style: AppTypography.heading2.copyWith(color: AppColors.textPrimary),
         ),
         backgroundColor: AppColors.bgPrimary,
@@ -42,7 +44,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: AppButton(
-              label: 'Generate New Report',
+              label: l10n.generateNewReport,
               icon: Icons.add_chart_rounded,
               isLoading: _isGenerating,
               onPressed: _generateReport,
@@ -52,9 +54,9 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
             child: reportsAsync.when(
               data: (reports) {
                 if (reports.isEmpty) {
-                  return const EmptyState(
-                    title: 'No reports yet',
-                    subtitle: 'Generate a health report for your pet',
+                  return EmptyState(
+                    title: l10n.noReportsYet,
+                    subtitle: l10n.generateHealthReport,
                     icon: Icons.description_outlined,
                   );
                 }
@@ -89,7 +91,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to generate report: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.failedToGenerateReport)),
         );
       }
     } finally {
@@ -136,7 +138,7 @@ class _ReportCard extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  report['title'] ?? 'Health Report',
+                  report['title'] ?? AppLocalizations.of(context)!.healthReport,
                   style: AppTypography.label.copyWith(
                     color: AppColors.textPrimary,
                   ),
@@ -157,7 +159,7 @@ class _ReportCard extends ConsumerWidget {
               color: AppColors.brandSecondary,
             ),
             onPressed: () => _previewPdf(context, ref, reportId),
-            tooltip: 'Preview',
+            tooltip: AppLocalizations.of(context)!.preview,
           ),
           IconButton(
             icon: const Icon(
@@ -165,7 +167,7 @@ class _ReportCard extends ConsumerWidget {
               color: AppColors.textSecondary,
             ),
             onPressed: () => _shareReport(context, ref, reportId),
-            tooltip: 'Share',
+            tooltip: AppLocalizations.of(context)!.share,
           ),
         ],
       ),
@@ -183,7 +185,7 @@ class _ReportCard extends ConsumerWidget {
           MaterialPageRoute(
             builder: (_) => Scaffold(
               appBar: AppBar(
-                title: const Text('Report Preview'),
+                title: Text(AppLocalizations.of(context)!.reportPreview),
                 backgroundColor: AppColors.bgPrimary,
                 elevation: 0,
               ),
@@ -199,7 +201,7 @@ class _ReportCard extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load preview: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.failedToLoadPreview)),
         );
       }
     }
@@ -219,7 +221,7 @@ class _ReportCard extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to share report: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.failedToShareReport)),
         );
       }
     }
