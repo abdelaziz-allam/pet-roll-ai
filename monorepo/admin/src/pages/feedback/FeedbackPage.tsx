@@ -122,7 +122,7 @@ const FeedbackPage: React.FC = () => {
         params.set('dateTo', dateRange[1].format('YYYY-MM-DD'));
       }
 
-      const res = await api.get<FeedbackResponse>(`/admin/feedback?${params.toString()}`);
+      const res = await api.get<FeedbackResponse>(`/feedback/admin?${params.toString()}`);
       setFeedbackItems(res.data);
       setPagination(res.pagination);
 
@@ -150,7 +150,7 @@ const FeedbackPage: React.FC = () => {
     }
     setSubmitting(true);
     try {
-      await api.put(`/admin/feedback/${selectedFeedback.id}/reply`, { reply: replyText.trim() });
+      await api.put(`/feedback/admin/${selectedFeedback.id}/reply`, { reply: replyText.trim() });
       message.success('Reply sent successfully');
       setReplyModalOpen(false);
       setReplyText('');
@@ -165,7 +165,7 @@ const FeedbackPage: React.FC = () => {
 
   const handleClose = async (record: FeedbackItem) => {
     try {
-      await api.put(`/admin/feedback/${record.id}/status`, { status: 'closed' });
+      await api.put(`/feedback/admin/${record.id}/status`, { status: 'closed' });
       message.success('Feedback closed');
       fetchFeedback();
     } catch (err: any) {
@@ -175,7 +175,7 @@ const FeedbackPage: React.FC = () => {
 
   const handleToggleTodo = async (record: FeedbackItem) => {
     try {
-      await api.put(`/admin/feedback/${record.id}/todo`, { isTodo: !record.isTodo });
+      await api.put(`/feedback/admin/${record.id}/todo`, { isTodo: !record.isTodo });
       message.success(record.isTodo ? 'Removed from TODO list' : 'Added to TODO list');
       fetchFeedback();
     } catch (err: any) {
