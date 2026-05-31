@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/birthday_celebration.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import 'pet_detail_screen.dart';
 import 'add_pet_screen.dart';
 
@@ -87,13 +88,13 @@ class _PetsScreenState extends State<PetsScreen> {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('My Pets', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: AppTheme.textPrimary)),
-                        SizedBox(height: 4),
-                        Text('Your furry family members', style: TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
+                        Text(AppLocalizations.of(context)!.myPets, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: AppTheme.textPrimary)),
+                        const SizedBox(height: 4),
+                        Text(AppLocalizations.of(context)!.yourFurryFamily, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
                       ],
                     ),
                   ),
@@ -195,9 +196,9 @@ class _PetsScreenState extends State<PetsScreen> {
             child: const Icon(Icons.pets, size: 56, color: AppTheme.primary),
           ),
           const SizedBox(height: 20),
-          const Text('No pets yet', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+          Text(AppLocalizations.of(context)!.noPetsYet, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
-          const Text('Tap + to add your first pet', style: TextStyle(color: AppTheme.textSecondary)),
+          Text(AppLocalizations.of(context)!.tapToAddPet, style: const TextStyle(color: AppTheme.textSecondary)),
         ],
       ),
     );

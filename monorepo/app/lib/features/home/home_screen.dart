@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../pets/screens/pets_screen.dart';
 import '../mating/screens/mating_hub_screen.dart';
 import '../verification/screens/verification_status_screen.dart';
@@ -40,15 +41,18 @@ class _HomeScreenState extends State<HomeScreen> {
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(0, Icons.pets_outlined, Icons.pets, 'My Pets'),
-                _buildNavItem(1, Icons.favorite_border, Icons.favorite, 'Mating'),
-                _buildNavItem(2, Icons.verified_outlined, Icons.verified, 'Verify'),
-                _buildNavItem(3, Icons.person_outline, Icons.person, 'Profile'),
-              ],
-            ),
+            child: Builder(builder: (context) {
+              final l10n = AppLocalizations.of(context)!;
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildNavItem(0, Icons.pets_outlined, Icons.pets, l10n.myPets),
+                  _buildNavItem(1, Icons.favorite_border, Icons.favorite, l10n.mating),
+                  _buildNavItem(2, Icons.verified_outlined, Icons.verified, l10n.verify),
+                  _buildNavItem(3, Icons.person_outline, Icons.person, l10n.profile),
+                ],
+              );
+            }),
           ),
         ),
       ),

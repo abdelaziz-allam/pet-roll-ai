@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/services/api_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 class FeedbackScreen extends StatefulWidget {
   const FeedbackScreen({super.key});
@@ -10,11 +11,10 @@ class FeedbackScreen extends StatefulWidget {
 }
 
 class _FeedbackScreenState extends State<FeedbackScreen> {
-  int _selectedTab = 0; // 0 = My Feedback, 1 = New Feedback
+  int _selectedTab = 0;
   bool _loading = true;
-  List<dynamic> _feedbackList = [];
+  List<Map<String, dynamic>> _feedbackList = [];
 
-  // Form state
   String _selectedType = 'general';
   final _messageController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -38,7 +38,8 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
       final api = ApiService();
       final response = await api.get('/feedback?page=1&limit=50');
       if (response is Map<String, dynamic>) {
-        _feedbackList = response['data'] ?? [];
+        final list = response['data'] as List? ?? [];
+        _feedbackList = list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
       }
     } catch (_) {}
     if (mounted) setState(() => _loading = false);
@@ -50,71 +51,86 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     setState(() => _submitting = true);
     try {
       final api = ApiService();
-      await api.post('/feedback', {
+      final result = await api.post('/feedback', {
         'type': _selectedType,
         'message': _messageController.text.trim(),
       });
+
+      // Optimistic: add the new item to the top of the list
+      if (result is Map<String, dynamic>) {
+        _feedbackList.insert(0, Map<String, dynamic>.from(result));
+      }
+
       _messageController.clear();
       setState(() {
         _selectedType = 'general';
         _selectedTab = 0;
+        _submitting = false;
       });
-      _loadFeedback();
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Feedback submitted successfully!'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.feedbackSent),
             backgroundColor: AppTheme.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
       }
     } catch (e) {
+      setState(() => _submitting = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error submitting feedback: $e'),
+            content: Text('$e'),
             backgroundColor: AppTheme.error,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
     }
-    if (mounted) setState(() => _submitting = false);
   }
 
-  DateTime _parseTimestamp(dynamic timestamp) {
+  String _formatDate(dynamic timestamp) {
+    DateTime date;
     if (timestamp is Map) {
       final seconds = timestamp['_seconds'] ?? 0;
-      return DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
+      date = DateTime.fromMillisecondsSinceEpoch((seconds as int) * 1000);
+    } else if (timestamp is String) {
+      date = DateTime.tryParse(timestamp) ?? DateTime.now();
+    } else {
+      date = DateTime.now();
     }
-    return DateTime.now();
-  }
-
-  String _formatDate(DateTime date) {
-    final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
+    final now = DateTime.now();
+    final diff = now.difference(date);
+    if (diff.inMinutes < 1) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    if (diff.inDays < 7) return '${diff.inDays}d ago';
+    final months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Feedback', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: Text(l10n.feedback, style: const TextStyle(fontWeight: FontWeight.w700)),
       ),
       body: Column(
         children: [
-          _buildTabToggle(),
+          _buildTabToggle(l10n),
           Expanded(
-            child: _selectedTab == 0 ? _buildMyFeedback() : _buildNewFeedback(),
+            child: _selectedTab == 0 ? _buildMyFeedback(l10n) : _buildNewFeedback(l10n),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTabToggle() {
+  Widget _buildTabToggle(AppLocalizations l10n) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
       child: Container(
@@ -125,9 +141,9 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         padding: const EdgeInsets.all(4),
         child: Row(
           children: [
-            Expanded(child: _buildTabButton('My Feedback', 0)),
+            Expanded(child: _buildTabButton(l10n.myFeedback, 0)),
             const SizedBox(width: 4),
-            Expanded(child: _buildTabButton('New Feedback', 1)),
+            Expanded(child: _buildTabButton(l10n.newFeedback, 1)),
           ],
         ),
       ),
@@ -160,11 +176,9 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     );
   }
 
-  Widget _buildMyFeedback() {
+  Widget _buildMyFeedback(AppLocalizations l10n) {
     if (_loading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppTheme.primary),
-      );
+      return const Center(child: CircularProgressIndicator(color: AppTheme.primary));
     }
 
     if (_feedbackList.isEmpty) {
@@ -177,12 +191,19 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               Icon(Icons.feedback_outlined, size: 64, color: Colors.grey.shade300),
               const SizedBox(height: 16),
               Text(
-                'No feedback yet.\nShare your thoughts with us!',
+                l10n.noFeedbackYet,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: AppTheme.textSecondary,
-                  height: 1.5,
+                style: const TextStyle(fontSize: 16, color: AppTheme.textSecondary, height: 1.5),
+              ),
+              const SizedBox(height: 20),
+              OutlinedButton.icon(
+                onPressed: () => setState(() => _selectedTab = 1),
+                icon: const Icon(Icons.add, size: 18),
+                label: Text(l10n.newFeedback),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.primary,
+                  side: const BorderSide(color: AppTheme.primary),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
             ],
@@ -197,17 +218,17 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         itemCount: _feedbackList.length,
-        itemBuilder: (context, index) => _buildFeedbackCard(_feedbackList[index]),
+        itemBuilder: (context, index) => _buildFeedbackCard(_feedbackList[index], l10n),
       ),
     );
   }
 
-  Widget _buildFeedbackCard(Map<String, dynamic> item) {
+  Widget _buildFeedbackCard(Map<String, dynamic> item, AppLocalizations l10n) {
     final type = item['type'] ?? 'general';
     final message = item['message'] ?? '';
     final status = item['status'] ?? 'open';
     final adminReply = item['adminReply'];
-    final createdAt = _parseTimestamp(item['createdAt']);
+    final createdAt = item['createdAt'];
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -222,27 +243,20 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         children: [
           Row(
             children: [
-              _buildTypeBadge(type),
+              _buildTypeBadge(type, l10n),
               const Spacer(),
-              _buildStatusBadge(status),
+              _buildStatusBadge(status, l10n),
             ],
           ),
           const SizedBox(height: 12),
           Text(
             message,
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppTheme.textPrimary,
-              height: 1.5,
-            ),
+            style: const TextStyle(fontSize: 14, color: AppTheme.textPrimary, height: 1.5),
           ),
           const SizedBox(height: 10),
           Text(
             _formatDate(createdAt),
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppTheme.textSecondary,
-            ),
+            style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
           ),
           if (status == 'replied' && adminReply != null) ...[
             const SizedBox(height: 12),
@@ -262,23 +276,15 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                       Icon(Icons.reply, size: 14, color: AppTheme.success),
                       const SizedBox(width: 6),
                       Text(
-                        'Admin Reply',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.success,
-                        ),
+                        l10n.adminReply,
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.success),
                       ),
                     ],
                   ),
                   const SizedBox(height: 6),
                   Text(
                     adminReply,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppTheme.textPrimary,
-                      height: 1.4,
-                    ),
+                    style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary, height: 1.4),
                   ),
                 ],
               ),
@@ -289,21 +295,21 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     );
   }
 
-  Widget _buildTypeBadge(String type) {
+  Widget _buildTypeBadge(String type, AppLocalizations l10n) {
     Color color;
     String label;
     switch (type) {
       case 'bug':
         color = AppTheme.error;
-        label = 'Bug';
+        label = l10n.bugReport;
         break;
       case 'suggestion':
         color = const Color(0xFF3B82F6);
-        label = 'Suggestion';
+        label = l10n.suggestion;
         break;
       default:
         color = AppTheme.textSecondary;
-        label = 'General';
+        label = l10n.general;
     }
 
     return Container(
@@ -312,32 +318,25 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
-      ),
+      child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: color)),
     );
   }
 
-  Widget _buildStatusBadge(String status) {
+  Widget _buildStatusBadge(String status, AppLocalizations l10n) {
     Color color;
     String label;
     switch (status) {
       case 'open':
         color = AppTheme.warning;
-        label = 'Open';
+        label = l10n.open;
         break;
       case 'replied':
         color = AppTheme.success;
-        label = 'Replied';
+        label = l10n.replied;
         break;
       default:
         color = AppTheme.textSecondary;
-        label = 'Closed';
+        label = l10n.closed;
     }
 
     return Container(
@@ -346,18 +345,11 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
-      ),
+      child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: color)),
     );
   }
 
-  Widget _buildNewFeedback() {
+  Widget _buildNewFeedback(AppLocalizations l10n) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Form(
@@ -365,38 +357,30 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Feedback Type',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimary,
-              ),
+            Text(
+              l10n.general == 'Allmänt' ? 'Feedbacktyp' : 'Feedback Type',
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 10),
-            _buildTypeSelector(),
+            _buildTypeSelector(l10n),
             const SizedBox(height: 24),
-            const Text(
-              'Your Message',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimary,
-              ),
+            Text(
+              l10n.general == 'Allmänt' ? 'Ditt meddelande' : 'Your Message',
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 10),
             TextFormField(
               controller: _messageController,
               maxLines: 5,
               maxLength: 500,
-              decoration: const InputDecoration(
-                hintText: 'Tell us what you think...',
-                hintStyle: TextStyle(color: AppTheme.textSecondary),
+              decoration: InputDecoration(
+                hintText: l10n.feedbackPlaceholder,
+                hintStyle: const TextStyle(color: AppTheme.textSecondary),
                 alignLabelWithHint: true,
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Please enter your feedback message';
+                  return l10n.feedbackPlaceholder;
                 }
                 return null;
               },
@@ -409,14 +393,10 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                 onPressed: _submitting ? null : _submitFeedback,
                 child: _submitting
                     ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.white,
-                        ),
+                        width: 22, height: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
                       )
-                    : const Text('Submit Feedback'),
+                    : Text(l10n.submitFeedback),
               ),
             ),
             const SizedBox(height: 40),
@@ -426,13 +406,13 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     );
   }
 
-  Widget _buildTypeSelector() {
+  Widget _buildTypeSelector(AppLocalizations l10n) {
     return Wrap(
       spacing: 10,
       children: [
-        _buildTypeChip('bug', 'Bug Report', Icons.bug_report_outlined, AppTheme.error),
-        _buildTypeChip('suggestion', 'Suggestion', Icons.lightbulb_outline, const Color(0xFF3B82F6)),
-        _buildTypeChip('general', 'General', Icons.chat_bubble_outline, AppTheme.textSecondary),
+        _buildTypeChip('bug', l10n.bugReport, Icons.bug_report_outlined, AppTheme.error),
+        _buildTypeChip('suggestion', l10n.suggestion, Icons.lightbulb_outline, const Color(0xFF3B82F6)),
+        _buildTypeChip('general', l10n.general, Icons.chat_bubble_outline, AppTheme.textSecondary),
       ],
     );
   }

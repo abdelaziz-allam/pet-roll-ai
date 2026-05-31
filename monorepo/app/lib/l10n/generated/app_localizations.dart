@@ -434,6 +434,18 @@ abstract class AppLocalizations {
   /// **'No pets yet'**
   String get noPetsYet;
 
+  /// No description provided for @yourFurryFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Your furry family members'**
+  String get yourFurryFamily;
+
+  /// No description provided for @tapToAddPet.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + to add your first pet'**
+  String get tapToAddPet;
+
   /// No description provided for @dangerZone.
   ///
   /// In en, this message translates to:

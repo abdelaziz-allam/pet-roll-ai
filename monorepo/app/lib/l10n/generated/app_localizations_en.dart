@@ -182,6 +182,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noPetsYet => 'No pets yet';
 
   @override
+  String get yourFurryFamily => 'Your furry family members';
+
+  @override
+  String get tapToAddPet => 'Tap + to add your first pet';
+
+  @override
   String get dangerZone => 'Danger Zone';
 
   @override

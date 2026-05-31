@@ -61,6 +61,8 @@
     }
   },
   "noPetsYet": "No pets yet",
+  "yourFurryFamily": "Your furry family members",
+  "tapToAddPet": "Tap + to add your first pet",
   "dangerZone": "Danger Zone",
   "permanentlyRemoveData": "Permanently remove all data",
   "english": "English",
