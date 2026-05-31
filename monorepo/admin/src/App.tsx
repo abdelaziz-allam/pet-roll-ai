@@ -14,6 +14,7 @@ import SettingsPage from '@/pages/settings/SettingsPage';
 import AdminUsersPage from '@/pages/admin-users/AdminUsersPage';
 import CategoriesPage from '@/pages/categories/CategoriesPage';
 import HealthCertificationsPage from '@/pages/health-certifications/HealthCertificationsPage';
+import FeedbackPage from '@/pages/feedback/FeedbackPage';
 
 const App: React.FC = () => {
   return (
@@ -30,6 +31,7 @@ const App: React.FC = () => {
         <Route path="/verification" element={<VerificationPage />} />
         <Route path="/mating" element={<MatingPage />} />
         <Route path="/health-certifications" element={<HealthCertificationsPage />} />
+        <Route path="/feedback" element={<FeedbackPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/admin-users" element={<AdminUsersPage />} />

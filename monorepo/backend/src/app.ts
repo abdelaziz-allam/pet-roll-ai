@@ -22,6 +22,7 @@ import { adminRoutes } from './modules/admin/admin.routes';
 import { adminAuthRoutes } from './modules/admin-auth/admin-auth.routes';
 import { cronRoutes } from './modules/cron/cron.routes';
 import { verificationRoutes } from './modules/verification/verification.routes';
+import { feedbackRoutes } from './modules/feedback/feedback.routes';
 import { seedInitialData } from './seed/initial-data';
 
 export async function buildApp() {
@@ -65,6 +66,7 @@ export async function buildApp() {
         { name: 'Notifications', description: 'Push notifications' },
         { name: 'Reports', description: 'Reports and analytics' },
         { name: 'Verification', description: 'Breeder verification requests' },
+        { name: 'Feedback', description: 'User feedback and suggestions' },
         { name: 'Cron', description: 'Scheduled tasks' },
       ],
     },
@@ -124,6 +126,7 @@ export async function buildApp() {
     await api.register(taggedRoutes(adminAuthRoutes, 'Admin Auth'), { prefix: '/admin-auth' });
     await api.register(taggedRoutes(cronRoutes, 'Cron'), { prefix: '/cron' });
     await api.register(taggedRoutes(verificationRoutes, 'Verification'), { prefix: '/verification' });
+    await api.register(taggedRoutes(feedbackRoutes, 'Feedback'), { prefix: '/feedback' });
   }, { prefix: '/api/v1' });
 
   await seedInitialData();
