@@ -119,7 +119,6 @@ export async function pregnancyRoutes(fastify: FastifyInstance) {
         stream.on('finish', resolve);
       });
 
-      await file.makePublic();
       const publicUrl = `https://storage.googleapis.com/${env.GCS_BUCKET}/${storagePath}`;
       const updatedPhotos = [...currentPhotos, publicUrl];
       await db.collection('pregnancies').doc(pregId).update({
