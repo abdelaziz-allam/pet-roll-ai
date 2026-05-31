@@ -65,8 +65,6 @@ export async function verificationRoutes(fastify: FastifyInstance) {
         stream.on('finish', resolve);
       });
 
-      await file.makePublic();
-
       const publicUrl = `https://storage.googleapis.com/${env.GCS_BUCKET}/${storagePath}`;
       return reply.code(200).send({ url: publicUrl, path: storagePath, name: data.filename, type: resolvedMime });
     } catch (err: any) {

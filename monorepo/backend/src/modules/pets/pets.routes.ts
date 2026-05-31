@@ -109,8 +109,6 @@ export async function petsRoutes(fastify: FastifyInstance) {
         stream.on('finish', resolve);
       });
 
-      await file.makePublic();
-
       const publicUrl = `https://storage.googleapis.com/${env.GCS_BUCKET}/${storagePath}`;
       return reply.code(200).send({ url: publicUrl, path: storagePath });
     } catch (err: any) {
