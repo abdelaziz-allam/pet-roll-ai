@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
@@ -152,13 +153,49 @@ class ApiService {
     throw ApiException(response.statusCode, response.body);
   }
 
+  MediaType? _resolveMediaType(String filePath) {
+    final ext = filePath.split('.').last.toLowerCase();
+    switch (ext) {
+      case 'jpg':
+      case 'jpeg':
+        return MediaType('image', 'jpeg');
+      case 'png':
+        return MediaType('image', 'png');
+      case 'webp':
+        return MediaType('image', 'webp');
+      case 'gif':
+        return MediaType('image', 'gif');
+      case 'pdf':
+        return MediaType('application', 'pdf');
+      default:
+        return null;
+    }
+  }
+
   Future<dynamic> uploadFile(String path, File file, {Map<String, String>? fields}) async {
-    final request = http.MultipartRequest('POST', Uri.parse('$baseUrl$path'));
+    if (_token == null) {
+      final refreshed = await _tryRefresh();
+      if (!refreshed) throw ApiException(401, 'Not authenticated');
+    }
+
+    final mediaType = _resolveMediaType(file.path);
+
+    var request = http.MultipartRequest('POST', Uri.parse('$baseUrl$path'));
     request.headers.addAll({'Authorization': 'Bearer $_token'});
     if (fields != null) request.fields.addAll(fields);
-    request.files.add(await http.MultipartFile.fromPath('file', file.path));
-    final streamed = await request.send();
-    final response = await http.Response.fromStream(streamed);
+    request.files.add(await http.MultipartFile.fromPath('file', file.path, contentType: mediaType));
+    var streamed = await request.send();
+    var response = await http.Response.fromStream(streamed);
+
+    if (response.statusCode == 401 && await _tryRefresh()) {
+      request = http.MultipartRequest('POST', Uri.parse('$baseUrl$path'));
+      request.headers.addAll({'Authorization': 'Bearer $_token'});
+      if (fields != null) request.fields.addAll(fields);
+      request.files.add(await http.MultipartFile.fromPath('file', file.path, contentType: mediaType));
+      streamed = await request.send();
+      response = await http.Response.fromStream(streamed);
+    }
+
     if (response.statusCode == 200 || response.statusCode == 201) {
       return jsonDecode(response.body);
     }
