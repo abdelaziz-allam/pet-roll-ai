@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../providers/pregnancy_provider.dart';
 import '../services/pregnancy_service.dart';
 
@@ -93,8 +94,9 @@ class _StartPregnancyScreenState extends ConsumerState<StartPregnancyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Start Pregnancy Tracking')),
+      appBar: AppBar(title: Text(l10n.startTracking)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -125,7 +127,7 @@ class _StartPregnancyScreenState extends ConsumerState<StartPregnancyScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              Text('Breeding Date', style: AppTypography.label),
+              Text(l10n.matingDate, style: AppTypography.label),
               const SizedBox(height: 8),
               InkWell(
                 onTap: _selectBreedingDate,
@@ -139,7 +141,7 @@ class _StartPregnancyScreenState extends ConsumerState<StartPregnancyScreen> {
                   child: Text(
                     _breedingDate != null
                         ? '${_breedingDate!.day}/${_breedingDate!.month}/${_breedingDate!.year}'
-                        : 'Select breeding date',
+                        : l10n.matingDate,
                     style: AppTypography.body.copyWith(
                       color: _breedingDate != null
                           ? AppColors.textPrimary
@@ -149,7 +151,7 @@ class _StartPregnancyScreenState extends ConsumerState<StartPregnancyScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              Text('Expected Due Date', style: AppTypography.label),
+              Text(l10n.expectedDeliveryDate, style: AppTypography.label),
               const SizedBox(height: 8),
               Container(
                 width: double.infinity,
@@ -162,7 +164,7 @@ class _StartPregnancyScreenState extends ConsumerState<StartPregnancyScreen> {
                 child: Text(
                   _expectedDueDate != null
                       ? '${_expectedDueDate!.day}/${_expectedDueDate!.month}/${_expectedDueDate!.year}'
-                      : 'Auto-calculated from breeding date',
+                      : l10n.autoCalculatedFromMatingDate,
                   style: AppTypography.body.copyWith(
                     color: _expectedDueDate != null
                         ? AppColors.textPrimary
@@ -179,14 +181,14 @@ class _StartPregnancyScreenState extends ConsumerState<StartPregnancyScreen> {
               ],
               const SizedBox(height: 20),
               AppTextField(
-                label: 'Notes',
+                label: l10n.notes,
                 hint: 'Optional notes about the pregnancy',
                 controller: _notesController,
                 maxLines: 3,
               ),
               const SizedBox(height: 32),
               AppButton(
-                label: 'Start Tracking',
+                label: l10n.startTracking,
                 onPressed: _breedingDate != null ? _submit : null,
                 isLoading: _isLoading,
               ),

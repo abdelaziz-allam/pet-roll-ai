@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 class AddPetScreen extends StatefulWidget {
   const AddPetScreen({super.key});
@@ -75,6 +76,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
   }
 
   void _showImageSourceSheet() {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
@@ -84,16 +86,16 @@ class _AddPetScreenState extends State<AddPetScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Add Photo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              Text(l10n.addPhoto, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _imageSourceOption(Icons.camera_alt, 'Camera', () {
+                  _imageSourceOption(Icons.camera_alt, l10n.camera, () {
                     Navigator.pop(ctx);
                     _pickImage(ImageSource.camera);
                   }),
-                  _imageSourceOption(Icons.photo_library, 'Gallery', () {
+                  _imageSourceOption(Icons.photo_library, l10n.gallery, () {
                     Navigator.pop(ctx);
                     _pickImage(ImageSource.gallery);
                   }),
@@ -164,15 +166,16 @@ class _AddPetScreenState extends State<AddPetScreen> {
       }
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         Navigator.pop(context, true);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Pet added successfully!'), backgroundColor: AppTheme.success),
+          SnackBar(content: Text(l10n.petAddedSuccessfully), backgroundColor: AppTheme.success),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.error),
+          SnackBar(content: Text('${AppLocalizations.of(context)!.error}: $e'), backgroundColor: AppTheme.error),
         );
       }
     } finally {
@@ -192,9 +195,10 @@ class _AddPetScreenState extends State<AddPetScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add New Pet', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: Text(l10n.addNewPet, style: const TextStyle(fontWeight: FontWeight.w700)),
       ),
       body: Form(
         key: _formKey,
@@ -203,12 +207,12 @@ class _AddPetScreenState extends State<AddPetScreen> {
           children: [
             _buildPhotoSection(),
             const SizedBox(height: 24),
-            _buildSectionTitle('Basic Information'),
+            _buildSectionTitle(l10n.basicInformation),
             const SizedBox(height: 12),
             TextFormField(
               controller: _nameCtrl,
-              decoration: const InputDecoration(labelText: 'Pet Name *', prefixIcon: Icon(Icons.pets)),
-              validator: (v) => (v == null || v.isEmpty) ? 'Name is required' : null,
+              decoration: InputDecoration(labelText: '${l10n.petName} *', prefixIcon: const Icon(Icons.pets)),
+              validator: (v) => (v == null || v.isEmpty) ? l10n.petNameRequired : null,
             ),
             const SizedBox(height: 12),
             Row(
@@ -216,7 +220,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: _species,
-                    decoration: const InputDecoration(labelText: 'Species'),
+                    decoration: InputDecoration(labelText: l10n.species),
                     items: ['dog', 'cat', 'bird', 'horse', 'rabbit', 'fish', 'reptile', 'hamster']
                         .map((s) => DropdownMenuItem(value: s, child: Text(s)))
                         .toList(),
@@ -227,7 +231,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: _gender,
-                    decoration: const InputDecoration(labelText: 'Gender'),
+                    decoration: InputDecoration(labelText: l10n.gender),
                     items: ['male', 'female'].map((g) => DropdownMenuItem(value: g, child: Text(g))).toList(),
                     onChanged: (v) => setState(() => _gender = v!),
                   ),
@@ -237,7 +241,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _breedCtrl,
-              decoration: const InputDecoration(labelText: 'Breed', prefixIcon: Icon(Icons.category)),
+              decoration: InputDecoration(labelText: l10n.breed, prefixIcon: const Icon(Icons.category)),
             ),
             const SizedBox(height: 12),
             Row(
@@ -246,14 +250,14 @@ class _AddPetScreenState extends State<AddPetScreen> {
                   child: TextFormField(
                     controller: _weightCtrl,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Weight (kg)', prefixIcon: Icon(Icons.monitor_weight)),
+                    decoration: InputDecoration(labelText: l10n.weightKg, prefixIcon: const Icon(Icons.monitor_weight)),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: TextFormField(
                     controller: _colorCtrl,
-                    decoration: const InputDecoration(labelText: 'Color', prefixIcon: Icon(Icons.palette)),
+                    decoration: InputDecoration(labelText: l10n.color, prefixIcon: const Icon(Icons.palette)),
                   ),
                 ),
               ],
@@ -266,7 +270,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                   initialDate: DateTime.now().subtract(const Duration(days: 365)),
                   firstDate: DateTime(2000),
                   lastDate: DateTime.now(),
-                  helpText: 'Select Date of Birth',
+                  helpText: l10n.selectDateOfBirth,
                 );
                 if (picked != null) setState(() => _dateOfBirth = picked);
               },
@@ -285,7 +289,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Date of Birth', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                          Text(l10n.dateOfBirth, style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
                           const SizedBox(height: 2),
                           Text(
                             _dateOfBirth != null
@@ -305,14 +309,14 @@ class _AddPetScreenState extends State<AddPetScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            _buildSectionTitle('Location'),
+            _buildSectionTitle(l10n.location),
             const SizedBox(height: 12),
             _buildLocationPicker(
-              label: 'Country',
+              label: l10n.country,
               icon: Icons.flag,
               value: _country,
               onTap: () => _showSearchablePicker(
-                title: 'Select Country',
+                title: l10n.selectCountry,
                 items: _countries.map((c) => c['name'] as String).toList(),
                 onSelected: (v) {
                   setState(() => _country = v);
@@ -322,24 +326,24 @@ class _AddPetScreenState extends State<AddPetScreen> {
             ),
             const SizedBox(height: 12),
             _buildLocationPicker(
-              label: 'City',
+              label: l10n.city,
               icon: Icons.location_city,
               value: _city,
               isLoading: _loadingCities,
               onTap: _country == null
                   ? () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please select a country first'), backgroundColor: AppTheme.warning),
+                        SnackBar(content: Text(l10n.pleaseSelectCountryFirst), backgroundColor: AppTheme.warning),
                       );
                     }
                   : () => _showSearchablePicker(
-                      title: 'Select City',
+                      title: l10n.selectCity,
                       items: _cities,
                       onSelected: (v) => setState(() => _city = v),
                     ),
             ),
             const SizedBox(height: 24),
-            _buildSectionTitle('Details'),
+            _buildSectionTitle(l10n.details),
             const SizedBox(height: 12),
             Container(
               decoration: BoxDecoration(
@@ -350,14 +354,14 @@ class _AddPetScreenState extends State<AddPetScreen> {
               child: Column(
                 children: [
                   SwitchListTile(
-                    title: const Text('Neutered / Spayed'),
+                    title: Text(l10n.neuteredSpayed),
                     value: _isNeutered,
                     onChanged: (v) => setState(() => _isNeutered = v),
                     activeColor: AppTheme.primary,
                   ),
                   Divider(height: 1, color: Colors.grey.shade100),
                   SwitchListTile(
-                    title: const Text('Available for Mating'),
+                    title: Text(l10n.availableForMating),
                     value: _isAvailableForMating,
                     onChanged: (v) => setState(() => _isAvailableForMating = v),
                     activeColor: AppTheme.primary,
@@ -369,7 +373,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
             TextFormField(
               controller: _notesCtrl,
               maxLines: 3,
-              decoration: const InputDecoration(labelText: 'Notes', prefixIcon: Icon(Icons.notes), alignLabelWithHint: true),
+              decoration: InputDecoration(labelText: l10n.notes, prefixIcon: const Icon(Icons.notes), alignLabelWithHint: true),
             ),
             const SizedBox(height: 32),
             SizedBox(
@@ -378,7 +382,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                 onPressed: _saving ? null : _submit,
                 child: _saving
                     ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text('Add Pet', style: TextStyle(fontSize: 16)),
+                    : Text(l10n.addPet, style: const TextStyle(fontSize: 16)),
               ),
             ),
             const SizedBox(height: 40),
@@ -389,10 +393,11 @@ class _AddPetScreenState extends State<AddPetScreen> {
   }
 
   Widget _buildPhotoSection() {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle('Photos'),
+        _buildSectionTitle(l10n.photos),
         const SizedBox(height: 12),
         SizedBox(
           height: 110,
@@ -437,6 +442,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
   }
 
   Widget _buildAddPhotoButton() {
+    final l10n = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: _showImageSourceSheet,
       child: Container(
@@ -447,12 +453,12 @@ class _AddPetScreenState extends State<AddPetScreen> {
           border: Border.all(color: AppTheme.primary, style: BorderStyle.solid, width: 2),
           color: AppTheme.primary.withOpacity(0.05),
         ),
-        child: const Column(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.add_a_photo, color: AppTheme.primary, size: 28),
-            SizedBox(height: 4),
-            Text('Add', style: TextStyle(color: AppTheme.primary, fontSize: 12, fontWeight: FontWeight.w600)),
+            const Icon(Icons.add_a_photo, color: AppTheme.primary, size: 28),
+            const SizedBox(height: 4),
+            Text(l10n.addPhoto, style: const TextStyle(color: AppTheme.primary, fontSize: 12, fontWeight: FontWeight.w600)),
           ],
         ),
       ),

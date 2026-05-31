@@ -7,6 +7,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/avatar_widget.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_indicator.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../models/mating_model.dart';
 import '../providers/mating_provider.dart';
 
@@ -17,10 +18,11 @@ class MatingDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final listingAsync = ref.watch(listingDetailProvider(listingId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Listing Details')),
+      appBar: AppBar(title: Text(l10n.listingDetails)),
       body: listingAsync.when(
         loading: () => const LoadingIndicator(),
         error: (error, _) => ErrorView(
@@ -34,6 +36,7 @@ class MatingDetailScreen extends ConsumerWidget {
 
   Widget _buildContent(
       BuildContext context, WidgetRef ref, MatingListing listing) {
+    final l10n = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,21 +47,21 @@ class MatingDetailScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildOwnerInfo(listing),
+                _buildOwnerInfo(context, listing),
                 const SizedBox(height: 20),
-                _buildPetDetails(listing),
+                _buildPetDetails(context, listing),
                 const SizedBox(height: 20),
-                _buildDescription(listing),
+                _buildDescription(context, listing),
                 const SizedBox(height: 20),
-                if (listing.location != null && listing.location!.city.isNotEmpty) _buildLocation(listing),
+                if (listing.location != null && listing.location!.city.isNotEmpty) _buildLocation(context, listing),
                 if (listing.preferences != null &&
                     listing.preferences!.isNotEmpty) ...[
                   const SizedBox(height: 20),
-                  _buildPreferences(listing),
+                  _buildPreferences(context, listing),
                 ],
                 const SizedBox(height: 32),
                 AppButton(
-                  label: 'Send Match Request',
+                  label: l10n.sendMatchRequest,
                   onPressed: () => _showMatchRequestDialog(context, ref),
                 ),
                 const SizedBox(height: 16),
@@ -92,7 +95,8 @@ class MatingDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildOwnerInfo(MatingListing listing) {
+  Widget _buildOwnerInfo(BuildContext context, MatingListing listing) {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
         AvatarWidget(name: listing.ownerName, size: 44),
@@ -117,7 +121,7 @@ class MatingDetailScreen extends ConsumerWidget {
               ),
               if (listing.isVerifiedBreeder)
                 Text(
-                  'Verified Breeder',
+                  l10n.verifiedBreeder,
                   style: AppTypography.bodySmall
                       .copyWith(color: AppColors.brandSecondary),
                 ),
@@ -128,17 +132,18 @@ class MatingDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildPetDetails(MatingListing listing) {
+  Widget _buildPetDetails(BuildContext context, MatingListing listing) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Pet Details',
+        Text(l10n.petDetails,
             style:
                 AppTypography.heading3.copyWith(color: AppColors.textPrimary)),
         const SizedBox(height: 8),
-        _detailRow('Name', listing.pet.name),
-        _detailRow('Species', listing.pet.species),
-        _detailRow('Breed', listing.pet.breed ?? 'Unknown'),
+        _detailRow(l10n.petDetails, listing.pet.name),
+        _detailRow(l10n.species, listing.pet.species),
+        _detailRow(l10n.breed, listing.pet.breed ?? 'Unknown'),
       ],
     );
   }
@@ -164,27 +169,29 @@ class MatingDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDescription(MatingListing listing) {
+  Widget _buildDescription(BuildContext context, MatingListing listing) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Description',
+        Text(l10n.description,
             style:
                 AppTypography.heading3.copyWith(color: AppColors.textPrimary)),
         const SizedBox(height: 8),
         Text(
-          listing.description ?? 'No description provided',
+          listing.description ?? l10n.noResultsFound,
           style: AppTypography.body.copyWith(color: AppColors.textPrimary),
         ),
       ],
     );
   }
 
-  Widget _buildLocation(MatingListing listing) {
+  Widget _buildLocation(BuildContext context, MatingListing listing) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Location',
+        Text(l10n.location,
             style:
                 AppTypography.heading3.copyWith(color: AppColors.textPrimary)),
         const SizedBox(height: 8),
@@ -204,11 +211,12 @@ class MatingDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildPreferences(MatingListing listing) {
+  Widget _buildPreferences(BuildContext context, MatingListing listing) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Preferences',
+        Text(l10n.preferences,
             style:
                 AppTypography.heading3.copyWith(color: AppColors.textPrimary)),
         const SizedBox(height: 8),
@@ -232,24 +240,25 @@ class MatingDetailScreen extends ConsumerWidget {
   }
 
   void _showMatchRequestDialog(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final messageController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Send Match Request'),
+        title: Text(l10n.sendMatchRequest),
         content: TextField(
           controller: messageController,
           maxLines: 3,
-          decoration: const InputDecoration(
-            hintText: 'Add a message (optional)',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            hintText: l10n.message,
+            border: const OutlineInputBorder(),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -263,11 +272,11 @@ class MatingDetailScreen extends ConsumerWidget {
               if (context.mounted) {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Match request sent!')),
+                  SnackBar(content: Text(l10n.requestSent)),
                 );
               }
             },
-            child: const Text('Send'),
+            child: Text(l10n.sent),
           ),
         ],
       ),

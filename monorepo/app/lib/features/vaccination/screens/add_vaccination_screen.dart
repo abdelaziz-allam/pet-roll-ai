@@ -7,6 +7,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../providers/vaccination_provider.dart';
 import '../services/vaccination_service.dart';
 
@@ -114,9 +115,10 @@ class _AddVaccinationScreenState extends ConsumerState<AddVaccinationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Log Vaccination', style: AppTypography.heading2),
+        title: Text(l10n.addVaccination, style: AppTypography.heading2),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -126,18 +128,18 @@ class _AddVaccinationScreenState extends ConsumerState<AddVaccinationScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AppTextField(
-                label: 'Vaccine Name',
+                label: l10n.vaccineName,
                 hint: 'e.g. Rabies, DHPP, Bordetella',
                 controller: _nameController,
                 textInputAction: TextInputAction.next,
                 prefixIcon: const Icon(Icons.vaccines_outlined),
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'Vaccine name is required';
+                  if (value == null || value.isEmpty) return l10n.vaccineNameAndDateRequired;
                   return null;
                 },
               ),
               const SizedBox(height: 16),
-              Text('Date Administered', style: AppTypography.label),
+              Text(l10n.firstDoseDate, style: AppTypography.label),
               const SizedBox(height: 6),
               InkWell(
                 onTap: () => _pickDate(isNextDue: false),
@@ -162,7 +164,7 @@ class _AddVaccinationScreenState extends ConsumerState<AddVaccinationScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Text('Next Due Date (optional)', style: AppTypography.label),
+              Text(l10n.nextVisitDate, style: AppTypography.label),
               const SizedBox(height: 6),
               InkWell(
                 onTap: () => _pickDate(isNextDue: true),
@@ -194,14 +196,14 @@ class _AddVaccinationScreenState extends ConsumerState<AddVaccinationScreen> {
               ),
               const SizedBox(height: 16),
               AppTextField(
-                label: 'Batch Number',
+                label: l10n.batchNumber,
                 hint: 'Vaccine batch number (optional)',
                 controller: _batchNumberController,
                 textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 16),
               AppTextField(
-                label: 'Veterinarian',
+                label: l10n.veterinarian,
                 hint: 'Vet name (optional)',
                 controller: _vetController,
                 textInputAction: TextInputAction.next,
@@ -209,7 +211,7 @@ class _AddVaccinationScreenState extends ConsumerState<AddVaccinationScreen> {
               ),
               const SizedBox(height: 16),
               AppTextField(
-                label: 'Notes',
+                label: l10n.notes,
                 hint: 'Any additional notes (optional)',
                 controller: _notesController,
                 maxLines: 3,
@@ -217,7 +219,7 @@ class _AddVaccinationScreenState extends ConsumerState<AddVaccinationScreen> {
               ),
               const SizedBox(height: 32),
               AppButton(
-                label: 'Save Vaccination',
+                label: l10n.saveVaccination,
                 onPressed: _handleSave,
                 isLoading: _isLoading,
               ),

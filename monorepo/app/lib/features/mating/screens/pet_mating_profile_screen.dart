@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 class PetMatingProfileScreen extends StatefulWidget {
   final String petId;
@@ -35,12 +36,14 @@ class _PetMatingProfileScreenState extends State<PetMatingProfileScreen> {
       final data = await ApiService().get('/mating/pets/${widget.petId}/profile');
       setState(() { _profile = data; _loading = false; });
     } catch (e) {
-      setState(() { _error = 'Failed to load pet profile'; _loading = false; });
+      final l10n = AppLocalizations.of(context)!;
+      setState(() { _error = l10n.error; _loading = false; });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppTheme.surface,
       body: _loading
@@ -62,12 +65,12 @@ class _PetMatingProfileScreenState extends State<PetMatingProfileScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.favorite, size: 20),
-                      SizedBox(width: 8),
-                      Text('Send Mating Request', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      const Icon(Icons.favorite, size: 20),
+                      const SizedBox(width: 8),
+                      Text(l10n.sendMatchRequest, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ),
@@ -78,13 +81,14 @@ class _PetMatingProfileScreenState extends State<PetMatingProfileScreen> {
   }
 
   Future<void> _sendMatingRequest() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final petsData = await ApiService().get('/pets?limit=50');
       final pets = (petsData is Map ? petsData['data'] : petsData) as List? ?? [];
       if (pets.isEmpty) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('You need to register a pet first'), backgroundColor: Colors.orange),
+            SnackBar(content: Text(l10n.selectPet), backgroundColor: Colors.orange),
           );
         }
         return;
@@ -106,14 +110,14 @@ class _PetMatingProfileScreenState extends State<PetMatingProfileScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Send Mating Request', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                Text(l10n.sendMatchRequest, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 8),
                 Text(
                   'Request to mate with ${_profile!['name'] ?? 'this pet'}',
                   style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
                 ),
                 const SizedBox(height: 16),
-                const Text('Select your pet:', style: TextStyle(fontWeight: FontWeight.w600)),
+                Text(l10n.selectPet, style: const TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 ...pets.map((pet) {
                   final isSelected = selectedPetId == pet['id'];
@@ -150,10 +154,10 @@ class _PetMatingProfileScreenState extends State<PetMatingProfileScreen> {
                 TextField(
                   controller: messageCtrl,
                   maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: 'Message (optional)',
-                    hintText: 'Introduce your pet...',
-                    prefixIcon: Icon(Icons.message),
+                  decoration: InputDecoration(
+                    labelText: l10n.message,
+                    hintText: l10n.message,
+                    prefixIcon: const Icon(Icons.message),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -163,7 +167,7 @@ class _PetMatingProfileScreenState extends State<PetMatingProfileScreen> {
                     onPressed: selectedPetId == null
                         ? null
                         : () => Navigator.pop(ctx, true),
-                    child: const Text('Send Request'),
+                    child: Text(l10n.sendRequest),
                   ),
                 ),
               ],
@@ -182,14 +186,14 @@ class _PetMatingProfileScreenState extends State<PetMatingProfileScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Mating request sent!'), backgroundColor: AppTheme.success),
+          SnackBar(content: Text(l10n.requestSent), backgroundColor: AppTheme.success),
         );
         Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.error),
+          SnackBar(content: Text('${l10n.error}: $e'), backgroundColor: AppTheme.error),
         );
       }
     }
@@ -211,6 +215,7 @@ class _PetMatingProfileScreenState extends State<PetMatingProfileScreen> {
   }
 
   Widget _buildProfile() {
+    final l10n = AppLocalizations.of(context)!;
     final photos = (_profile!['photos'] as List?) ?? [];
     final owner = _profile!['owner'] as Map<String, dynamic>?;
     final healthRecords = (_profile!['healthRecords'] as List?) ?? [];
@@ -388,6 +393,7 @@ class _PetMatingProfileScreenState extends State<PetMatingProfileScreen> {
   }
 
   Widget _buildDetailsSection() {
+    final l10n = AppLocalizations.of(context)!;
     final dob = _profile!['dateOfBirth'];
     String ageText = '';
     if (dob != null) {
@@ -410,15 +416,15 @@ class _PetMatingProfileScreenState extends State<PetMatingProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          Text(l10n.petDetails, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 12),
           _detailRow(Icons.cake, 'Age', ageText.isNotEmpty ? ageText : 'Unknown'),
-          _detailRow(Icons.monitor_weight, 'Weight', _profile!['weight'] != null ? '${_profile!['weight']} kg' : 'Not specified'),
+          _detailRow(Icons.monitor_weight, l10n.weight, _profile!['weight'] != null ? '${_profile!['weight']} kg' : 'Not specified'),
           _detailRow(Icons.palette, 'Color', _profile!['color'] ?? 'Not specified'),
           _detailRow(Icons.content_cut, 'Neutered', _profile!['isNeutered'] == true ? 'Yes' : 'No'),
           if (_profile!['notes'] != null && (_profile!['notes'] as String).isNotEmpty) ...[
             const Divider(height: 24),
-            const Text('Notes', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+            Text(l10n.notes, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
             const SizedBox(height: 4),
             Text(_profile!['notes'], style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
           ],
@@ -443,6 +449,7 @@ class _PetMatingProfileScreenState extends State<PetMatingProfileScreen> {
   }
 
   Widget _buildHealthSection(List healthRecords) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(16),
@@ -454,11 +461,11 @@ class _PetMatingProfileScreenState extends State<PetMatingProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.health_and_safety, color: AppTheme.success, size: 20),
-              SizedBox(width: 8),
-              Text('Health Records', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              const Icon(Icons.health_and_safety, color: AppTheme.success, size: 20),
+              const SizedBox(width: 8),
+              Text(l10n.healthRecords, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             ],
           ),
           const SizedBox(height: 12),

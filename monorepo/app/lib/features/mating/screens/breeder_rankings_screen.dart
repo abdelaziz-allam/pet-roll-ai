@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../models/breeder_ranking.dart';
 
 class BreederRankingsScreen extends StatefulWidget {
@@ -34,9 +35,10 @@ class _BreederRankingsScreenState extends State<BreederRankingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Top Breeders'),
+        title: Text(l10n.topBreeders),
         centerTitle: true,
         flexibleSpace: Container(
           decoration: const BoxDecoration(
@@ -71,13 +73,14 @@ class _BreederRankingsScreenState extends State<BreederRankingsScreen> {
   }
 
   Widget _buildEmpty() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.emoji_events_outlined, size: 64, color: Colors.grey[300]),
           const SizedBox(height: 16),
-          Text('No rankings yet', style: TextStyle(fontSize: 18, color: Colors.grey[600])),
+          Text(l10n.noRankingsYet, style: TextStyle(fontSize: 18, color: Colors.grey[600])),
         ],
       ),
     );
@@ -108,6 +111,7 @@ class _BreederRankingsScreenState extends State<BreederRankingsScreen> {
   }
 
   Widget _buildPodiumItem(BreederRanking breeder, int rank, double height) {
+    final l10n = AppLocalizations.of(context)!;
     final medals = ['', '🥇', '🥈', '🥉'];
     final colors = [
       Colors.grey,
@@ -167,7 +171,7 @@ class _BreederRankingsScreenState extends State<BreederRankingsScreen> {
               ),
             ),
             Text(
-              ' matches',
+              ' ${l10n.matchesCount}',
               style: TextStyle(color: Colors.grey[500], fontSize: 11),
             ),
           ],
@@ -193,7 +197,7 @@ class _BreederRankingsScreenState extends State<BreederRankingsScreen> {
         ),
         const SizedBox(height: 2),
         Text(
-          '${breeder.successRate}% success',
+          '${breeder.successRate}% ${l10n.success}',
           style: TextStyle(color: Colors.grey[500], fontSize: 10),
         ),
         Container(
@@ -224,6 +228,7 @@ class _BreederRankingsScreenState extends State<BreederRankingsScreen> {
   }
 
   Widget _buildRankRow(int index) {
+    final l10n = AppLocalizations.of(context)!;
     final breeder = _breeders[index];
     final medals = ['🥇', '🥈', '🥉'];
 
@@ -277,7 +282,7 @@ class _BreederRankingsScreenState extends State<BreederRankingsScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${breeder.totalListings} listings • ${breeder.totalViews} views',
+                  '${breeder.totalListings} ${l10n.listingsCount} • ${breeder.totalViews} ${l10n.viewsCount}',
                   style: TextStyle(color: Colors.grey[500], fontSize: 12),
                 ),
               ],

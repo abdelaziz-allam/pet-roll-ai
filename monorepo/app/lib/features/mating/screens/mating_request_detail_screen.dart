@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../widgets/wedding_card_dialog.dart';
 import '../widgets/wedding_card_view.dart';
 import 'pet_mating_profile_screen.dart';
@@ -31,6 +32,7 @@ class _MatingRequestDetailScreenState extends State<MatingRequestDetailScreen> {
   }
 
   Future<void> _respondToRequest(String status) async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _responding = true);
     try {
       await ApiService().put('/mating/requests/${_request['id']}/respond', {'status': status});
@@ -60,7 +62,7 @@ class _MatingRequestDetailScreenState extends State<MatingRequestDetailScreen> {
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Request declined'),
+            content: Text(l10n.rejected),
             backgroundColor: AppTheme.textSecondary,
           ),
         );
@@ -69,7 +71,7 @@ class _MatingRequestDetailScreenState extends State<MatingRequestDetailScreen> {
       setState(() => _responding = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.error),
+          SnackBar(content: Text('${l10n.error}: $e'), backgroundColor: AppTheme.error),
         );
       }
     }
@@ -77,6 +79,7 @@ class _MatingRequestDetailScreenState extends State<MatingRequestDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final status = _request['status'] ?? 'pending';
     final listing = _request['listing'] as Map<String, dynamic>?;
     final pet = _request['pet'] as Map<String, dynamic>?;
@@ -106,17 +109,17 @@ class _MatingRequestDetailScreenState extends State<MatingRequestDetailScreen> {
       case 'accepted':
         statusColor = AppTheme.success;
         statusIcon = Icons.check_circle;
-        statusLabel = 'Accepted';
+        statusLabel = l10n.accepted;
         break;
       case 'rejected':
         statusColor = AppTheme.error;
         statusIcon = Icons.cancel;
-        statusLabel = 'Rejected';
+        statusLabel = l10n.rejected;
         break;
       default:
         statusColor = Colors.orange;
         statusIcon = Icons.access_time;
-        statusLabel = 'Pending';
+        statusLabel = l10n.pending;
     }
 
     String? listingPhotoUrl;
@@ -140,7 +143,7 @@ class _MatingRequestDetailScreenState extends State<MatingRequestDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Request Details', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: Text(l10n.requestDetails, style: const TextStyle(fontWeight: FontWeight.w700)),
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),
@@ -176,7 +179,7 @@ class _MatingRequestDetailScreenState extends State<MatingRequestDetailScreen> {
           const SizedBox(height: 24),
 
           // Listing pet card
-          const Text('Listing Pet', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textSecondary)),
+          Text(l10n.listingPet, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textSecondary)),
           const SizedBox(height: 8),
           _buildPetCard(
             name: listingPetName,
@@ -202,12 +205,12 @@ class _MatingRequestDetailScreenState extends State<MatingRequestDetailScreen> {
                 color: AppTheme.primary.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.favorite, color: AppTheme.primary, size: 18),
-                  SizedBox(width: 6),
-                  Text('Mating Request', style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w600, fontSize: 13)),
+                  const Icon(Icons.favorite, color: AppTheme.primary, size: 18),
+                  const SizedBox(width: 6),
+                  Text(l10n.matingRequest, style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w600, fontSize: 13)),
                 ],
               ),
             ),
@@ -216,7 +219,7 @@ class _MatingRequestDetailScreenState extends State<MatingRequestDetailScreen> {
           const SizedBox(height: 16),
 
           // Your pet card
-          const Text('Your Pet', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textSecondary)),
+          Text(l10n.yourPet, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textSecondary)),
           const SizedBox(height: 8),
           _buildPetCard(
             name: myPetName,
@@ -234,7 +237,7 @@ class _MatingRequestDetailScreenState extends State<MatingRequestDetailScreen> {
           // Message section
           if (message != null && message.isNotEmpty) ...[
             const SizedBox(height: 24),
-            const Text('Message', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textSecondary)),
+            Text(l10n.message, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textSecondary)),
             const SizedBox(height: 8),
             Container(
               width: double.infinity,
@@ -270,12 +273,12 @@ class _MatingRequestDetailScreenState extends State<MatingRequestDetailScreen> {
                 children: [
                   const Icon(Icons.celebration, color: AppTheme.success, size: 40),
                   const SizedBox(height: 12),
-                  const Text('Match Confirmed!', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.success)),
+                  Text(l10n.matchConfirmed, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.success)),
                   const SizedBox(height: 8),
                   Text(
                     widget.isSent
-                        ? '${receiver?['displayName'] ?? 'The owner'} accepted your mating request for $listingPetName'
-                        : 'You accepted the mating request from ${sender?['displayName'] ?? 'the owner'}',
+                        ? '${receiver?['displayName'] ?? 'The owner'} ${l10n.accepted} - $listingPetName'
+                        : '${l10n.accepted} - ${sender?['displayName'] ?? 'the owner'}',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                   ),
@@ -323,7 +326,7 @@ class _MatingRequestDetailScreenState extends State<MatingRequestDetailScreen> {
                         );
                       },
                       icon: const Icon(Icons.card_giftcard, size: 18),
-                      label: const Text('View Wedding Card'),
+                      label: Text(l10n.viewWeddingCard),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primary,
                         foregroundColor: Colors.white,
@@ -347,7 +350,7 @@ class _MatingRequestDetailScreenState extends State<MatingRequestDetailScreen> {
                   child: OutlinedButton.icon(
                     onPressed: _responding ? null : () => _respondToRequest('rejected'),
                     icon: const Icon(Icons.close, size: 20),
-                    label: const Text('Decline', style: TextStyle(fontSize: 16)),
+                    label: Text(l10n.decline, style: const TextStyle(fontSize: 16)),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppTheme.error,
                       side: const BorderSide(color: AppTheme.error),
@@ -361,7 +364,7 @@ class _MatingRequestDetailScreenState extends State<MatingRequestDetailScreen> {
                   child: ElevatedButton.icon(
                     onPressed: _responding ? null : () => _respondToRequest('accepted'),
                     icon: const Icon(Icons.check, size: 20),
-                    label: const Text('Accept', style: TextStyle(fontSize: 16)),
+                    label: Text(l10n.accept, style: const TextStyle(fontSize: 16)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.success,
                       foregroundColor: Colors.white,

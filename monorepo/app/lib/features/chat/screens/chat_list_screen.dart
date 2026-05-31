@@ -9,6 +9,7 @@ import '../../../core/widgets/avatar_widget.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_indicator.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../models/chat_model.dart';
 import '../providers/chat_provider.dart';
 
@@ -17,10 +18,11 @@ class ChatListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final roomsAsync = ref.watch(chatRoomsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Messages')),
+      appBar: AppBar(title: Text(l10n.messages)),
       body: roomsAsync.when(
         loading: () => const LoadingIndicator(),
         error: (error, _) => ErrorView(
@@ -29,10 +31,9 @@ class ChatListScreen extends ConsumerWidget {
         ),
         data: (rooms) {
           if (rooms.isEmpty) {
-            return const EmptyState(
-              title: 'No Messages Yet',
-              subtitle:
-                  'Start chatting by accepting a match request or browsing mating listings.',
+            return EmptyState(
+              title: l10n.noMessagesYet,
+              subtitle: l10n.startChattingSubtitle,
               icon: Icons.chat_bubble_outline,
             );
           }

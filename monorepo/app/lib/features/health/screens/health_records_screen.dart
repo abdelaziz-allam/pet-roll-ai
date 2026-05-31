@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 class HealthRecordsScreen extends StatefulWidget {
   final String petId;
@@ -36,6 +37,7 @@ class _HealthRecordsScreenState extends State<HealthRecordsScreen> {
   }
 
   void _showAddDialog() {
+    final l10n = AppLocalizations.of(context)!;
     final titleCtrl = TextEditingController();
     final descCtrl = TextEditingController();
     final vetCtrl = TextEditingController();
@@ -56,31 +58,31 @@ class _HealthRecordsScreenState extends State<HealthRecordsScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Add Health Record', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                Text(l10n.addHealthRecord, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
                   value: type,
-                  decoration: const InputDecoration(labelText: 'Type'),
+                  decoration: InputDecoration(labelText: l10n.type),
                   items: ['checkup', 'illness', 'injury', 'surgery', 'dental', 'other']
                       .map((t) => DropdownMenuItem(value: t, child: Text(t)))
                       .toList(),
                   onChanged: (v) => type = v!,
                 ),
                 const SizedBox(height: 12),
-                TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Title *', prefixIcon: Icon(Icons.title))),
+                TextField(controller: titleCtrl, decoration: InputDecoration(labelText: '${l10n.addHealthRecord} *', prefixIcon: const Icon(Icons.title))),
                 const SizedBox(height: 12),
-                TextField(controller: descCtrl, maxLines: 2, decoration: const InputDecoration(labelText: 'Description', prefixIcon: Icon(Icons.description))),
+                TextField(controller: descCtrl, maxLines: 2, decoration: InputDecoration(labelText: l10n.description, prefixIcon: const Icon(Icons.description))),
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Expanded(child: TextField(controller: vetCtrl, decoration: const InputDecoration(labelText: 'Veterinarian', prefixIcon: Icon(Icons.person)))),
+                    Expanded(child: TextField(controller: vetCtrl, decoration: InputDecoration(labelText: l10n.veterinarian, prefixIcon: const Icon(Icons.person)))),
                     const SizedBox(width: 12),
-                    Expanded(child: TextField(controller: clinicCtrl, decoration: const InputDecoration(labelText: 'Clinic', prefixIcon: Icon(Icons.local_hospital)))),
+                    Expanded(child: TextField(controller: clinicCtrl, decoration: InputDecoration(labelText: l10n.clinic, prefixIcon: const Icon(Icons.local_hospital)))),
                   ],
                 ),
                 const SizedBox(height: 16),
                 _buildDateSelector(
-                  label: 'Visit Date *',
+                  label: l10n.visitDate,
                   icon: Icons.calendar_today,
                   color: Colors.blue,
                   date: visitDate,
@@ -96,11 +98,11 @@ class _HealthRecordsScreenState extends State<HealthRecordsScreen> {
                 ),
                 const SizedBox(height: 12),
                 _buildDateSelector(
-                  label: 'Next Visit Date',
+                  label: l10n.nextVisitDate,
                   icon: Icons.event_repeat,
                   color: AppTheme.primary,
                   date: nextVisitDate,
-                  hint: 'Set to receive reminders',
+                  hint: l10n.setToReceiveReminders,
                   onTap: () async {
                     final picked = await showDatePicker(
                       context: ctx,
@@ -119,7 +121,7 @@ class _HealthRecordsScreenState extends State<HealthRecordsScreen> {
                         Icon(Icons.notifications_active, size: 14, color: AppTheme.success),
                         const SizedBox(width: 6),
                         Text(
-                          'You will be reminded before this date',
+                          l10n.youWillBeRemindedBeforeDate,
                           style: TextStyle(fontSize: 12, color: AppTheme.success, fontWeight: FontWeight.w500),
                         ),
                       ],
@@ -132,7 +134,7 @@ class _HealthRecordsScreenState extends State<HealthRecordsScreen> {
                     onPressed: () async {
                       if (titleCtrl.text.isEmpty || visitDate == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Title and Visit Date are required'), backgroundColor: AppTheme.warning),
+                          SnackBar(content: Text(l10n.titleAndVisitDateRequired), backgroundColor: AppTheme.warning),
                         );
                         return;
                       }
@@ -165,7 +167,7 @@ class _HealthRecordsScreenState extends State<HealthRecordsScreen> {
                         );
                       }
                     },
-                    child: const Text('Save Record'),
+                    child: Text(l10n.saveRecord),
                   ),
                 ),
               ],
@@ -222,6 +224,7 @@ class _HealthRecordsScreenState extends State<HealthRecordsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (_loading) return const Center(child: CircularProgressIndicator(color: AppTheme.primary));
 
     return Stack(
@@ -233,9 +236,9 @@ class _HealthRecordsScreenState extends State<HealthRecordsScreen> {
                   children: [
                     Icon(Icons.medical_services_outlined, size: 48, color: Colors.grey[300]),
                     const SizedBox(height: 12),
-                    const Text('No health records', style: TextStyle(color: AppTheme.textSecondary)),
+                    Text(l10n.noHealthRecords, style: const TextStyle(color: AppTheme.textSecondary)),
                     const SizedBox(height: 4),
-                    const Text('Tap + to add one', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                    Text(l10n.tapPlusToAddOne, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
                   ],
                 ),
               )
@@ -261,6 +264,7 @@ class _HealthRecordsScreenState extends State<HealthRecordsScreen> {
   }
 
   Widget _buildRecordCard(dynamic record) {
+    final l10n = AppLocalizations.of(context)!;
     final type = record['type'] ?? 'checkup';
     final color = _typeColor(type);
     final visitDate = record['date'] != null ? DateTime.tryParse(record['date']) : null;
@@ -318,7 +322,7 @@ class _HealthRecordsScreenState extends State<HealthRecordsScreen> {
                 _infoChip(
                   isOverdue ? Icons.warning : Icons.event_repeat,
                   isOverdue
-                      ? 'Overdue!'
+                      ? l10n.overdue
                       : 'Next: ${nextVisit.day}/${nextVisit.month}/${nextVisit.year}',
                   isOverdue ? AppTheme.error : AppTheme.primary,
                 ),

@@ -9,6 +9,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_indicator.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../models/notification_model.dart';
 import '../providers/notification_provider.dart';
 
@@ -17,12 +18,13 @@ class NotificationsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final notificationsAsync = ref.watch(notificationsProvider(1));
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Notifications',
+          l10n.notifications,
           style: AppTypography.heading2.copyWith(color: AppColors.textPrimary),
         ),
         backgroundColor: AppColors.bgPrimary,
@@ -34,7 +36,7 @@ class NotificationsScreen extends ConsumerWidget {
               ref.invalidate(notificationsProvider);
             },
             child: Text(
-              'Mark all read',
+              l10n.markAllRead,
               style: AppTypography.label.copyWith(color: AppColors.brandPrimary),
             ),
           ),
@@ -48,9 +50,9 @@ class NotificationsScreen extends ConsumerWidget {
         child: notificationsAsync.when(
           data: (notifications) {
             if (notifications.isEmpty) {
-              return const EmptyState(
-                title: 'No notifications yet',
-                subtitle: 'You\'ll see updates about your pets here',
+              return EmptyState(
+                title: l10n.noNotificationsYet,
+                subtitle: l10n.notificationsSubtitle,
                 icon: Icons.notifications_none_rounded,
               );
             }

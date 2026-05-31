@@ -8,6 +8,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_indicator.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../models/mating_model.dart';
 import '../providers/mating_provider.dart';
 
@@ -16,15 +17,16 @@ class MatchRequestsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Match Requests'),
-          bottom: const TabBar(
+          title: Text(l10n.matchRequest),
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'Sent'),
-              Tab(text: 'Received'),
+              Tab(text: l10n.sent),
+              Tab(text: l10n.received),
             ],
           ),
         ),
@@ -44,6 +46,7 @@ class _SentRequestsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final requestsAsync = ref.watch(sentRequestsProvider);
 
     return requestsAsync.when(
@@ -54,9 +57,9 @@ class _SentRequestsTab extends ConsumerWidget {
       ),
       data: (requests) {
         if (requests.isEmpty) {
-          return const EmptyState(
-            title: 'No Sent Requests',
-            subtitle: 'You haven\'t sent any match requests yet.',
+          return EmptyState(
+            title: l10n.noRequestsYet,
+            subtitle: l10n.noRequestsYet,
             icon: Icons.send_outlined,
           );
         }
@@ -82,12 +85,13 @@ class _SentRequestCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       child: ListTile(
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         title: Text(
-          'Request to listing',
+          l10n.matingRequest,
           style: AppTypography.label.copyWith(color: AppColors.textPrimary),
         ),
         subtitle: Column(
@@ -111,7 +115,7 @@ class _SentRequestCard extends ConsumerWidget {
             ),
           ],
         ),
-        trailing: _buildStatusBadge(request.status),
+        trailing: _buildStatusBadge(context, request.status),
         onTap: request.status == MatchRequestStatus.accepted
             ? () => context.pushNamed(
                   RouteNames.chatRoom,
@@ -122,7 +126,8 @@ class _SentRequestCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatusBadge(MatchRequestStatus status) {
+  Widget _buildStatusBadge(BuildContext context, MatchRequestStatus status) {
+    final l10n = AppLocalizations.of(context)!;
     Color bgColor;
     Color textColor;
     String label;
@@ -131,15 +136,15 @@ class _SentRequestCard extends ConsumerWidget {
       case MatchRequestStatus.pending:
         bgColor = AppColors.warning.withOpacity(0.15);
         textColor = AppColors.warning;
-        label = 'Pending';
+        label = l10n.pending;
       case MatchRequestStatus.accepted:
         bgColor = AppColors.accentGreen.withOpacity(0.15);
         textColor = AppColors.accentGreenDark;
-        label = 'Accepted';
+        label = l10n.accepted;
       case MatchRequestStatus.rejected:
         bgColor = AppColors.error.withOpacity(0.15);
         textColor = AppColors.error;
-        label = 'Rejected';
+        label = l10n.rejected;
     }
 
     return Container(
@@ -168,6 +173,7 @@ class _ReceivedRequestsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final requestsAsync = ref.watch(receivedRequestsProvider);
 
     return requestsAsync.when(
@@ -178,9 +184,9 @@ class _ReceivedRequestsTab extends ConsumerWidget {
       ),
       data: (requests) {
         if (requests.isEmpty) {
-          return const EmptyState(
-            title: 'No Received Requests',
-            subtitle: 'You haven\'t received any match requests yet.',
+          return EmptyState(
+            title: l10n.noRequestsYet,
+            subtitle: l10n.noRequestsYet,
             icon: Icons.inbox_outlined,
           );
         }
@@ -206,6 +212,7 @@ class _ReceivedRequestCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -216,12 +223,12 @@ class _ReceivedRequestCard extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Match Request',
+                    l10n.matchRequest,
                     style: AppTypography.label
                         .copyWith(color: AppColors.textPrimary),
                   ),
                 ),
-                _buildStatusBadge(request.status),
+                _buildStatusBadge(context, request.status),
               ],
             ),
             if (request.message != null) ...[
@@ -249,7 +256,7 @@ class _ReceivedRequestCard extends ConsumerWidget {
                         foregroundColor: AppColors.error,
                         side: const BorderSide(color: AppColors.error),
                       ),
-                      child: const Text('Reject'),
+                      child: Text(l10n.decline),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -259,7 +266,7 @@ class _ReceivedRequestCard extends ConsumerWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.accentGreen,
                       ),
-                      child: const Text('Accept'),
+                      child: Text(l10n.accept),
                     ),
                   ),
                 ],
@@ -285,7 +292,8 @@ class _ReceivedRequestCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatusBadge(MatchRequestStatus status) {
+  Widget _buildStatusBadge(BuildContext context, MatchRequestStatus status) {
+    final l10n = AppLocalizations.of(context)!;
     Color bgColor;
     Color textColor;
     String label;
@@ -294,15 +302,15 @@ class _ReceivedRequestCard extends ConsumerWidget {
       case MatchRequestStatus.pending:
         bgColor = AppColors.warning.withOpacity(0.15);
         textColor = AppColors.warning;
-        label = 'Pending';
+        label = l10n.pending;
       case MatchRequestStatus.accepted:
         bgColor = AppColors.accentGreen.withOpacity(0.15);
         textColor = AppColors.accentGreenDark;
-        label = 'Accepted';
+        label = l10n.accepted;
       case MatchRequestStatus.rejected:
         bgColor = AppColors.error.withOpacity(0.15);
         textColor = AppColors.error;
-        label = 'Rejected';
+        label = l10n.rejected;
     }
 
     return Container(
@@ -323,6 +331,7 @@ class _ReceivedRequestCard extends ConsumerWidget {
 
   Future<void> _handleAction(
       BuildContext context, WidgetRef ref, String status) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final matingService = ref.read(matingServiceProvider);
       await matingService.updateMatchRequest(request.id, {'status': status});
@@ -332,13 +341,13 @@ class _ReceivedRequestCard extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(
-                  'Request ${status == 'accepted' ? 'accepted' : 'rejected'}')),
+                  status == 'accepted' ? l10n.accepted : l10n.rejected)),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text('${l10n.error}: $e')),
         );
       }
     }

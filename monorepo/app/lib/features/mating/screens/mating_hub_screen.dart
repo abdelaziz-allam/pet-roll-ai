@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/services/api_service.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import 'mating_browse_screen.dart';
 import 'mating_matches_screen.dart';
 import 'wedding_cards_screen.dart';
@@ -36,19 +37,20 @@ class _MatingHubScreenState extends State<MatingHubScreen> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mating', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: Text(l10n.mating, style: const TextStyle(fontWeight: FontWeight.w700)),
         bottom: TabBar(
           controller: _tabController,
           labelColor: AppTheme.primary,
           unselectedLabelColor: AppTheme.textSecondary,
           indicatorColor: AppTheme.primary,
           indicatorWeight: 3,
-          tabs: const [
-            Tab(icon: Icon(Icons.search, size: 20), text: 'Browse'),
-            Tab(icon: Icon(Icons.favorite, size: 20), text: 'Requests'),
-            Tab(icon: Icon(Icons.card_giftcard, size: 20), text: 'Cards'),
+          tabs: [
+            Tab(icon: const Icon(Icons.search, size: 20), text: l10n.browse),
+            Tab(icon: const Icon(Icons.favorite, size: 20), text: l10n.requests),
+            Tab(icon: const Icon(Icons.card_giftcard, size: 20), text: l10n.cards),
           ],
         ),
       ),
@@ -64,7 +66,7 @@ class _MatingHubScreenState extends State<MatingHubScreen> with SingleTickerProv
         onPressed: _openCreateListing,
         backgroundColor: AppTheme.primary,
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Create Listing', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+        label: Text(l10n.createListing, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
       ),
     );
   }
@@ -113,9 +115,10 @@ class _CreateMatingListingScreenState extends State<_CreateMatingListingScreen> 
   }
 
   Future<void> _submit() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_selectedPetId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a pet'), backgroundColor: Colors.orange),
+        SnackBar(content: Text(l10n.selectPet), backgroundColor: Colors.orange),
       );
       return;
     }
@@ -143,14 +146,14 @@ class _CreateMatingListingScreenState extends State<_CreateMatingListingScreen> 
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Mating listing created!'), backgroundColor: Colors.green),
+          SnackBar(content: Text(l10n.listingCreated), backgroundColor: Colors.green),
         );
         Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('${l10n.error}: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -160,20 +163,21 @@ class _CreateMatingListingScreenState extends State<_CreateMatingListingScreen> 
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Mating Listing', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: Text(l10n.createMatingListing, style: const TextStyle(fontWeight: FontWeight.w700)),
       ),
       body: _loadingPets
           ? const Center(child: CircularProgressIndicator(color: AppTheme.primary))
           : _pets.isEmpty
-              ? const Center(child: Text('No pets found. Add a pet first.'))
+              ? Center(child: Text(l10n.noListingsFound))
               : SingleChildScrollView(
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Select Pet', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      Text(l10n.selectPet, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
                       ..._pets.map((pet) {
                         final isSelected = _selectedPetId == pet['id'];
@@ -219,10 +223,10 @@ class _CreateMatingListingScreenState extends State<_CreateMatingListingScreen> 
                       TextField(
                         controller: _descriptionCtrl,
                         maxLines: 3,
-                        decoration: const InputDecoration(
-                          labelText: 'Description (optional)',
-                          hintText: 'Describe your pet for potential matches...',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: l10n.description,
+                          hintText: l10n.enterDescription,
+                          border: const OutlineInputBorder(),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -231,9 +235,9 @@ class _CreateMatingListingScreenState extends State<_CreateMatingListingScreen> 
                           Expanded(
                             child: TextField(
                               controller: _cityCtrl,
-                              decoration: const InputDecoration(
-                                labelText: 'City',
-                                border: OutlineInputBorder(),
+                              decoration: InputDecoration(
+                                labelText: l10n.city,
+                                border: const OutlineInputBorder(),
                               ),
                             ),
                           ),
@@ -241,9 +245,9 @@ class _CreateMatingListingScreenState extends State<_CreateMatingListingScreen> 
                           Expanded(
                             child: TextField(
                               controller: _countryCtrl,
-                              decoration: const InputDecoration(
-                                labelText: 'Country',
-                                border: OutlineInputBorder(),
+                              decoration: InputDecoration(
+                                labelText: l10n.country,
+                                border: const OutlineInputBorder(),
                               ),
                             ),
                           ),
@@ -253,10 +257,10 @@ class _CreateMatingListingScreenState extends State<_CreateMatingListingScreen> 
                       TextField(
                         controller: _preferencesCtrl,
                         maxLines: 2,
-                        decoration: const InputDecoration(
-                          labelText: 'Preferences (optional)',
-                          hintText: 'What are you looking for in a match?',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: l10n.preferences,
+                          hintText: l10n.preferences,
+                          border: const OutlineInputBorder(),
                         ),
                       ),
                       const SizedBox(height: 28),
@@ -271,7 +275,7 @@ class _CreateMatingListingScreenState extends State<_CreateMatingListingScreen> 
                           ),
                           child: _submitting
                               ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                              : const Text('Create Listing', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                              : Text(l10n.createListing, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
                         ),
                       ),
                     ],

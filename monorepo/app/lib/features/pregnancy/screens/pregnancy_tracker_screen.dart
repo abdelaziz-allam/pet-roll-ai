@@ -7,6 +7,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_indicator.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../models/pregnancy_model.dart';
 import '../providers/pregnancy_provider.dart';
 import '../services/pregnancy_service.dart';
@@ -31,6 +32,7 @@ class _PregnancyTrackerScreenState extends ConsumerState<PregnancyTrackerScreen>
   }
 
   Future<void> _showAddWeightDialog(Pregnancy pregnancy) async {
+    final l10n = AppLocalizations.of(context)!;
     final weightController = TextEditingController();
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
@@ -47,7 +49,7 @@ class _PregnancyTrackerScreenState extends ConsumerState<PregnancyTrackerScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -60,7 +62,7 @@ class _PregnancyTrackerScreenState extends ConsumerState<PregnancyTrackerScreen>
                 });
               }
             },
-            child: const Text('Save'),
+            child: Text(l10n.save),
           ),
         ],
       ),
@@ -88,10 +90,11 @@ class _PregnancyTrackerScreenState extends ConsumerState<PregnancyTrackerScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final pregnancyAsync = ref.watch(activePregnancyProvider(widget.petId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Pregnancy Tracker')),
+      appBar: AppBar(title: Text(l10n.pregnancyTracker)),
       body: pregnancyAsync.when(
         loading: () => const LoadingIndicator(),
         error: (error, _) => ErrorView(
@@ -101,10 +104,10 @@ class _PregnancyTrackerScreenState extends ConsumerState<PregnancyTrackerScreen>
         data: (pregnancy) {
           if (pregnancy == null) {
             return EmptyState(
-              title: 'No Active Pregnancy',
-              subtitle: 'Start tracking your pet\'s pregnancy journey.',
+              title: l10n.noPregnancyRecords,
+              subtitle: l10n.tapPlusToTrackPregnancy,
               icon: Icons.pregnant_woman,
-              actionLabel: 'Start Tracking',
+              actionLabel: l10n.startTracking,
               onAction: _navigateToStart,
             );
           }
