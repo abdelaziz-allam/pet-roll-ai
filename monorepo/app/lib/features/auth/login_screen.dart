@@ -10,6 +10,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/api_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../main.dart';
 import '../home/home_screen.dart';
 
@@ -196,15 +197,15 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
         final result = await api.postWithFirebaseToken('/auth/register', idToken, {
           'displayName': displayName,
         });
-        await api.setToken(result['accessToken']);
+        await api.setTokens(result['accessToken'], result['refreshToken']);
       } else {
         final result = await api.postWithFirebaseToken('/auth/login', idToken);
-        await api.setToken(result['accessToken']);
+        await api.setTokens(result['accessToken'], result['refreshToken']);
       }
     } on ApiException catch (e) {
       if (e.statusCode == 409 && isNewUser) {
         final result = await api.postWithFirebaseToken('/auth/login', idToken);
-        await api.setToken(result['accessToken']);
+        await api.setTokens(result['accessToken'], result['refreshToken']);
       } else {
         rethrow;
       }
@@ -295,6 +296,7 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -347,7 +349,7 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
                 const SizedBox(height: 8),
                 Center(
                   child: Text(
-                    _isSignUp ? 'Create your account' : 'Sign in to your account',
+                    _isSignUp ? l10n.createAccount : l10n.signIn,
                     style: TextStyle(color: Colors.grey[600], fontSize: 15),
                   ),
                 ),
@@ -375,16 +377,15 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
                     controller: _nameController,
                     textCapitalization: TextCapitalization.words,
                     decoration: InputDecoration(
-                      labelText: 'Full Name',
-                      hintText: 'Enter your name',
+                      labelText: l10n.fullName,
                       prefixIcon: const Icon(Icons.person_outlined),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                       filled: true,
                       fillColor: Colors.grey[50],
                     ),
                     validator: (v) {
-                      if (v == null || v.trim().isEmpty) return 'Name is required';
-                      if (v.trim().length < 2) return 'Name must be at least 2 characters';
+                      if (v == null || v.trim().isEmpty) return l10n.fullName;
+                      if (v.trim().length < 2) return l10n.fullName;
                       return null;
                     },
                   ),
@@ -395,16 +396,15 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
                   keyboardType: TextInputType.emailAddress,
                   autocorrect: false,
                   decoration: InputDecoration(
-                    labelText: 'Email',
-                    hintText: 'Enter your email address',
+                    labelText: l10n.email,
                     prefixIcon: const Icon(Icons.email_outlined),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                     filled: true,
                     fillColor: Colors.grey[50],
                   ),
                   validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Email is required';
-                    if (!v.contains('@')) return 'Enter a valid email';
+                    if (v == null || v.trim().isEmpty) return l10n.email;
+                    if (!v.contains('@')) return l10n.email;
                     return null;
                   },
                 ),
@@ -413,8 +413,7 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
                   controller: _passwordController,
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
-                    labelText: 'Password',
-                    hintText: _isSignUp ? 'Create a password (min 6 chars)' : 'Enter your password',
+                    labelText: l10n.password,
                     prefixIcon: const Icon(Icons.lock_outlined),
                     suffixIcon: IconButton(
                       icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
@@ -425,8 +424,8 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
                     fillColor: Colors.grey[50],
                   ),
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Password is required';
-                    if (_isSignUp && v.length < 6) return 'Password must be at least 6 characters';
+                    if (v == null || v.isEmpty) return l10n.password;
+                    if (_isSignUp && v.length < 6) return l10n.password;
                     return null;
                   },
                 ),
@@ -443,7 +442,7 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
                     ),
                     child: _loading
                         ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : Text(_isSignUp ? 'Create Account' : 'Sign In', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                        : Text(_isSignUp ? l10n.createAccount : l10n.signIn, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -463,7 +462,7 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
                   child: OutlinedButton.icon(
                     onPressed: _loading ? null : _signInWithGoogle,
                     icon: const Icon(Icons.g_mobiledata, size: 28, color: Colors.red),
-                    label: const Text('Continue with Google', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+                    label: Text(l10n.continueWithGoogle, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.black87,
                       side: BorderSide(color: Colors.grey[300]!),
@@ -478,7 +477,7 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
                     child: OutlinedButton.icon(
                       onPressed: _loading ? null : _signInWithApple,
                       icon: const Icon(Icons.apple, size: 24, color: Colors.black),
-                      label: const Text('Continue with Apple', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+                      label: Text(l10n.continueWithApple, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.black87,
                         side: BorderSide(color: Colors.grey[300]!),
@@ -492,7 +491,7 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      _isSignUp ? 'Already have an account? ' : "Don't have an account? ",
+                      _isSignUp ? l10n.alreadyHaveAccount : l10n.dontHaveAccount,
                       style: TextStyle(color: Colors.grey[600], fontSize: 14),
                     ),
                     GestureDetector(
@@ -503,7 +502,7 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
                         });
                       },
                       child: Text(
-                        _isSignUp ? 'Sign In' : 'Sign Up',
+                        _isSignUp ? l10n.signIn : l10n.signUp,
                         style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w600, fontSize: 14),
                       ),
                     ),

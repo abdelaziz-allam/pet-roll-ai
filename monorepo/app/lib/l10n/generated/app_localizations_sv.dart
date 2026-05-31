@@ -183,6 +183,12 @@ class AppLocalizationsSv extends AppLocalizations {
   String get noPetsYet => 'Inga husdjur ännu';
 
   @override
+  String get yourFurryFamily => 'Dina lurviga familjemedlemmar';
+
+  @override
+  String get tapToAddPet => 'Tryck + för att lägga till ditt första husdjur';
+
+  @override
   String get dangerZone => 'Riskzon';
 
   @override

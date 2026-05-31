@@ -61,6 +61,8 @@
     }
   },
   "noPetsYet": "Inga husdjur ännu",
+  "yourFurryFamily": "Dina lurviga familjemedlemmar",
+  "tapToAddPet": "Tryck + för att lägga till ditt första husdjur",
   "dangerZone": "Riskzon",
   "permanentlyRemoveData": "Ta bort all data permanent",
   "english": "English",
