@@ -50,24 +50,29 @@ export async function verificationRoutes(fastify: FastifyInstance) {
       return reply.code(200).send({ url: fakeUrl, path: storagePath, name: data.filename, type: resolvedMime });
     }
 
-    const bucket = storage.bucket(env.GCS_BUCKET);
-    const file = bucket.file(storagePath);
+    try {
+      const bucket = storage.bucket(env.GCS_BUCKET);
+      const file = bucket.file(storagePath);
 
-    const stream = file.createWriteStream({
-      metadata: { contentType: resolvedMime },
-      resumable: false,
-    });
+      const stream = file.createWriteStream({
+        metadata: { contentType: resolvedMime },
+        resumable: false,
+      });
 
-    await new Promise<void>((resolve, reject) => {
-      data.file.pipe(stream);
-      stream.on('error', reject);
-      stream.on('finish', resolve);
-    });
+      await new Promise<void>((resolve, reject) => {
+        data.file.pipe(stream);
+        stream.on('error', reject);
+        stream.on('finish', resolve);
+      });
 
-    await file.makePublic();
+      await file.makePublic();
 
-    const publicUrl = `https://storage.googleapis.com/${env.GCS_BUCKET}/${storagePath}`;
-    return reply.code(200).send({ url: publicUrl, path: storagePath, name: data.filename, type: resolvedMime });
+      const publicUrl = `https://storage.googleapis.com/${env.GCS_BUCKET}/${storagePath}`;
+      return reply.code(200).send({ url: publicUrl, path: storagePath, name: data.filename, type: resolvedMime });
+    } catch (err: any) {
+      request.log.error({ err, storagePath }, 'Failed to upload verification document to GCS');
+      return reply.code(500).send({ error: 'Upload failed', message: err.message || 'Storage error' });
+    }
   });
 
   // POST /verification/submit — Submit a new verification request
