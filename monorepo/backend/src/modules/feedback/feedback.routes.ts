@@ -48,17 +48,26 @@ export async function feedbackRoutes(fastify: FastifyInstance) {
       dateTo?: string;
     };
 
-    const result = await feedbackService.listAllFeedback({
-      page: +page,
-      limit: +limit,
-      status,
-      type,
-      isTodo,
-      dateFrom,
-      dateTo,
-    });
+    try {
+      const result = await feedbackService.listAllFeedback({
+        page: +page,
+        limit: +limit,
+        status,
+        type,
+        isTodo,
+        dateFrom,
+        dateTo,
+      });
 
-    return reply.code(200).send(result);
+      return reply.code(200).send(result);
+    } catch (err: any) {
+      request.log.error({ err, query: request.query }, 'Failed to list feedback');
+      return reply.code(500).send({
+        error: 'Error',
+        message: err.message || 'Internal server error',
+        statusCode: 500,
+      });
+    }
   });
 
   fastify.put('/admin/:id/reply', { preHandler: [requireAdminAuth] }, async (request, reply) => {
