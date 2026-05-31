@@ -86,8 +86,17 @@ export async function pregnancyRoutes(fastify: FastifyInstance) {
     }
 
     const timestamp = Date.now();
-    const filename = data.filename;
-    const storagePath = `pregnancies/${ownerId}/${pregId}/father/${timestamp}_${filename}`;
+    const safeName = data.filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const storagePath = `pregnancies/${ownerId}/${pregId}/father/${timestamp}_${safeName}`;
+
+    const ext = data.filename.split('.').pop()?.toLowerCase() || '';
+    const extToMime: Record<string, string> = {
+      jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+      webp: 'image/webp', gif: 'image/gif', pdf: 'application/pdf',
+    };
+    const resolvedMime = (data.mimetype === 'application/octet-stream' && extToMime[ext])
+      ? extToMime[ext]
+      : data.mimetype;
 
     if (env.USE_MEMORY_STORE) {
       const fakeUrl = `https://storage.example.com/${storagePath}`;
@@ -99,24 +108,29 @@ export async function pregnancyRoutes(fastify: FastifyInstance) {
       return reply.code(200).send({ url: fakeUrl, path: storagePath, totalPhotos: updatedPhotos.length });
     }
 
-    const bucket = storage.bucket(env.GCS_BUCKET);
-    const file = bucket.file(storagePath);
-    const stream = file.createWriteStream({ metadata: { contentType: data.mimetype }, resumable: false });
+    try {
+      const bucket = storage.bucket(env.GCS_BUCKET);
+      const file = bucket.file(storagePath);
+      const stream = file.createWriteStream({ metadata: { contentType: resolvedMime }, resumable: false });
 
-    await new Promise<void>((resolve, reject) => {
-      data.file.pipe(stream);
-      stream.on('error', reject);
-      stream.on('finish', resolve);
-    });
+      await new Promise<void>((resolve, reject) => {
+        data.file.pipe(stream);
+        stream.on('error', reject);
+        stream.on('finish', resolve);
+      });
 
-    await file.makePublic();
-    const publicUrl = `https://storage.googleapis.com/${env.GCS_BUCKET}/${storagePath}`;
-    const updatedPhotos = [...currentPhotos, publicUrl];
-    await db.collection('pregnancies').doc(pregId).update({
-      'fatherInfo.photos': updatedPhotos,
-      updatedAt: FieldValue.serverTimestamp(),
-    });
+      await file.makePublic();
+      const publicUrl = `https://storage.googleapis.com/${env.GCS_BUCKET}/${storagePath}`;
+      const updatedPhotos = [...currentPhotos, publicUrl];
+      await db.collection('pregnancies').doc(pregId).update({
+        'fatherInfo.photos': updatedPhotos,
+        updatedAt: FieldValue.serverTimestamp(),
+      });
 
-    return reply.code(200).send({ url: publicUrl, path: storagePath, totalPhotos: updatedPhotos.length });
+      return reply.code(200).send({ url: publicUrl, path: storagePath, totalPhotos: updatedPhotos.length });
+    } catch (err: any) {
+      request.log.error({ err, storagePath }, 'Failed to upload pregnancy photo to GCS');
+      return reply.code(500).send({ error: 'Upload failed', message: err.message || 'Storage error' });
+    }
   });
 }

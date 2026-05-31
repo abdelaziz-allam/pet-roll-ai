@@ -39,11 +39,22 @@ class PetService {
   }
 
   Future<PetModel> uploadPhoto(String petId, String filePath) async {
+    final ext = filePath.split('.').last.toLowerCase();
+    final mimeMap = {
+      'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'png': 'image/png',
+      'webp': 'image/webp', 'gif': 'image/gif',
+    };
+    final contentType = mimeMap[ext] ?? 'application/octet-stream';
+    final parts = contentType.split('/');
+
     final formData = FormData.fromMap({
-      'photo': await MultipartFile.fromFile(filePath),
+      'file': await MultipartFile.fromFile(
+        filePath,
+        contentType: DioMediaType(parts[0], parts[1]),
+      ),
     });
     final response = await _apiClient.upload(
-      '/pets/$petId/photos',
+      '/pets/$petId/photos/upload',
       data: formData,
     );
     return PetModel.fromJson(response.data as Map<String, dynamic>);
