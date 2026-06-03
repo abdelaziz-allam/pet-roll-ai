@@ -58,6 +58,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "834040996278-1oqtma6jci4e28o9rurcjb8ehldg3nkv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.petroll.pet_roll",
+            "certificate_hash": "a8cab824b58eb97a6e59ec6b5aa24157ddab5390"
+          }
+        },
+        {
           "client_id": "834040996278-c70af6kunc902iv84c7j68cjkokijcvv.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
