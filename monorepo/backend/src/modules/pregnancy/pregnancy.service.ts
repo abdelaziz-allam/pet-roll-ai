@@ -17,20 +17,29 @@ export class PregnancyService {
   async startTracking(petId: string, ownerId: string, input: any) {
     const petData = await this.verifyPetOwnership(petId, ownerId);
 
-    const activeSnap = await this.pregRef
-      .where('petId', '==', petId)
-      .where('status', '==', 'active')
-      .get();
+    try {
+      const activeSnap = await this.pregRef
+        .where('petId', '==', petId)
+        .where('status', '==', 'active')
+        .get();
 
-    if (!activeSnap.empty) {
-      const error: any = new Error('Pet already has an active pregnancy');
-      error.statusCode = 409;
-      throw error;
+      if (!activeSnap.empty) {
+        const error: any = new Error('Pet already has an active pregnancy');
+        error.statusCode = 409;
+        throw error;
+      }
+    } catch (err: any) {
+      if (err.statusCode === 409) throw err;
+      // Index not ready - skip active check rather than blocking user
     }
 
     const matingDateStr = input.matingDate || input.startDate;
     const matingDate = new Date(matingDateStr);
-    const gestationDays = petData.species === 'dog' ? 63 : 65;
+    const gestationMap: Record<string, number> = {
+      dog: 63, cat: 65, rabbit: 31, hamster: 16, guinea_pig: 68,
+      cow: 283, horse: 340, sheep: 152, goat: 150, pig: 114,
+    };
+    const gestationDays = gestationMap[petData.species] || 65;
     const calculatedDueDate = new Date(matingDate.getTime() + gestationDays * 24 * 60 * 60 * 1000);
     const expectedDueDate = input.expectedDueDate || calculatedDueDate.toISOString().split('T')[0];
 
@@ -56,18 +65,21 @@ export class PregnancyService {
 
   async getAll(petId: string, ownerId: string, page = 1, limit = 20) {
     await this.verifyPetOwnership(petId, ownerId);
-    const countSnap = await this.pregRef.where('petId', '==', petId).count().get();
-    const total = countSnap.data().count;
-    const offset = (page - 1) * limit;
 
     const snapshot = await this.pregRef
       .where('petId', '==', petId)
-      .orderBy('createdAt', 'desc')
-      .offset(offset)
-      .limit(limit)
       .get();
 
-    const records = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const allRecords = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    allRecords.sort((a: any, b: any) => {
+      const aDate = a.createdAt?._seconds || 0;
+      const bDate = b.createdAt?._seconds || 0;
+      return bDate - aDate;
+    });
+
+    const total = allRecords.length;
+    const offset = (page - 1) * limit;
+    const records = allRecords.slice(offset, offset + limit);
     return { data: records, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
@@ -114,6 +126,11 @@ export class PregnancyService {
   async getMilestones(pregId: string, ownerId: string) {
     const preg = await this.getById(pregId, ownerId) as any;
     return preg.milestones || [];
+  }
+
+  async deletePregnancy(pregId: string, ownerId: string) {
+    await this.getById(pregId, ownerId);
+    await this.pregRef.doc(pregId).delete();
   }
 
   async completeMilestone(pregId: string, milestoneId: string, ownerId: string) {

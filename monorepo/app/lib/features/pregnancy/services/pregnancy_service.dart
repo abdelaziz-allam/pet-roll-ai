@@ -95,4 +95,25 @@ class PregnancyService {
       throw ApiException.fromDioException(e);
     }
   }
+
+  Future<void> deletePregnancy(String petId, String pregnancyId) async {
+    try {
+      await _api.delete('/pets/$petId/pregnancy/$pregnancyId');
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  Future<Pregnancy> update(
+    String petId,
+    String pregnancyId,
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      final response = await _api.put('/pets/$petId/pregnancy/$pregnancyId', data: data);
+      return Pregnancy.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
 }

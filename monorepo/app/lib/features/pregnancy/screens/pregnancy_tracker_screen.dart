@@ -88,6 +88,230 @@ class _PregnancyTrackerScreenState extends ConsumerState<PregnancyTrackerScreen>
     ref.invalidate(pregnancyMilestonesProvider((widget.petId, pregnancy.id)));
   }
 
+  Future<void> _deletePregnancy(Pregnancy pregnancy) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Pregnancy'),
+        content: const Text('Are you sure you want to delete this pregnancy record? This cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      try {
+        await ref.read(pregnancyServiceProvider).deletePregnancy(widget.petId, pregnancy.id);
+        ref.invalidate(activePregnancyProvider(widget.petId));
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e')),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _editPregnancy(Pregnancy pregnancy) async {
+    final l10n = AppLocalizations.of(context)!;
+    DateTime matingDate = pregnancy.breedingDate;
+    DateTime expectedDueDate = pregnancy.expectedDueDate;
+    String status = pregnancy.status;
+    final notesCtrl = TextEditingController(text: pregnancy.notes ?? '');
+    final litterSizeCtrl = TextEditingController(text: pregnancy.litterSize?.toString() ?? '');
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) => Padding(
+          padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40, height: 4,
+                    decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(ctx),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(color: Colors.grey.shade100, shape: BoxShape.circle),
+                        child: const Icon(Icons.arrow_back, size: 20),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text('Edit Pregnancy', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(ctx),
+                      child: const Icon(Icons.close, color: Colors.grey),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                const Text('Status', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _statusChip('active', status, AppColors.brandPrimary, () => setSheetState(() => status = 'active')),
+                    _statusChip('completed', status, Colors.green, () => setSheetState(() => status = 'completed')),
+                    _statusChip('miscarriage', status, Colors.orange, () => setSheetState(() => status = 'miscarriage')),
+                    _statusChip('false_alarm', status, Colors.grey, () => setSheetState(() => status = 'false_alarm')),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                const Text('Mating Date', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 8),
+                InkWell(
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: ctx,
+                      initialDate: matingDate,
+                      firstDate: DateTime.now().subtract(const Duration(days: 400)),
+                      lastDate: DateTime.now(),
+                    );
+                    if (picked != null) setSheetState(() => matingDate = picked);
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.borderDefault),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text('${matingDate.day}/${matingDate.month}/${matingDate.year}'),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                const Text('Expected Due Date', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 8),
+                InkWell(
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: ctx,
+                      initialDate: expectedDueDate,
+                      firstDate: DateTime.now().subtract(const Duration(days: 30)),
+                      lastDate: DateTime.now().add(const Duration(days: 400)),
+                    );
+                    if (picked != null) setSheetState(() => expectedDueDate = picked);
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.borderDefault),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text('${expectedDueDate.day}/${expectedDueDate.month}/${expectedDueDate.year}'),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                TextField(
+                  controller: litterSizeCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Litter Size',
+                    prefixIcon: Icon(Icons.pets),
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: notesCtrl,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    labelText: l10n.notes,
+                    prefixIcon: const Icon(Icons.notes),
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      try {
+                        final body = <String, dynamic>{
+                          'matingDate': matingDate.toIso8601String(),
+                          'startDate': matingDate.toIso8601String(),
+                          'expectedDueDate': expectedDueDate.toIso8601String(),
+                          'status': status,
+                          'notes': notesCtrl.text,
+                        };
+                        if (litterSizeCtrl.text.isNotEmpty) {
+                          body['litterSize'] = int.tryParse(litterSizeCtrl.text);
+                        }
+                        await ref.read(pregnancyServiceProvider).update(
+                              widget.petId, pregnancy.id, body);
+                        if (ctx.mounted) Navigator.pop(ctx);
+                        ref.invalidate(activePregnancyProvider(widget.petId));
+                      } catch (e) {
+                        if (ctx.mounted) {
+                          ScaffoldMessenger.of(ctx).showSnackBar(
+                            SnackBar(content: Text('Error: $e')),
+                          );
+                        }
+                      }
+                    },
+                    child: const Text('Save Changes'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _statusChip(String value, String current, Color color, VoidCallback onTap) {
+    final isSelected = value == current;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withOpacity(0.15) : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: isSelected ? color : Colors.grey.shade300),
+        ),
+        child: Text(
+          value.replaceAll('_', ' ').split(' ').map((w) => w[0].toUpperCase() + w.substring(1)).join(' '),
+          style: TextStyle(color: isSelected ? color : AppColors.textSecondary, fontWeight: FontWeight.w600, fontSize: 13),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -124,6 +348,8 @@ class _PregnancyTrackerScreenState extends ConsumerState<PregnancyTrackerScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildProgressCard(pregnancy),
+          const SizedBox(height: 12),
+          _buildActionButtons(pregnancy),
           const SizedBox(height: 20),
           _buildCurrentMilestone(pregnancy),
           const SizedBox(height: 20),
@@ -132,6 +358,36 @@ class _PregnancyTrackerScreenState extends ConsumerState<PregnancyTrackerScreen>
           _buildMilestoneChecklist(pregnancy),
         ],
       ),
+    );
+  }
+
+  Widget _buildActionButtons(Pregnancy pregnancy) {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () => _editPregnancy(pregnancy),
+            icon: const Icon(Icons.edit, size: 18),
+            label: const Text('Edit'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.brandPrimary,
+              side: BorderSide(color: AppColors.brandPrimary.withOpacity(0.5)),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () => _deletePregnancy(pregnancy),
+            icon: const Icon(Icons.delete_outline, size: 18),
+            label: const Text('Delete'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.red,
+              side: BorderSide(color: Colors.red.withOpacity(0.5)),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

@@ -31,6 +31,11 @@ class _StartPregnancyScreenState extends ConsumerState<StartPregnancyScreen> {
     'rabbit': 31,
     'hamster': 16,
     'guinea_pig': 68,
+    'cow': 283,
+    'horse': 340,
+    'sheep': 152,
+    'goat': 150,
+    'pig': 114,
   };
 
   String _selectedSpecies = 'dog';
@@ -39,7 +44,7 @@ class _StartPregnancyScreenState extends ConsumerState<StartPregnancyScreen> {
     final date = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime.now().subtract(const Duration(days: 120)),
+      firstDate: DateTime.now().subtract(const Duration(days: 400)),
       lastDate: DateTime.now(),
     );
     if (date != null) {
