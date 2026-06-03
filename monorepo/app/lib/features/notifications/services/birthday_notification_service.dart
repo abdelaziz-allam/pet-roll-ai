@@ -86,31 +86,35 @@ class BirthdayNotificationService {
     final age = nextBirthday.year - dateOfBirth.year;
     final id = _notificationId(petId);
 
-    await _plugin.zonedSchedule(
-      id,
-      'Happy Birthday $petName!',
-      '$petName turns $age today! Celebrate with your furry friend.',
-      nextBirthday,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'pet_birthday',
-          'Pet Birthdays',
-          channelDescription: 'Birthday notifications for your pets',
-          importance: Importance.high,
-          priority: Priority.high,
-          icon: '@mipmap/ic_launcher',
+    try {
+      await _plugin.zonedSchedule(
+        id,
+        'Happy Birthday $petName!',
+        '$petName turns $age today! Celebrate with your furry friend.',
+        nextBirthday,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'pet_birthday',
+            'Pet Birthdays',
+            channelDescription: 'Birthday notifications for your pets',
+            importance: Importance.high,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
+          ),
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
         ),
-        iOS: DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        ),
-      ),
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.dateAndTime,
-    );
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.dateAndTime,
+      );
+    } catch (_) {
+      // Silently fail if notification scheduling fails
+    }
   }
 
   Future<void> cancelBirthdayNotification(String petId) async {
@@ -154,30 +158,34 @@ class BirthdayNotificationService {
 
     final id = ('$vaccinationId-dose$doseNumber').hashCode.abs() % 100000;
 
-    await _plugin.zonedSchedule(
-      id,
-      'Vaccination Reminder: $vaccineName',
-      'Dose $doseNumber is due today. Don\'t forget to visit your vet!',
-      scheduledDate,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'vaccination_reminder',
-          'Vaccination Reminders',
-          channelDescription: 'Reminders for upcoming vaccination doses',
-          importance: Importance.high,
-          priority: Priority.high,
-          icon: '@mipmap/ic_launcher',
+    try {
+      await _plugin.zonedSchedule(
+        id,
+        'Vaccination Reminder: $vaccineName',
+        'Dose $doseNumber is due today. Don\'t forget to visit your vet!',
+        scheduledDate,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'vaccination_reminder',
+            'Vaccination Reminders',
+            channelDescription: 'Reminders for upcoming vaccination doses',
+            importance: Importance.high,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
+          ),
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
         ),
-        iOS: DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        ),
-      ),
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-    );
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      );
+    } catch (_) {
+      // Silently fail if notification scheduling fails
+    }
   }
 
   Future<void> cancelVaccinationReminder(String vaccinationId, int doseNumber) async {

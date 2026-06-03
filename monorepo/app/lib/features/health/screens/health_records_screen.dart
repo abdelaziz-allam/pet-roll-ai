@@ -150,13 +150,15 @@ class _HealthRecordsScreenState extends State<HealthRecordsScreen> {
                         });
 
                         if (nextVisitDate != null) {
-                          final notifId = widget.petId.hashCode + titleCtrl.text.hashCode;
-                          await NotificationService().scheduleReminders(
-                            baseId: notifId.abs() % 100000,
-                            title: '🏥 Vet Visit Reminder',
-                            body: '${titleCtrl.text} - Next visit at ${vetCtrl.text.isNotEmpty ? vetCtrl.text : "vet"}',
-                            targetDate: nextVisitDate!,
-                          );
+                          try {
+                            final notifId = widget.petId.hashCode + titleCtrl.text.hashCode;
+                            await NotificationService().scheduleReminders(
+                              baseId: notifId.abs() % 100000,
+                              title: '🏥 Vet Visit Reminder',
+                              body: '${titleCtrl.text} - Next visit at ${vetCtrl.text.isNotEmpty ? vetCtrl.text : "vet"}',
+                              targetDate: nextVisitDate!,
+                            );
+                          } catch (_) {}
                         }
 
                         Navigator.pop(ctx);

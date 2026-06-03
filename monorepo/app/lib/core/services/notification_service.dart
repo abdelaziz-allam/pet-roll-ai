@@ -180,30 +180,34 @@ class NotificationService {
     required String body,
     required DateTime scheduledDate,
   }) async {
-    final tzDate = tz.TZDateTime.from(scheduledDate, tz.local);
+    try {
+      final tzDate = tz.TZDateTime.from(scheduledDate, tz.local);
 
-    await _plugin.zonedSchedule(
-      id,
-      title,
-      body,
-      tzDate,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'pet_roll_reminders',
-          'Petfolioo Reminders',
-          channelDescription: 'Reminders for pet health, vaccinations, and events',
-          importance: Importance.high,
-          priority: Priority.high,
+      await _plugin.zonedSchedule(
+        id,
+        title,
+        body,
+        tzDate,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'pet_roll_reminders',
+            'Petfolioo Reminders',
+            channelDescription: 'Reminders for pet health, vaccinations, and events',
+            importance: Importance.high,
+            priority: Priority.high,
+          ),
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
         ),
-        iOS: DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-    );
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    } catch (_) {
+      // Silently fail if notification scheduling fails (e.g. missing exact alarm permission)
+    }
   }
 
   Future<void> cancelAll(int baseId, {int range = 10}) async {

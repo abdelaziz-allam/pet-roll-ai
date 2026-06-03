@@ -466,12 +466,14 @@ class _PetDetailScreenState extends State<PetDetailScreen> with SingleTickerProv
       });
 
       // Schedule birthday notification
-      final notifId = (_pet['id'].hashCode + 99999).abs() % 100000;
-      await NotificationService().scheduleBirthdayNotification(
-        notificationId: notifId,
-        petName: _pet['name'] ?? 'Your pet',
-        birthDate: picked,
-      );
+      try {
+        final notifId = (_pet['id'].hashCode + 99999).abs() % 100000;
+        await NotificationService().scheduleBirthdayNotification(
+          notificationId: notifId,
+          petName: _pet['name'] ?? 'Your pet',
+          birthDate: picked,
+        );
+      } catch (_) {}
 
       setState(() => _pet['dateOfBirth'] = picked.toIso8601String());
 

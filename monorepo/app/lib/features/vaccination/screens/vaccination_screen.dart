@@ -205,31 +205,35 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
                       }
                       try {
                         final nextDoseDate = doseDates.length > 1 ? doseDates[1] : null;
-                        await ApiService().post('/pets/${widget.petId}/vaccinations', {
+                        final body = <String, dynamic>{
                           'name': nameCtrl.text,
-                          'manufacturer': manufacturerCtrl.text,
-                          'batchNumber': batchCtrl.text,
-                          'vetName': vetCtrl.text,
-                          'administeredDate': firstDoseDate!.toIso8601String(),
-                          'nextDueDate': nextDoseDate?.toIso8601String(),
-                          'totalDoses': totalDoses,
-                          'currentDose': 1,
-                          'doseDates': doseDates.map((d) => d?.toIso8601String()).toList(),
-                        });
+                          'dateAdministered': firstDoseDate!.toIso8601String(),
+                        };
+                        if (manufacturerCtrl.text.isNotEmpty) body['manufacturer'] = manufacturerCtrl.text;
+                        if (batchCtrl.text.isNotEmpty) body['batchNumber'] = batchCtrl.text;
+                        if (vetCtrl.text.isNotEmpty) body['veterinarian'] = vetCtrl.text;
+                        if (nextDoseDate != null) body['nextDueDate'] = nextDoseDate.toIso8601String();
+                        if (totalDoses > 1) body['totalDoses'] = totalDoses;
+                        body['currentDose'] = 1;
+                        final validDoseDates = doseDates.where((d) => d != null).map((d) => d!.toIso8601String()).toList();
+                        if (validDoseDates.isNotEmpty) body['doseDates'] = validDoseDates;
+                        await ApiService().post('/pets/${widget.petId}/vaccinations', body);
 
                         // Schedule notifications for future doses
-                        final notifService = NotificationService();
-                        for (int i = 1; i < doseDates.length; i++) {
-                          if (doseDates[i] != null && doseDates[i]!.isAfter(DateTime.now())) {
-                            final notifId = (widget.petId.hashCode + nameCtrl.text.hashCode + i).abs() % 100000;
-                            await notifService.scheduleReminders(
-                              baseId: notifId,
-                              title: '💉 Vaccination Reminder',
-                              body: '${nameCtrl.text} - Dose ${i + 1} of $totalDoses',
-                              targetDate: doseDates[i]!,
-                            );
+                        try {
+                          final notifService = NotificationService();
+                          for (int i = 1; i < doseDates.length; i++) {
+                            if (doseDates[i] != null && doseDates[i]!.isAfter(DateTime.now())) {
+                              final notifId = (widget.petId.hashCode + nameCtrl.text.hashCode + i).abs() % 100000;
+                              await notifService.scheduleReminders(
+                                baseId: notifId,
+                                title: '💉 Vaccination Reminder',
+                                body: '${nameCtrl.text} - Dose ${i + 1} of $totalDoses',
+                                targetDate: doseDates[i]!,
+                              );
+                            }
                           }
-                        }
+                        } catch (_) {}
 
                         Navigator.pop(ctx);
                         _load();

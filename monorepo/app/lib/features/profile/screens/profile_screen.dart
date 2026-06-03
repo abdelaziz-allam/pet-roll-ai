@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../main.dart';
 import '../../feedback/feedback_screen.dart';
 import '../../pets/screens/pet_detail_screen.dart';
@@ -39,24 +40,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showDeleteAccountDialog() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: AppTheme.error, size: 28),
-            SizedBox(width: 10),
-            Text('Delete Account'),
+            const Icon(Icons.warning_amber_rounded, color: AppTheme.error, size: 28),
+            const SizedBox(width: 10),
+            Text(l10n.deleteAccount),
           ],
         ),
-        content: const Text(
-          'This will permanently delete your account and all associated data including pets, health records, and mating listings. This action cannot be undone.',
-        ),
+        content: Text(l10n.deleteAccountConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -73,13 +73,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.error),
+                    SnackBar(content: Text('${l10n.error}: $e'), backgroundColor: AppTheme.error),
                   );
                 }
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.error),
-            child: const Text('Delete', style: TextStyle(color: Colors.white)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -87,16 +87,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showDeletePetDialog(dynamic pet) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Delete ${pet['name'] ?? 'Pet'}?'),
-        content: const Text('This will permanently remove this pet and all related records.'),
+        title: Text('${l10n.deletePet} ${pet['name'] ?? ''}?'),
+        content: Text(l10n.deleteAccountConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -106,19 +107,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _loadProfile();
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Pet deleted'), backgroundColor: AppTheme.success),
+                    SnackBar(content: Text(l10n.success), backgroundColor: AppTheme.success),
                   );
                 }
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.error),
+                    SnackBar(content: Text('${l10n.error}: $e'), backgroundColor: AppTheme.error),
                   );
                 }
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.error),
-            child: const Text('Delete', style: TextStyle(color: Colors.white)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -134,33 +135,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _requestReview() async {
-    final prefs = await SharedPreferences.getInstance();
-    final lastPrompt = prefs.getInt('last_review_prompt') ?? 0;
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final thirtyDays = 30 * 24 * 60 * 60 * 1000;
-
-    if (now - lastPrompt < thirtyDays && lastPrompt > 0) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Thank you! You can rate us again later.'), backgroundColor: AppTheme.primary),
-        );
-      }
-      return;
-    }
-
-    await prefs.setInt('last_review_prompt', now);
+    final l10n = AppLocalizations.of(context)!;
 
     if (mounted) {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Enjoying Petfolioo?', style: TextStyle(fontWeight: FontWeight.w700)),
-          content: const Text('If you love our app, please take a moment to rate us on the Play Store. Your feedback helps us grow!'),
+          title: Text(l10n.enjoyingApp, style: const TextStyle(fontWeight: FontWeight.w700)),
+          content: Text(l10n.rateUsMessage),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Later'),
+              child: Text(l10n.later),
             ),
             ElevatedButton(
               onPressed: () {
@@ -168,7 +155,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _openPlayStore();
               },
               style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary),
-              child: const Text('Rate Now', style: TextStyle(color: Colors.white)),
+              child: Text(l10n.rateNow, style: const TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -187,9 +174,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: Text(l10n.profile, style: const TextStyle(fontWeight: FontWeight.w700)),
         actions: [
           IconButton(
             onPressed: _logout,
@@ -206,18 +194,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   _buildProfileHeader(),
                   const SizedBox(height: 24),
-                  _buildSection('My Pets', Icons.pets),
+                  _buildSection(l10n.myPets, Icons.pets),
                   const SizedBox(height: 12),
                   if (_pets.isEmpty)
                     _buildEmptyPets()
                   else
                     ..._pets.map((pet) => _buildPetTile(pet)),
                   const SizedBox(height: 24),
-                  _buildSection('Settings', Icons.settings),
+                  _buildSection(l10n.settings, Icons.settings),
                   const SizedBox(height: 12),
                   _buildSettingsCard(),
                   const SizedBox(height: 24),
-                  _buildSection('Danger Zone', Icons.warning_amber_rounded),
+                  _buildSection(l10n.dangerZone, Icons.warning_amber_rounded),
                   const SizedBox(height: 12),
                   _buildDangerZone(),
                   const SizedBox(height: 40),
@@ -282,7 +270,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '${_pets.length} pet${_pets.length == 1 ? '' : 's'} registered',
+                    AppLocalizations.of(context)!.petsRegistered(_pets.length),
                     style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w500),
                   ),
                 ),
@@ -312,8 +300,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         borderRadius: BorderRadius.circular(14),
         boxShadow: AppTheme.cardShadow,
       ),
-      child: const Center(
-        child: Text('No pets yet', style: TextStyle(color: AppTheme.textSecondary)),
+      child: Center(
+        child: Text(AppLocalizations.of(context)!.noPetsYet, style: const TextStyle(color: AppTheme.textSecondary)),
       ),
     );
   }
@@ -375,6 +363,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildSettingsCard() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -385,40 +374,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           ListTile(
             leading: const Icon(Icons.notifications_active, color: AppTheme.primary),
-            title: const Text('Reminder Notifications', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
-            subtitle: const Text('How many reminders before each event', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+            title: Text(l10n.reminderNotifications, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
+            subtitle: Text(l10n.reminderNotificationsDesc, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
             trailing: const Icon(Icons.chevron_right, color: AppTheme.textSecondary, size: 20),
             onTap: _showNotificationSettings,
           ),
           Divider(height: 1, color: Colors.grey.shade100),
           ListTile(
             leading: const Icon(Icons.feedback_outlined, color: AppTheme.primary),
-            title: const Text('Feedback & Suggestions', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
-            subtitle: const Text('Help us improve Petfolioo', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+            title: Text(l10n.feedbackAndSuggestions, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
+            subtitle: Text(l10n.feedbackDesc, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
             trailing: const Icon(Icons.chevron_right, color: AppTheme.textSecondary, size: 20),
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FeedbackScreen())),
           ),
           Divider(height: 1, color: Colors.grey.shade100),
           ListTile(
             leading: const Icon(Icons.star_outline, color: AppTheme.primary),
-            title: const Text('Rate Us', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
-            subtitle: const Text('Love Petfolioo? Leave a review!', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+            title: Text(l10n.rateUs, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
+            subtitle: Text(l10n.rateUsDesc, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
             trailing: const Icon(Icons.chevron_right, color: AppTheme.textSecondary, size: 20),
             onTap: _requestReview,
           ),
           Divider(height: 1, color: Colors.grey.shade100),
           ListTile(
             leading: const Icon(Icons.language, color: AppTheme.primary),
-            title: const Text('Language', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
+            title: Text(l10n.language, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
             subtitle: Text(
-              localeNotifier.value.languageCode == 'sv' ? 'Svenska' : 'English',
+              localeNotifier.value.languageCode == 'sv' ? l10n.swedish : l10n.english,
               style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
             ),
             trailing: const Icon(Icons.chevron_right, color: AppTheme.textSecondary, size: 20),
             onTap: _showLanguagePicker,
           ),
           Divider(height: 1, color: Colors.grey.shade100),
-          _settingsTile(Icons.info_outline, 'About', 'Petfolioo v1.0.1'),
+          _settingsTile(Icons.info_outline, l10n.about, 'Petfolioo v1.0.1'),
         ],
       ),
     );
@@ -426,6 +415,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _showNotificationSettings() async {
     int currentCount = await NotificationService().getReminderCount();
+    final l10n = AppLocalizations.of(context)!;
 
     if (!mounted) return;
     showModalBottomSheet(
@@ -438,11 +428,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Notification Settings', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+              Text(l10n.notificationSettings, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
-              const Text(
-                'Configure how many reminder notifications you receive before each scheduled event (vet visits, vaccinations, pregnancy due dates).',
-                style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+              Text(
+                l10n.reminderNotificationsDesc,
+                style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
               ),
               const SizedBox(height: 24),
               Container(
@@ -456,13 +446,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     const Icon(Icons.notifications_active, color: AppTheme.primary),
                     const SizedBox(width: 16),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Number of Reminders', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                          SizedBox(height: 2),
-                          Text('Before each scheduled date', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                          Text(l10n.numberOfReminders, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                          const SizedBox(height: 2),
+                          Text(l10n.reminderNotificationsDesc, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
                         ],
                       ),
                     ),
@@ -483,25 +473,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Preview:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                    const SizedBox(height: 6),
-                    Text(
-                      _buildReminderPreview(currentCount),
-                      style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
-                    ),
-                  ],
-                ),
-              ),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
@@ -511,14 +482,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Navigator.pop(ctx);
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Reminders set to $currentCount notifications before each event'),
-                          backgroundColor: AppTheme.success,
-                        ),
+                        SnackBar(content: Text(l10n.success), backgroundColor: AppTheme.success),
                       );
                     }
                   },
-                  child: const Text('Save Settings'),
+                  child: Text(l10n.saveSettings),
                 ),
               ),
               const SizedBox(height: 8),
@@ -543,15 +511,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  String _buildReminderPreview(int count) {
-    if (count == 1) return 'You\'ll get 1 reminder a few days before the event';
-    if (count == 2) return 'You\'ll get reminders spread across the days leading up to the event';
-    if (count == 3) return 'You\'ll get 3 reminders: early, mid, and close to the event';
-    if (count == 4) return 'You\'ll get 4 reminders spread evenly before the event';
-    return 'You\'ll get 5 reminders (maximum) spread before the event';
-  }
-
   void _showLanguagePicker() {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
@@ -561,7 +522,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Select Language', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+            Text(l10n.selectLanguage, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
             const SizedBox(height: 20),
             _buildLanguageOption(ctx, 'English', 'en'),
             const SizedBox(height: 8),
@@ -616,6 +577,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildDangerZone() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -627,14 +589,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           ListTile(
             leading: const Icon(Icons.logout, color: AppTheme.error),
-            title: const Text('Log Out', style: TextStyle(fontWeight: FontWeight.w500, color: AppTheme.error, fontSize: 14)),
+            title: Text(l10n.logout, style: const TextStyle(fontWeight: FontWeight.w500, color: AppTheme.error, fontSize: 14)),
             onTap: _logout,
           ),
           Divider(height: 1, color: Colors.grey.shade100),
           ListTile(
             leading: const Icon(Icons.delete_forever, color: AppTheme.error),
-            title: const Text('Delete Account', style: TextStyle(fontWeight: FontWeight.w500, color: AppTheme.error, fontSize: 14)),
-            subtitle: const Text('Permanently remove all data', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+            title: Text(l10n.deleteAccount, style: const TextStyle(fontWeight: FontWeight.w500, color: AppTheme.error, fontSize: 14)),
+            subtitle: Text(l10n.permanentlyRemoveData, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
             onTap: _showDeleteAccountDialog,
           ),
         ],

@@ -82,8 +82,9 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
     try {
       final googleSignIn = GoogleSignIn(
         scopes: ['email', 'profile'],
-        serverClientId: '834040996278-0lmec5vdgu349d8fktcog17qmd2ae3tt.apps.googleusercontent.com',
       );
+
+      await googleSignIn.signOut();
       final googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
         setState(() { _loading = false; });
@@ -203,8 +204,14 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
         await api.setTokens(result['accessToken'], result['refreshToken']);
       }
     } on ApiException catch (e) {
-      if (e.statusCode == 409 && isNewUser) {
+      if (e.statusCode == 409) {
         final result = await api.postWithFirebaseToken('/auth/login', idToken);
+        await api.setTokens(result['accessToken'], result['refreshToken']);
+      } else if (e.statusCode == 404 && !isNewUser) {
+        final displayName = user.displayName ?? user.email?.split('@').first ?? 'User';
+        final result = await api.postWithFirebaseToken('/auth/register', idToken, {
+          'displayName': displayName,
+        });
         await api.setTokens(result['accessToken'], result['refreshToken']);
       } else {
         rethrow;
