@@ -53,6 +53,12 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Petfolioo needs access to your camera to take photos of your pets and upload verification documents.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Petfolioo needs access to your photo library to select pet photos and verification documents.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Petfolioo needs permission to save certificate images to your photo library.</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

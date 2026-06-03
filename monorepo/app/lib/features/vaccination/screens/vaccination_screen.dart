@@ -3,6 +3,7 @@ import '../../../core/services/api_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import 'edit_vaccination_screen.dart';
 
 class VaccinationScreen extends StatefulWidget {
   final String petId;
@@ -26,10 +27,14 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
+      print('[VAC] Loading vaccinations for petId: ${widget.petId}');
       final data = await ApiService().get('/pets/${widget.petId}/vaccinations');
+      print('[VAC] Response: $data');
       final List<dynamic> items = data is List ? data : (data['vaccinations'] ?? data['data'] ?? []);
+      print('[VAC] Parsed items count: ${items.length}');
       setState(() { _vaccinations = items; _loading = false; });
     } catch (e) {
+      print('[VAC] Error loading vaccinations: $e');
       setState(() { _vaccinations = []; _loading = false; });
     }
   }
@@ -218,7 +223,9 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
                         body['currentDose'] = 1;
                         final validDoseDates = doseDates.where((d) => d != null).map((d) => d!.toIso8601String()).toList();
                         if (validDoseDates.isNotEmpty) body['doseDates'] = validDoseDates;
-                        await ApiService().post('/pets/${widget.petId}/vaccinations', body);
+                        print('[VAC] Saving vaccination: $body');
+                        final result = await ApiService().post('/pets/${widget.petId}/vaccinations', body);
+                        print('[VAC] Save result: $result');
 
                         // Schedule notifications for future doses
                         try {
@@ -350,6 +357,50 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
     );
   }
 
+  void _editVaccination(dynamic vac) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EditVaccinationScreen(
+          petId: widget.petId,
+          vaccination: Map<String, dynamic>.from(vac as Map),
+        ),
+      ),
+    );
+    if (result == true) _load();
+  }
+
+  Future<void> _deleteVaccination(dynamic vac) async {
+    final vacId = vac['id'];
+    if (vacId == null) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Vaccination'),
+        content: const Text('Are you sure you want to delete this vaccination record?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      try {
+        await ApiService().delete('/pets/${widget.petId}/vaccinations/$vacId');
+        _load();
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.error),
+          );
+        }
+      }
+    }
+  }
+
   Widget _buildVacCard(dynamic vac) {
     final nextDue = vac['nextDueDate'] != null ? DateTime.tryParse(vac['nextDueDate']) : null;
     final administeredDate = vac['dateAdministered'] != null ? DateTime.tryParse(vac['dateAdministered']) : null;
@@ -359,7 +410,9 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
     final currentDose = vac['currentDose'] ?? 1;
     final doseProgress = currentDose / totalDoses;
 
-    return Container(
+    return GestureDetector(
+      onTap: () => _editVaccination(vac),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -468,8 +521,53 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
               ),
             ),
           ],
+
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              GestureDetector(
+                onTap: () => _editVaccination(vac),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.edit, size: 14, color: AppTheme.primary),
+                      const SizedBox(width: 4),
+                      Text('Edit', style: TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => _deleteVaccination(vac),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppTheme.error.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.delete_outline, size: 14, color: AppTheme.error),
+                      const SizedBox(width: 4),
+                      Text('Delete', style: TextStyle(fontSize: 12, color: AppTheme.error, fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
+    ),
     );
   }
 

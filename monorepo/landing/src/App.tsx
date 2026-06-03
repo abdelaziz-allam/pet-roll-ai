@@ -541,10 +541,10 @@ const App: React.FC = () => {
             <div>
               <h4>Legal</h4>
               <ul>
-                <li><a href="#">Privacy Policy</a></li>
-                <li><a href="#">Terms of Service</a></li>
-                <li><a href="#">Cookie Policy</a></li>
-                <li><a href="#">GDPR</a></li>
+                <li><a href="/privacy-policy.html">Privacy Policy</a></li>
+                <li><a href="/terms-of-service.html">Terms of Service</a></li>
+                <li><a href="/privacy-policy.html#cookies">Cookie Policy</a></li>
+                <li><a href="/privacy-policy.html#gdpr">GDPR</a></li>
               </ul>
             </div>
           </div>

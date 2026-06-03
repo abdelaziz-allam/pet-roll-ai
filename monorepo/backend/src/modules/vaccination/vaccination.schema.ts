@@ -16,6 +16,7 @@ export const logVaccinationSchema = z.object({
   totalDoses: z.number().int().positive().optional(),
   currentDose: z.number().int().positive().optional(),
   doseDates: z.array(z.string().nullable()).optional(),
+  doseNotes: z.array(z.string().max(500)).optional(),
 }).refine((data) => data.vaccineName || data.name, {
   message: 'Either vaccineName or name is required',
 }).refine((data) => data.dateAdministered || data.administeredDate, {
@@ -38,6 +39,7 @@ export const updateVaccinationSchema = z.object({
   totalDoses: z.number().int().positive().optional(),
   currentDose: z.number().int().positive().optional(),
   doseDates: z.array(z.string().nullable()).optional(),
+  doseNotes: z.array(z.string().max(500)).optional(),
 });
 
 export type LogVaccinationInput = z.infer<typeof logVaccinationSchema>;

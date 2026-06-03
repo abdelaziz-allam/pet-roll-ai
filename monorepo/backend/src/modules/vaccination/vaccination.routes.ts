@@ -16,8 +16,18 @@ export async function vaccinationRoutes(fastify: FastifyInstance) {
   fastify.get('/pets/:petId/vaccinations', async (request, reply) => {
     const { petId } = request.params as { petId: string };
     const { page = 1, limit = 20 } = request.query as any;
-    const result = await vaccinationService.getVaccinations(petId, request.user!.uid, +page, +limit);
-    return reply.code(200).send(result);
+    try {
+      const result = await vaccinationService.getVaccinations(petId, request.user!.uid, +page, +limit);
+      return reply.code(200).send(result);
+    } catch (err: any) {
+      request.log.error({ err, petId }, 'Failed to get vaccinations');
+      const statusCode = err.statusCode || 500;
+      return reply.code(statusCode).send({
+        error: 'Error',
+        message: err.message || 'Internal server error',
+        statusCode,
+      });
+    }
   });
 
   fastify.get('/pets/:petId/vaccinations/upcoming', async (request, reply) => {

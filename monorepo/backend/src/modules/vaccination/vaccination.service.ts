@@ -43,7 +43,7 @@ export class VaccinationService {
 
     const snapshot = await this.vacRef
       .where('petId', '==', petId)
-      .orderBy('createdAt', 'desc')
+      .orderBy('dateAdministered', 'desc')
       .offset(offset)
       .limit(limit)
       .get();

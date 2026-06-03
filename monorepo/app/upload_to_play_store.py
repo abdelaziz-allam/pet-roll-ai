@@ -17,7 +17,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
 SERVICE_ACCOUNT_KEY = '/tmp/play-publisher-key.json'
-PACKAGE_NAME = 'com.petroll.app'
+PACKAGE_NAME = 'com.petroll.pet_roll'
 AAB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                         'build/app/outputs/bundle/release/app-release.aab')
 
@@ -62,30 +62,31 @@ def upload_aab(service):
     version_code = response['versionCode']
     print(f"  Uploaded! Version code: {version_code}")
 
-    print(f"\n[3/4] Assigning to internal testing track...")
+    print(f"\n[3/4] Assigning to closed testing (alpha) track...")
     service.edits().tracks().update(
         packageName=PACKAGE_NAME,
         editId=edit_id,
-        track='internal',
+        track='alpha',
         body={
-            'track': 'internal',
+            'track': 'alpha',
             'releases': [{
                 'versionCodes': [str(version_code)],
                 'status': 'completed',
                 'releaseNotes': [{
                     'language': 'en-US',
-                    'text': 'Initial release of PET Roll:\n'
-                           '- Pet profile management with photos\n'
-                           '- Vaccination tracking & smart reminders\n'
-                           '- Complete medical history timeline\n'
-                           '- Pregnancy tracking with milestones\n'
-                           '- Mating marketplace for breeders\n'
-                           '- In-app chat & push notifications'
+                    'text': 'Petfolioo v1.1.1:\n'
+                           '- Fixed Google Sign-in failures\n'
+                           '- Fixed crash when scheduling notifications\n'
+                           '- Fixed health record modal not closing after save\n'
+                           '- Fixed vaccination save error (500)\n'
+                           '- Fixed Rate Us dialog showing "Later" only\n'
+                           '- Fixed adaptive icon display on round launchers\n'
+                           '- Fixed birthday edit crash'
                 }]
             }]
         }
     ).execute()
-    print(f"  Assigned to internal testing track!")
+    print(f"  Assigned to closed testing (alpha) track!")
 
     print(f"\n[4/4] Committing edit...")
     service.edits().commit(packageName=PACKAGE_NAME, editId=edit_id).execute()
@@ -111,7 +112,7 @@ def main():
 
     print("\nChecking if app exists in Play Console...")
     if not check_app_exists(service):
-        print("\nERROR: App 'com.petroll.app' not found in Play Console.")
+        print("\nERROR: App 'com.petroll.pet_roll' not found in Play Console.")
         print("Please create the app first at: https://play.google.com/console")
         print("\nSteps:")
         print("  1. Go to Play Console > All apps > Create app")

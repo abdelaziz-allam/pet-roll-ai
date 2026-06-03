@@ -1,3 +1,5 @@
+typedef Vaccination = VaccinationModel;
+
 class VaccinationModel {
   final String id;
   final String petId;
@@ -27,9 +29,17 @@ class VaccinationModel {
     required this.createdAt,
   });
 
+  String get name => vaccineName;
+
   bool get isOverdue {
     if (nextDueDate == null) return false;
     return DateTime.now().isAfter(nextDueDate!);
+  }
+
+  bool get isUpcoming {
+    if (nextDueDate == null) return false;
+    final daysUntil = nextDueDate!.difference(DateTime.now()).inDays;
+    return daysUntil >= 0 && daysUntil <= 30;
   }
 
   int? get daysUntilDue {
@@ -39,10 +49,10 @@ class VaccinationModel {
 
   factory VaccinationModel.fromJson(Map<String, dynamic> json) {
     return VaccinationModel(
-      id: json['id'] as String,
-      petId: json['petId'] as String,
-      ownerId: json['ownerId'] as String,
-      vaccineName: json['vaccineName'] as String,
+      id: json['id'] ?? json['_id'] ?? '',
+      petId: json['petId'] ?? '',
+      ownerId: json['ownerId'] ?? '',
+      vaccineName: json['vaccineName'] ?? json['name'] ?? '',
       dateAdministered: DateTime.parse(json['dateAdministered'] as String),
       nextDueDate: json['nextDueDate'] != null ? DateTime.parse(json['nextDueDate'] as String) : null,
       batchNumber: json['batchNumber'] as String?,
@@ -50,7 +60,7 @@ class VaccinationModel {
       clinic: json['clinic'] as String?,
       notes: json['notes'] as String?,
       sideEffects: json['sideEffects'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt'] as String) : DateTime.now(),
     );
   }
 

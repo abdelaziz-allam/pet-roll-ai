@@ -1,0 +1,430 @@
+- generic [ref=e1]:
+  - generic:
+    - generic:
+      - img
+      - progressbar
+      - generic: Loading Google Play Console
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e6]:
+        - button "Show navigation sidebar" [ref=e7] [cursor=pointer]:
+          - img [ref=e10]: menu
+        - generic [ref=e44]:
+          - button "Notifications Open notification center" [ref=e49]:
+            - img [ref=e53]: notifications
+            - generic [ref=e55]: Notifications
+          - button "Petfolioo" [ref=e369] [cursor=pointer]:
+            - img [ref=e375]
+    - generic [ref=e15]:
+      - button "Switch developer accounts PET Roll petroll.site.contactus@gmail.com" [ref=e19] [cursor=pointer]:
+        - img "Switch developer accounts" [ref=e20]
+        - generic [ref=e21]:
+          - generic [ref=e22]: PET Roll
+          - generic [ref=e23]: petroll.site.contactus@gmail.com
+      - navigation [ref=e57]:
+        - link "All apps" [ref=e377] [cursor=pointer]:
+          - /url: /console/u/0/developers/5992375701600392135/app-list
+          - img [ref=e379]: keyboard_backspace
+          - generic [ref=e380]: All apps
+        - list [ref=e58]:
+          - listitem "Dashboard" [ref=e383]:
+            - button "Dashboard" [ref=e384] [cursor=pointer]:
+              - img [ref=e387]: dashboard
+              - generic [ref=e388]: Dashboard
+          - listitem "Statistics" [ref=e391]:
+            - button "Statistics" [ref=e392] [cursor=pointer]:
+              - img [ref=e395]: bar_chart
+              - generic [ref=e396]: Statistics
+          - listitem "Publishing overview" [ref=e399]:
+            - button "Publishing overview" [ref=e400] [cursor=pointer]:
+              - img [ref=e403]: overview
+              - generic [ref=e404]: Publishing overview
+          - listitem "Protected with Play" [ref=e407]:
+            - button "Protected with Play" [ref=e408] [cursor=pointer]:
+              - img [ref=e411]: shield
+              - generic [ref=e412]: Protected with Play
+          - listitem "Test and release" [ref=e415]:
+            - button "Test and release" [ref=e416] [cursor=pointer]:
+              - img [ref=e419]: rocket_launch
+              - generic [ref=e420]: Test and release
+          - listitem "Monitor and improve" [ref=e423]:
+            - button "Monitor and improve" [ref=e424] [cursor=pointer]:
+              - img [ref=e427]: vital_signs
+              - generic [ref=e428]: Monitor and improve
+            - list [ref=e960]:
+              - generic [ref=e962]:
+                - listitem "Reach and devices" [ref=e964]:
+                  - button "Reach and devices" [ref=e965] [cursor=pointer]:
+                    - generic [ref=e966]: Reach and devices
+                    - img [ref=e968]: expand_more
+                - listitem "Ratings and reviews" [ref=e970]:
+                  - button "Ratings and reviews" [ref=e971] [cursor=pointer]:
+                    - generic [ref=e972]: Ratings and reviews
+                    - img [ref=e974]: expand_more
+                - listitem "Android vitals" [ref=e976]:
+                  - button "Android vitals" [ref=e977] [cursor=pointer]:
+                    - generic [ref=e978]: Android vitals
+                    - img [ref=e980]: expand_more
+                - listitem "Policy and programs" [ref=e982]:
+                  - button "Policy and programs" [ref=e983] [cursor=pointer]:
+                    - generic [ref=e984]: Policy and programs
+                    - img [ref=e986]: expand_less
+                  - list [ref=e987]:
+                    - generic [ref=e989]:
+                      - listitem "Policy status" [ref=e991]:
+                        - button "Policy status" [ref=e992] [cursor=pointer]:
+                          - generic [ref=e993]: Policy status
+                      - listitem "App content" [ref=e995]:
+                        - button "App content" [ref=e996] [cursor=pointer]:
+                          - generic [ref=e997]: App content
+                      - listitem "Teacher Approved" [ref=e999]:
+                        - button "Teacher Approved" [ref=e1000] [cursor=pointer]:
+                          - generic [ref=e1001]: Teacher Approved
+          - listitem "Grow users" [ref=e431]:
+            - button "Grow users" [ref=e432] [cursor=pointer]:
+              - img [ref=e435]: finance_mode
+              - generic [ref=e436]: Grow users
+          - listitem "Monetize with Play" [ref=e439]:
+            - button "Monetize with Play" [ref=e440] [cursor=pointer]:
+              - img [ref=e443]: sell
+              - generic [ref=e444]: Monetize with Play
+    - generic [ref=e25]:
+      - generic [ref=e1076]:
+        - generic [ref=e1080]:
+          - generic:
+            - generic:
+              - link "Go back to Dashboard":
+                - /url: /console/u/0/developers/5992375701600392135/app/4975956261234571904/app-dashboard
+                - img [ref=e1087] [cursor=pointer]: keyboard_backspace
+                - generic [ref=e1088] [cursor=pointer]: Dashboard
+          - generic [ref=e1092]:
+            - heading "Content ratings" [level=1] [ref=e1097]
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - button "Discard changes":
+                      - generic: Discard changes
+        - generic [ref=e1107]:
+          - generic [ref=e1112]:
+            - tablist [ref=e1113]:
+              - tab "Step 1 of 3, Category" [disabled] [ref=e1114]:
+                - img [ref=e1236]: check
+                - generic [ref=e1119]: Category
+              - tab "Step 2 of 3, Questionnaire" [selected] [ref=e1121]:
+                - generic [ref=e1124]: "2"
+                - generic [ref=e1126]: Questionnaire
+              - tab "Step 3 of 3, Summary" [disabled] [ref=e1128]:
+                - generic [ref=e1131]: "3"
+                - generic [ref=e1133]: Summary
+            - tabpanel [ref=e1135]:
+              - generic [ref=e1237]:
+                - heading "All Other App Types" [level=2] [ref=e1249]
+                - generic [ref=e1252]:
+                  - generic [ref=e1254]:
+                    - heading "Downloaded App" [level=3] [ref=e1264]
+                    - generic "Completed category Downloaded App" [ref=e1377]:
+                      - img [ref=e1380]: check_circle
+                      - generic [ref=e1381]: Completed
+                  - generic [ref=e1270]:
+                    - generic [ref=e1274]:
+                      - text: Does the app contain any ratings-relevant content (e.g., sex, violence, language) downloaded as part of the app package (code, assets)?
+                      - link "Learn more about this question., Opens in a new tab" [ref=e1276] [cursor=pointer]:
+                        - /url: https://support.google.com/googleplay/android-developer/answer/11070756?hl=en
+                        - text: Learn more
+                    - radiogroup "Responses to the above single choice question." [ref=e1280]:
+                      - generic [ref=e1281] [cursor=pointer]:
+                        - radio "Yes" [ref=e1283]
+                        - generic [ref=e1288]: "Yes"
+                      - generic [ref=e1289] [cursor=pointer]:
+                        - radio "No" [checked] [ref=e1291]
+                        - generic [ref=e1296]: "No"
+                - generic [ref=e1299]:
+                  - generic [ref=e1301]:
+                    - heading "User Content Sharing" [level=3] [ref=e1311]
+                    - generic "Completed category User Content Sharing" [ref=e1605]:
+                      - img [ref=e1608]: check_circle
+                      - generic [ref=e1609]: Completed
+                  - generic [ref=e1385]:
+                    - generic [ref=e1387]:
+                      - generic [ref=e1391]:
+                        - text: Does the app natively allow users to interact or exchange content with other users through voice communication, text, or sharing images or audio?
+                        - link "Learn more about this question., Opens in a new tab" [ref=e1393] [cursor=pointer]:
+                          - /url: https://support.google.com/googleplay/android-developer/answer/11070862?hl=en
+                          - text: Learn more
+                      - radiogroup "Responses to the above single choice question." [ref=e1397]:
+                        - generic [ref=e1398] [cursor=pointer]:
+                          - radio "Yes" [checked] [ref=e1400]
+                          - generic [ref=e1405]: "Yes"
+                        - generic [ref=e1406] [cursor=pointer]:
+                          - radio "No" [ref=e1408]
+                          - generic [ref=e1413]: "No"
+                    - generic [ref=e1416]:
+                      - generic [ref=e1420]:
+                        - text: Is shared, user-generated content the primary source of content in the app?
+                        - link "Learn more about this question., Opens in a new tab" [ref=e1422] [cursor=pointer]:
+                          - /url: https://support.google.com/googleplay/android-developer/answer/12994051?hl=en
+                          - text: Learn more
+                      - radiogroup "Responses to the above single choice question." [ref=e1426]:
+                        - generic [ref=e1427] [cursor=pointer]:
+                          - radio "Yes" [ref=e1429]
+                          - generic [ref=e1434]: "Yes"
+                        - generic [ref=e1435] [cursor=pointer]:
+                          - radio "No" [checked] [ref=e1437]
+                          - generic [ref=e1442]: "No"
+                    - generic [ref=e1444]:
+                      - generic [ref=e1448]: Does the app permit the public sharing of nudity?
+                      - radiogroup "Responses to the above single choice question." [ref=e1452]:
+                        - generic [ref=e1453] [cursor=pointer]:
+                          - radio "Yes" [ref=e1455]
+                          - generic [ref=e1460]: "Yes"
+                        - generic [ref=e1461] [cursor=pointer]:
+                          - radio "No" [checked] [ref=e1463]
+                          - generic [ref=e1468]: "No"
+                    - generic [ref=e1470]:
+                      - generic [ref=e1474]: Does the app permit the public sharing of real-world, graphic violence outside of a newsworthy context?
+                      - radiogroup "Responses to the above single choice question." [ref=e1478]:
+                        - generic [ref=e1479] [cursor=pointer]:
+                          - radio "Yes" [ref=e1481]
+                          - generic [ref=e1486]: "Yes"
+                        - generic [ref=e1487] [cursor=pointer]:
+                          - radio "No" [checked] [ref=e1489]
+                          - generic [ref=e1494]: "No"
+                    - generic [ref=e1496]:
+                      - generic [ref=e1500]: Does the app include the ability to block users or user-generated content?
+                      - radiogroup "Responses to the above single choice question." [ref=e1504]:
+                        - generic [ref=e1505] [cursor=pointer]:
+                          - radio "Yes" [ref=e1507]
+                          - generic [ref=e1512]: "Yes"
+                        - generic [ref=e1513] [cursor=pointer]:
+                          - radio "No" [checked] [ref=e1515]
+                          - generic [ref=e1520]: "No"
+                    - generic [ref=e1522]:
+                      - generic [ref=e1526]: Does the app include the ability to report users or user-generated content?
+                      - radiogroup "Responses to the above single choice question." [ref=e1530]:
+                        - generic [ref=e1531] [cursor=pointer]:
+                          - radio "Yes" [ref=e1533]
+                          - generic [ref=e1538]: "Yes"
+                        - generic [ref=e1539] [cursor=pointer]:
+                          - radio "No" [checked] [ref=e1541]
+                          - generic [ref=e1546]: "No"
+                    - generic [ref=e1548]:
+                      - generic [ref=e1552]: Does the app include chat moderation?
+                      - radiogroup "Responses to the above single choice question." [ref=e1556]:
+                        - generic [ref=e1557] [cursor=pointer]:
+                          - radio "Yes" [ref=e1559]
+                          - generic [ref=e1564]: "Yes"
+                        - generic [ref=e1565] [cursor=pointer]:
+                          - radio "No" [checked] [ref=e1567]
+                          - generic [ref=e1572]: "No"
+                    - generic [ref=e1574]:
+                      - generic [ref=e1578]: Can interactions in the app be limited to invited friends only?
+                      - radiogroup "Responses to the above single choice question." [ref=e1582]:
+                        - generic [ref=e1583] [cursor=pointer]:
+                          - radio "Yes" [ref=e1585]
+                          - generic [ref=e1590]: "Yes"
+                        - generic [ref=e1591] [cursor=pointer]:
+                          - radio "No" [checked] [ref=e1593]
+                          - generic [ref=e1598]: "No"
+                - generic [ref=e1315]:
+                  - generic [ref=e1317]:
+                    - heading "Online Content" [level=3] [ref=e1327]
+                    - generic "Completed category Online Content" [ref=e1849]:
+                      - img [ref=e1852]: check_circle
+                      - generic [ref=e1853]: Completed
+                  - generic [ref=e1615]:
+                    - generic [ref=e1619]:
+                      - text: Does the app feature or promote content that isn't part of the initial app download, but can be accessed from the app? Examples of this type of content are movies in the Netflix app, product listings in the Amazon Shopping app, songs in the Spotify app, generated AI content, or news articles in the New York Times app.
+                      - link "Learn more about this question., Opens in a new tab" [ref=e1621] [cursor=pointer]:
+                        - /url: https://support.google.com/googleplay/android-developer/answer/11070055?hl=en
+                        - text: Learn more
+                    - radiogroup "Responses to the above single choice question." [ref=e1625]:
+                      - generic [ref=e1626] [cursor=pointer]:
+                        - radio "Yes" [checked] [ref=e1628]
+                        - generic [ref=e1633]: "Yes"
+                      - generic [ref=e1634] [cursor=pointer]:
+                        - radio "No" [ref=e1636]
+                        - generic [ref=e1641]: "No"
+                - generic [ref=e1645]:
+                  - generic [ref=e1647]:
+                    - heading "Violence" [level=3] [ref=e1657]
+                    - generic "Completed category Violence" [ref=e1738]:
+                      - img [ref=e1741]: check_circle
+                      - generic [ref=e1742]: Completed
+                  - generic [ref=e1663]:
+                    - generic [ref=e1667]:
+                      - text: Can the app contain violent material? Content that sellers create as part of the app catalog needs to be considered; however, this question does not refer to user-generated content (e.g., comments and reviews).
+                      - link "Learn more about this question., Opens in a new tab" [ref=e1669] [cursor=pointer]:
+                        - /url: https://support.google.com/googleplay/android-developer/answer/422?hl=en
+                        - text: Learn more
+                    - radiogroup "Responses to the above single choice question." [ref=e1673]:
+                      - generic [ref=e1674] [cursor=pointer]:
+                        - radio "Yes" [ref=e1676]
+                        - generic [ref=e1681]: "Yes"
+                      - generic [ref=e1682] [cursor=pointer]:
+                        - radio "No" [checked] [ref=e1684]
+                        - generic [ref=e1689]: "No"
+                - generic [ref=e1692]:
+                  - generic [ref=e1694]:
+                    - heading "Sexuality" [level=3] [ref=e1704]
+                    - generic "Completed category Sexuality" [ref=e1775]:
+                      - img [ref=e1778]: check_circle
+                      - generic [ref=e1779]: Completed
+                  - generic [ref=e1748]:
+                    - generic [ref=e1752]:
+                      - text: Can the app contain sexual material or nudity (except in a natural or scientific setting)? Content that sellers create as part of the app catalog needs to be considered; however, this question does not refer to user-generated content (e.g., comments and reviews).
+                      - link "Learn more about this question., Opens in a new tab" [ref=e1754] [cursor=pointer]:
+                        - /url: https://support.google.com/googleplay/android-developer/answer/426?hl=en
+                        - text: Learn more
+                    - radiogroup "Responses to the above single choice question." [ref=e1758]:
+                      - generic [ref=e1759] [cursor=pointer]:
+                        - radio "Yes" [ref=e1761]
+                        - generic [ref=e1766]: "Yes"
+                      - generic [ref=e1767] [cursor=pointer]:
+                        - radio "No" [checked] [ref=e1769]
+                        - generic [ref=e1774]: "No"
+                - generic [ref=e1708]:
+                  - generic [ref=e1710]:
+                    - heading "Language" [level=3] [ref=e1720]
+                    - generic "Completed category Language" [ref=e1812]:
+                      - img [ref=e1815]: check_circle
+                      - generic [ref=e1816]: Completed
+                  - generic [ref=e1785]:
+                    - generic [ref=e1789]:
+                      - text: Can the app contain any potentially offensive language? Please note that this does not refer to user-generated content.
+                      - link "Learn more about this question., Opens in a new tab" [ref=e1791] [cursor=pointer]:
+                        - /url: https://support.google.com/googleplay/android-developer/answer/436?hl=en
+                        - text: Learn more
+                    - radiogroup "Responses to the above single choice question." [ref=e1795]:
+                      - generic [ref=e1796] [cursor=pointer]:
+                        - radio "Yes" [ref=e1798]
+                        - generic [ref=e1803]: "Yes"
+                      - generic [ref=e1804] [cursor=pointer]:
+                        - radio "No" [checked] [ref=e1806]
+                        - generic [ref=e1811]: "No"
+                - generic [ref=e1724]:
+                  - generic [ref=e1726]:
+                    - heading "Controlled Substance" [level=3] [ref=e1736]
+                    - generic "Completed category Controlled Substance" [ref=e1854]:
+                      - img [ref=e1857]: check_circle
+                      - generic [ref=e1858]: Completed
+                  - generic [ref=e1822]:
+                    - generic [ref=e1826]:
+                      - text: Can the app contain references to or depictions of illegal or recreational drugs? Content that sellers create as part of the app catalog needs to be considered; however, this question does not refer to user-generated content (e.g., comments and reviews).
+                      - link "Learn more about this question., Opens in a new tab" [ref=e1828] [cursor=pointer]:
+                        - /url: https://support.google.com/googleplay/android-developer/answer/430?hl=en
+                        - text: Learn more
+                    - radiogroup "Responses to the above single choice question." [ref=e1832]:
+                      - generic [ref=e1833] [cursor=pointer]:
+                        - radio "Yes" [ref=e1835]
+                        - generic [ref=e1840]: "Yes"
+                      - generic [ref=e1841] [cursor=pointer]:
+                        - radio "No" [checked] [ref=e1843]
+                        - generic [ref=e1848]: "No"
+                - generic [ref=e1331]:
+                  - generic [ref=e1333]:
+                    - heading "Promotion or Sale of Age-Restricted Products or Activities" [level=3] [ref=e1343]
+                    - generic "Completed category Promotion or Sale of Age-Restricted Products or Activities" [ref=e1860]:
+                      - img [ref=e1863]: check_circle
+                      - generic [ref=e1864]: Completed
+                  - generic [ref=e1869]:
+                    - generic [ref=e1873]: Does the app focus on promoting or selling items or activities that are typically age-restricted such as cigarettes, alcohol, firearms, or gambling?
+                    - radiogroup "Responses to the above single choice question." [ref=e1877]:
+                      - generic [ref=e1878] [cursor=pointer]:
+                        - radio "Yes" [ref=e1880]
+                        - generic [ref=e1885]: "Yes"
+                      - generic [ref=e1886] [cursor=pointer]:
+                        - radio "No" [checked] [ref=e1888]
+                        - generic [ref=e1894]: "No"
+                - generic [ref=e1347]:
+                  - generic [ref=e1349]:
+                    - heading "Miscellaneous" [level=3] [ref=e1359]
+                    - generic "Completed category Miscellaneous" [ref=e1895]:
+                      - img [ref=e1898]: check_circle
+                      - generic [ref=e1899]: Completed
+                  - generic [ref=e1902]:
+                    - generic [ref=e1904]:
+                      - generic [ref=e1908]:
+                        - text: Does the app share the user's current and precise physical location with other users?
+                        - link "Learn more about this question., Opens in a new tab" [ref=e1910] [cursor=pointer]:
+                          - /url: https://support.google.com/googleplay/android-developer/answer/11069750?hl=en
+                          - text: Learn more
+                      - radiogroup "Responses to the above single choice question." [ref=e1914]:
+                        - generic [ref=e1915] [cursor=pointer]:
+                          - radio "Yes" [ref=e1917]
+                          - generic [ref=e1922]: "Yes"
+                        - generic [ref=e1923] [cursor=pointer]:
+                          - radio "No" [checked] [ref=e1925]
+                          - generic [ref=e1931]: "No"
+                    - generic [ref=e1933]:
+                      - generic [ref=e1937]:
+                        - text: Does the app allow users to purchase digital goods?
+                        - link "Learn more about this question., Opens in a new tab" [ref=e1939] [cursor=pointer]:
+                          - /url: https://support.google.com/googleplay/android-developer/answer/543?hl=en
+                          - text: Learn more
+                      - radiogroup "Responses to the above single choice question." [ref=e1943]:
+                        - generic [ref=e1944] [cursor=pointer]:
+                          - radio "Yes" [ref=e1946]
+                          - generic [ref=e1951]: "Yes"
+                        - generic [ref=e1952] [cursor=pointer]:
+                          - radio "No" [checked] [ref=e1954]
+                          - generic [ref=e1960]: "No"
+                    - generic [ref=e1962]:
+                      - generic [ref=e1966]: Does the app include cash rewards, gift cards, play-to-earn features, convertible cryptocurrency rewards, or the issuance of transferable digital assets (e.g., NFTs)?
+                      - radiogroup "Responses to the above single choice question." [ref=e1970]:
+                        - generic [ref=e1971] [cursor=pointer]:
+                          - radio "Yes" [ref=e1973]
+                          - generic [ref=e1978]: "Yes"
+                        - generic [ref=e1979] [cursor=pointer]:
+                          - radio "No" [checked] [ref=e1981]
+                          - generic [ref=e1987]: "No"
+                    - generic [ref=e1989]:
+                      - generic [ref=e1993]:
+                        - text: Is the app a web browser or search engine?
+                        - link "Learn more about this question., Opens in a new tab" [ref=e1995] [cursor=pointer]:
+                          - /url: https://support.google.com/googleplay/android-developer/answer/546?hl=en
+                          - text: Learn more
+                      - radiogroup "Responses to the above single choice question." [ref=e1999]:
+                        - generic [ref=e2000] [cursor=pointer]:
+                          - radio "Yes" [ref=e2002]
+                          - generic [ref=e2007]: "Yes"
+                        - generic [ref=e2008] [cursor=pointer]:
+                          - radio "No" [checked] [ref=e2010]
+                          - generic [ref=e2016]: "No"
+                    - generic [ref=e2018]:
+                      - generic [ref=e2022]:
+                        - text: Is the app primarily a news or educational product?
+                        - link "Learn more about this question., Opens in a new tab" [ref=e2024] [cursor=pointer]:
+                          - /url: https://support.google.com/googleplay/android-developer/answer/11071161?hl=en
+                          - text: Learn more
+                      - radiogroup "Responses to the above single choice question." [ref=e2028]:
+                        - generic [ref=e2029] [cursor=pointer]:
+                          - radio "Yes" [ref=e2031]
+                          - generic [ref=e2036]: "Yes"
+                        - generic [ref=e2037] [cursor=pointer]:
+                          - radio "No" [checked] [active] [ref=e2039]
+                          - generic [ref=e2045]: "No"
+          - generic [ref=e1216]:
+            - button "Next" [disabled] [ref=e1362]:
+              - generic [ref=e1365]: Next
+            - generic [ref=e1366]:
+              - button "Save" [ref=e1368]:
+                - generic [ref=e1371]: Save
+              - button "Back" [ref=e1373]:
+                - generic [ref=e1376]: Back
+      - generic [ref=e33]:
+        - generic [ref=e1225]:
+          - link "Product updates" [ref=e1226] [cursor=pointer]:
+            - /url: https://play.google.com/console/about/whats-new/
+          - link "Status dashboard" [ref=e1227] [cursor=pointer]:
+            - /url: https://status.play.google.com/
+          - link "Help" [ref=e1228] [cursor=pointer]:
+            - /url: /console/u/0/developers/5992375701600392135/help-and-support?app=4975956261234571904
+        - generic [ref=e1229]:
+          - generic [ref=e1230]: © 2026 Google
+          - link "Privacy" [ref=e1231] [cursor=pointer]:
+            - /url: https://www.google.com/policies/privacy/
+          - link "Developer Distribution Agreement" [ref=e1232] [cursor=pointer]:
+            - /url: https://play.google.com/about/developer-distribution-agreement.html
+          - link "Terms of Service" [ref=e1233] [cursor=pointer]:
+            - /url: https://play.google.com/about/console/terms-of-service/

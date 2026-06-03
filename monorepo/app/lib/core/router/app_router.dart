@@ -17,7 +17,6 @@ import '../../features/health/screens/health_records_screen.dart';
 import '../../features/health/screens/health_record_detail_screen.dart';
 import '../../features/health/screens/add_health_record_screen.dart';
 import '../../features/vaccination/screens/vaccination_list_screen.dart';
-import '../../features/vaccination/screens/vaccination_detail_screen.dart';
 import '../../features/vaccination/screens/add_vaccination_screen.dart';
 import '../../features/pregnancy/screens/pregnancy_tracker_screen.dart';
 import '../../features/pregnancy/screens/start_pregnancy_screen.dart';
@@ -155,14 +154,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                         name: RouteNames.addVaccination,
                         builder: (context, state) => AddVaccinationScreen(
                           petId: state.pathParameters['petId']!,
-                        ),
-                      ),
-                      GoRoute(
-                        path: ':vaccinationId',
-                        name: RouteNames.vaccinationDetail,
-                        builder: (context, state) => VaccinationDetailScreen(
-                          petId: state.pathParameters['petId']!,
-                          vaccinationId: state.pathParameters['vaccinationId']!,
                         ),
                       ),
                     ],

@@ -27,8 +27,11 @@ export const startPregnancySchema = z.object({
 
 export const updatePregnancySchema = z.object({
   status: z.enum(['active', 'completed', 'miscarriage', 'false_alarm']).optional(),
+  matingDate: z.string().optional(),
+  startDate: z.string().optional(),
+  expectedDueDate: z.string().optional(),
   actualDeliveryDate: z.string().optional(),
-  litterSize: z.number().int().positive().optional(),
+  litterSize: z.number().int().positive().nullable().optional(),
   complications: z.string().optional(),
   notes: z.string().max(500).optional(),
   fatherInfo: z.object({

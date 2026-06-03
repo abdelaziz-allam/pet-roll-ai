@@ -25,8 +25,17 @@ export async function pregnancyRoutes(fastify: FastifyInstance) {
   fastify.get('/pets/:petId/pregnancies', async (request, reply) => {
     const { petId } = request.params as { petId: string };
     const { page = 1, limit = 20 } = request.query as any;
-    const result = await pregnancyService.getAll(petId, request.user!.uid, +page, +limit);
-    return reply.code(200).send(result);
+    try {
+      const result = await pregnancyService.getAll(petId, request.user!.uid, +page, +limit);
+      return reply.code(200).send(result);
+    } catch (err: any) {
+      request.log.error({ err, petId }, 'Failed to get pregnancies');
+      if (err.code === 9) {
+        return reply.code(200).send({ data: [], total: 0, page: 1, limit: 20, totalPages: 0 });
+      }
+      const statusCode = err.statusCode || 500;
+      return reply.code(statusCode).send({ error: 'Error', message: err.message || 'Internal server error', statusCode });
+    }
   });
 
   fastify.get('/pets/:petId/pregnancy', async (request, reply) => {
@@ -61,6 +70,12 @@ export async function pregnancyRoutes(fastify: FastifyInstance) {
     const { pregId, milestoneId } = request.params as { petId: string; pregId: string; milestoneId: string };
     const milestone = await pregnancyService.completeMilestone(pregId, milestoneId, request.user!.uid);
     return reply.code(200).send(milestone);
+  });
+
+  fastify.delete('/pets/:petId/pregnancy/:pregId', async (request, reply) => {
+    const { pregId } = request.params as { petId: string; pregId: string };
+    await pregnancyService.deletePregnancy(pregId, request.user!.uid);
+    return reply.code(204).send();
   });
 
   fastify.post('/pets/:petId/pregnancy/:pregId/weight', async (request, reply) => {
