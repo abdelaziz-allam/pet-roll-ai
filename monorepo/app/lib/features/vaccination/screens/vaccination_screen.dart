@@ -27,7 +27,8 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
     setState(() => _loading = true);
     try {
       final data = await ApiService().get('/pets/${widget.petId}/vaccinations');
-      setState(() { _vaccinations = data['data'] ?? []; _loading = false; });
+      final List<dynamic> items = data is List ? data : (data['vaccinations'] ?? data['data'] ?? []);
+      setState(() { _vaccinations = items; _loading = false; });
     } catch (e) {
       setState(() { _vaccinations = []; _loading = false; });
     }
@@ -351,7 +352,7 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
 
   Widget _buildVacCard(dynamic vac) {
     final nextDue = vac['nextDueDate'] != null ? DateTime.tryParse(vac['nextDueDate']) : null;
-    final administeredDate = vac['administeredDate'] != null ? DateTime.tryParse(vac['administeredDate']) : null;
+    final administeredDate = vac['dateAdministered'] != null ? DateTime.tryParse(vac['dateAdministered']) : null;
     final isOverdue = nextDue != null && nextDue.isBefore(DateTime.now());
     final daysLeft = nextDue != null ? nextDue.difference(DateTime.now()).inDays : null;
     final totalDoses = vac['totalDoses'] ?? 1;
