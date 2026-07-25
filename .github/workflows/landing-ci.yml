@@ -71,6 +71,8 @@ jobs:
 
           docker build \
             -f docker/Dockerfile.landing \
+            --build-arg NEXT_PUBLIC_GA_MEASUREMENT_ID=G-P1BLB43EGZ \
+            --build-arg NEXT_PUBLIC_API_URL=https://api.petfolioo.com/api/v1 \
             -t $IMAGE \
             -t $IMAGE_LATEST \
             .
