@@ -35,11 +35,15 @@ jobs:
 
       - name: Type check
         working-directory: monorepo/admin
-        run: npx tsc --noEmit || true
+        run: npx tsc --noEmit
+
+      - name: Run tests
+        working-directory: monorepo/admin
+        run: npm test
 
       - name: Build
         working-directory: monorepo/admin
-        run: npm run build || true
+        run: npm run build
 
   build-and-push:
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')

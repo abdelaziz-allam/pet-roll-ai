@@ -47,7 +47,7 @@ describe('Mating Module', () => {
     });
 
     it('should reject invalid species', () => {
-      const input = { petId: 'pet-1', species: 'fish', breed: 'Goldfish', gender: 'male', age: 1 };
+      const input = { petId: 'pet-1', species: 'lizard', breed: 'Gecko', gender: 'male', age: 1 };
       const result = createListingSchema.safeParse(input);
       expect(result.success).toBe(false);
     });

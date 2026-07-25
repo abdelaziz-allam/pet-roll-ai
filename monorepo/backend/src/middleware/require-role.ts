@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 
-const ROLE_HIERARCHY = ['user', 'support', 'moderator', 'admin'];
+const ROLE_HIERARCHY = ['user', 'support', 'moderator', 'admin', 'super_admin'];
 
 export function requireRole(...roles: string[]) {
   return async (request: FastifyRequest, reply: FastifyReply) => {

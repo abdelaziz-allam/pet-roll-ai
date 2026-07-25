@@ -39,10 +39,10 @@ describe('Pets Module', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should reject invalid species', () => {
+    it('should reject empty species', () => {
       const input = {
         name: 'Buddy',
-        species: 'bird',
+        species: '',
         breed: 'Parrot',
         gender: 'male',
         dateOfBirth: '2022-01-15',

@@ -35,11 +35,11 @@ jobs:
 
       - name: Type check
         working-directory: monorepo/backend
-        run: npx tsc --noEmit || true
+        run: npx tsc --noEmit
 
       - name: Run tests
         working-directory: monorepo/backend
-        run: npm test 2>/dev/null || echo "Tests skipped"
+        run: npm test
 
   build-and-push:
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
