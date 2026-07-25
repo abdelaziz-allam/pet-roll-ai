@@ -1,0 +1,14 @@
+{
+  "name": "Petfolioo - Complete Pet Health Management",
+  "short_name": "Petfolioo",
+  "description": "Track vaccinations, manage health records, monitor pregnancies, and find breeding partners.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#ffffff",
+  "theme_color": "#F1379D",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

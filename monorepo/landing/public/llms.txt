@@ -1,0 +1,47 @@
+# Petfolioo
+
+> Complete pet health management platform for modern pet parents and professional breeders.
+
+Petfolioo is a mobile-first platform (iOS and Android) that provides digital pet health management including vaccination tracking, health records, pregnancy monitoring, breeding marketplace, care scheduling, and health reports. Founded in 2024 and headquartered in Helsingborg, Sweden.
+
+## Core Features
+
+- Vaccination Tracker: Log vaccines with dates, types, batch numbers. Smart reminders before due dates. Species-specific schedules (core and non-core).
+- Health Records: Digital records for vet visits, surgeries, medications, weight, lab results. Secure cloud storage. PDF report generation.
+- Pregnancy Monitor: Week-by-week milestones for dogs, cats, and other species. Expected delivery dates. Weight tracking. Multiple concurrent pregnancies.
+- Mating Marketplace: Connect verified breeders. Health certifications required. Lineage info. Direct messaging. Location-based matching.
+- Smart Schedules: Feeding, medication, grooming, exercise reminders. Customized per pet species and breed.
+- Health Reports: PDF generation for vet visits, travel documents, breed registration, insurance claims.
+
+## Supported Species
+
+Dogs, cats, birds (parrots, canaries, finches), rabbits, hamsters, guinea pigs, reptiles (snakes, lizards, turtles), fish, horses.
+
+## Technical Details
+
+- Platform: Mobile (Flutter/Dart) on iOS and Android
+- Backend: REST API (Fastify/TypeScript) hosted on Google Cloud Run
+- Database: Firebase Firestore (EU region)
+- Authentication: Firebase Auth (Google, Apple, Email)
+- Languages: English, Swedish
+- Data Region: EU (europe-north1, Finland)
+- Compliance: GDPR compliant
+
+## Business Information
+
+- Company: Petfolioo AB
+- Founded: 2024
+- Location: Helsingborg, Sweden
+- Market: Nordic (Sweden, Denmark, Norway, Finland) expanding to EU
+- Pricing: Free tier (up to 3 pets), Premium subscription for unlimited pets and advanced features
+- Website: https://petfolioo.com
+- API: https://api.petfolioo.com
+- App: https://play.google.com/store/apps/details?id=com.petroll.pet_roll
+
+## Target Users
+
+1. Pet Owners: Track health, vaccinations, schedules for personal pets
+2. Professional Breeders: Pregnancy management, lineage, mating marketplace
+3. Veterinarians: Access patient health histories, issue digital certificates
+4. Pet Shops: Set up health profiles at point of sale
+5. Shelters: Document rescue animal health for adoption

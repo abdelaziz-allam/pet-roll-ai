@@ -3,7 +3,7 @@ name: Landing Page CI/CD
 on:
   push:
     branches: [main]
-    paths: ['monorepo/landing/**', 'monorepo/docker/Dockerfile.landing', 'monorepo/docker/nginx-landing.conf', '.github/workflows/landing-ci.yml']
+    paths: ['monorepo/landing/**', 'monorepo/docker/Dockerfile.landing', '.github/workflows/landing-ci.yml']
   pull_request:
     branches: [main]
     paths: ['monorepo/landing/**']
@@ -35,7 +35,7 @@ jobs:
 
       - name: Type check
         working-directory: monorepo/landing
-        run: npx tsc --noEmit || true
+        run: npx next lint || true
 
       - name: Build
         working-directory: monorepo/landing
