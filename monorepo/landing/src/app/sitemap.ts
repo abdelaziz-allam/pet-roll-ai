@@ -2,14 +2,26 @@ import type { MetadataRoute } from 'next';
 
 async function getBlogSlugs(): Promise<{ slug: string; updatedAt?: { _seconds: number } }[]> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.petfolioo.com/api/v1';
+  const allPosts: { slug: string; updatedAt?: { _seconds: number } }[] = [];
+  let page = 1;
+  const limit = 100;
+
   try {
-    const res = await fetch(`${apiUrl}/blog/posts?limit=200`, { next: { revalidate: 3600 } });
-    if (!res.ok) return [];
-    const json = await res.json();
-    return (json.data || []).map((p: any) => ({ slug: p.slug, updatedAt: p.updatedAt }));
+    while (true) {
+      const res = await fetch(`${apiUrl}/blog/posts?limit=${limit}&page=${page}`, { next: { revalidate: 3600 } });
+      if (!res.ok) break;
+      const json = await res.json();
+      const posts = json.data || [];
+      if (posts.length === 0) break;
+      allPosts.push(...posts.map((p: any) => ({ slug: p.slug, updatedAt: p.updatedAt })));
+      if (page >= (json.totalPages || 1)) break;
+      page++;
+    }
   } catch {
-    return [];
+    // return whatever we collected
   }
+
+  return allPosts;
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

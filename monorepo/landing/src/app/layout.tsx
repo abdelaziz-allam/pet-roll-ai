@@ -74,7 +74,7 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.json',
   other: {
-    'google-site-verification': '',
+    'google-site-verification': 'gdhx6DN7H1sHG0ZDD55T02onQCXPbGxeLDBsHWMyghQ',
     'theme-color': '#F1379D',
   },
 };
