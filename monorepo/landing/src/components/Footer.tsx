@@ -48,6 +48,7 @@ export default function Footer() {
               <li><Link href="/pet-owners">For Pet Owners</Link></li>
               <li><Link href="/breeders">For Breeders</Link></li>
               <li><Link href="/veterinarians">For Veterinarians</Link></li>
+              <li><Link href="/blog">Blog</Link></li>
             </ul>
           </div>
           <div>

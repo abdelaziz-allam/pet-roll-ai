@@ -1,9 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 export default function Navbar() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   useEffect(() => {
     const handleScroll = () => {
       const navbar = document.querySelector('.navbar');
@@ -42,15 +44,29 @@ export default function Navbar() {
         <ul className="navbar-links">
           <li><a href="#features">Features</a></li>
           <li><a href="#how-it-works">How it Works</a></li>
+          <li><Link href="/blog">Blog</Link></li>
           <li><a href="#testimonials">Testimonials</a></li>
           <li><a href="#download" className="btn btn-primary btn-sm">Get the App</a></li>
         </ul>
-        <button className="mobile-menu-btn" aria-label="Menu">
+        <button
+          className={`mobile-menu-btn${mobileOpen ? ' active' : ''}`}
+          aria-label="Menu"
+          onClick={() => setMobileOpen(!mobileOpen)}
+        >
           <span></span>
           <span></span>
           <span></span>
         </button>
       </div>
+      {mobileOpen && (
+        <div className="mobile-menu">
+          <a href="#features" onClick={() => setMobileOpen(false)}>Features</a>
+          <a href="#how-it-works" onClick={() => setMobileOpen(false)}>How it Works</a>
+          <Link href="/blog" onClick={() => setMobileOpen(false)}>Blog</Link>
+          <a href="#testimonials" onClick={() => setMobileOpen(false)}>Testimonials</a>
+          <a href="#download" className="btn btn-primary btn-sm" onClick={() => setMobileOpen(false)}>Get the App</a>
+        </div>
+      )}
     </nav>
   );
 }
