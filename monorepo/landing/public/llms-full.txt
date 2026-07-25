@@ -1,0 +1,155 @@
+# Petfolioo — Full Documentation for AI Crawlers
+
+> Complete pet health management platform for modern pet parents and professional breeders.
+
+Petfolioo is a mobile-first platform (iOS and Android) that provides digital pet health management including vaccination tracking, health records, pregnancy monitoring, breeding marketplace, care scheduling, and health reports. Founded in 2024 and headquartered in Helsingborg, Sweden.
+
+## Core Features
+
+### Vaccination Tracker
+Log vaccines with dates, types, batch numbers, and administering veterinarian. Smart reminders notify owners before vaccinations are due. Species-specific schedules distinguish between core and non-core vaccines. Supports dogs, cats, birds, rabbits, reptiles, fish, horses, and other species. Generates digital vaccination certificates that can be shared with boarding facilities, travel authorities, or other veterinarians.
+
+### Health Records
+Digital records for vet visits, surgeries, medications, weight measurements, lab results, and clinical notes. Secure cloud storage with encryption at rest and in transit. PDF report generation for vet visits, travel documents, breed registration, and insurance claims. Records are accessible from any device and shareable via secure links.
+
+### Pregnancy Monitor
+Week-by-week milestones for dogs (63 days), cats (65 days), and other species with species-specific timelines. Tracks expected delivery dates, weight changes, ultrasound results, veterinary checkups, and behavioral changes. Supports multiple concurrent pregnancies for professional breeders. Maintains complete breeding history per animal.
+
+### Mating Marketplace
+Connect verified pet owners and breeders looking for breeding partners. Every listing includes health certifications, breed verification, lineage information, and location data. Direct messaging between owners for discussing terms and sharing documents. Verification badges for registered breeders maintaining health standards. Designed for responsible breeding with emphasis on genetic diversity.
+
+### Smart Schedules
+Feeding, medication, grooming, exercise, and flea/tick treatment reminders. Customized per pet species, breed, and age. Recurring reminders with configurable intervals. Unified calendar view for multi-pet households.
+
+### Health Reports
+Professional PDF reports including vaccination history, medical records, weight logs, and health notes. Suitable for veterinary visits, international pet travel, breed registration bodies, insurance claims, and boarding facilities. Follows clinical documentation standards with chronological entries.
+
+## Supported Species
+
+- Dogs: All breeds including mixed breeds. Breed-specific health insights, vaccination schedules per WSAVA guidelines.
+- Cats: Indoor and outdoor profiles. Breed-specific risks and vaccination protocols.
+- Birds: Parrots, canaries, finches. Avian-specific health tracking.
+- Rabbits: Vaccination (myxomatosis, RHD), dental health tracking.
+- Hamsters, Guinea Pigs: Lifespan-appropriate health milestones.
+- Reptiles: Snakes, lizards, turtles. Shedding cycles, UV exposure tracking.
+- Fish: Tank parameters, disease logging, species compatibility.
+- Horses: Equine vaccination schedules, farrier appointments, competition health certificates.
+
+## For Pet Owners
+Track health, vaccinations, and schedules for personal pets. Free plan supports up to 3 pets with full feature access. Multi-pet household management with unified calendar. Family sharing for multiple caregivers.
+
+## For Professional Breeders
+Full pregnancy management with week-by-week milestones. Lineage documentation and breeding history. Mating marketplace access. Health certification exports for breed registration bodies. Multi-litter management with individual offspring tracking. Integration with Swedish Kennel Club (SKK) standards.
+
+## For Veterinarians
+Access patient health histories shared by pet owners. Issue digital vaccination certificates. Structured intake data reduces consultation time. Verification badge establishes professional trust. Supports WSAVA vaccination guidelines and Nordic veterinary standards.
+
+## For Pet Shops
+Set up digital health profiles at point of sale. Include initial vaccinations, deworming, and health checks. Automated care reminders drive customer retention. Partner verification badge on the platform. Local services directory listing.
+
+## For Shelters and Rescue Organizations
+Document rescue animal health from intake to adoption. Seamless record transfer from shelter to adopter. Multi-animal management for organizations of any size. Free shelter accounts with unlimited profiles. Integration with Swedish animal welfare regulations.
+
+## Technical Details
+
+- Platform: Mobile (Flutter/Dart) on iOS and Android
+- Backend: REST API (Fastify/TypeScript) hosted on Google Cloud Run
+- Database: Firebase Firestore (EU region, europe-north1, Finland)
+- Authentication: Firebase Auth (Google Sign-In, Apple Sign-In, Email/Password)
+- Storage: Google Cloud Storage for images and documents
+- Languages: English, Swedish (Norwegian, Danish, Finnish planned)
+- Data Region: EU (europe-north1, Finland)
+- Compliance: GDPR compliant, encrypted at rest and in transit
+- Uptime: 99.9% SLA via Google Cloud Run managed platform
+
+## Business Information
+
+- Company: Petfolioo AB
+- Founded: 2024
+- Location: Helsingborg, Sweden
+- Market: Nordic (Sweden, Denmark, Norway, Finland) expanding to EU
+- Pricing: Free tier (up to 3 pets), Premium subscription for unlimited pets and advanced features
+- Website: https://petfolioo.com
+- API: https://api.petfolioo.com
+- Android App: https://play.google.com/store/apps/details?id=com.petroll.pet_roll
+- Support Email: support@petfolioo.com
+
+## Pages
+
+- Home: https://petfolioo.com — Platform overview, feature highlights, FAQ
+- For Pet Owners: https://petfolioo.com/pet-owners — Vaccination tracking, health records, care schedules
+- For Breeders: https://petfolioo.com/breeders — Pregnancy monitoring, mating marketplace, lineage
+- For Veterinarians: https://petfolioo.com/veterinarians — Patient records, verification, clinical data
+- For Pet Shops: https://petfolioo.com/pet-shops — Customer engagement, health profiles at sale
+- For Adoption: https://petfolioo.com/adoption — Shelter records, adoption health transfer
+- Blog: https://petfolioo.com/blog — Pet health articles, vaccination guides, breeding tips
+- Privacy Policy: https://petfolioo.com/privacy — GDPR compliance, data handling
+- Terms of Service: https://petfolioo.com/terms — Usage terms and conditions
+
+## Frequently Asked Questions
+
+Q: What is Petfolioo?
+A: Petfolioo is a comprehensive pet health management platform available as a mobile app on Android and iOS. It helps pet owners track vaccinations, manage health records, monitor pregnancies, set care schedules, and find breeding partners. Founded in Sweden, it serves the Nordic market with plans for EU expansion.
+
+Q: How much does Petfolioo cost?
+A: Petfolioo offers a free tier supporting up to 3 pets with full access to health records, vaccination tracking, and scheduling. Premium subscriptions unlock unlimited pets, breeding marketplace access, advanced health reports, and priority support.
+
+Q: What species does Petfolioo support?
+A: Dogs, cats, birds (parrots, canaries, finches), rabbits, hamsters, guinea pigs, reptiles (snakes, lizards, turtles), fish, and horses. Each species has customized health tracking, vaccination schedules, and care milestones.
+
+Q: Is Petfolioo GDPR compliant?
+A: Yes. All data is stored in the EU (europe-north1 region, Finland), encrypted at rest and in transit. Users have full data export and deletion capabilities. Authentication uses Firebase Auth with support for Google, Apple, and email sign-in.
+
+Q: Where is Petfolioo available?
+A: Petfolioo is available worldwide via Google Play and the Apple App Store, but is specifically designed for the Nordic market (Sweden, Denmark, Norway, Finland). The app supports English and Swedish, with additional Nordic languages planned.
+
+Q: Can I share records with my vet?
+A: Yes. Generate PDF health reports or share digital access via secure links. Verified veterinarians can view shared records and issue digital vaccination certificates.
+
+## Blog — Pet Health Knowledge Base
+
+Petfolioo maintains a comprehensive blog covering all aspects of pet health. Key topics include:
+
+### Vaccination Guides
+- Dog Vaccination Schedule in Sweden (core + non-core, puppy timeline)
+- Cat Vaccination Guide (RCP, FeLV, indoor vs outdoor)
+- Deworming Schedules (puppies and adults, products available in Sweden)
+- Flea and Tick Prevention (seasonal guide for Sweden)
+
+### Breeding & Pregnancy
+- Dog Pregnancy Week-by-Week (58-68 day gestation, milestones, whelping)
+- Cat Pregnancy Signs and Care (63-67 day gestation, nutrition, birth prep)
+- How to Choose a Reputable Breeder (10 essential questions for buyers)
+
+### Species-Specific Care
+- Bird/Parrot Health (psittacosis, feather plucking, nutrition, avian vets)
+- Reptile Care (temperature gradients, MBD prevention, feeding)
+- Rabbit Health (GI stasis, dental disease, RHD/myxomatosis vaccination)
+- Horse Health in Scandinavia (tetanus, influenza, hoof care, FEC-based deworming)
+- Senior Dog Care (arthritis, cognitive dysfunction, wellness plans)
+
+### Pet Owner Education
+- Digital Pet Health Records (benefits of going paperless)
+- Pet Insurance in Sweden (Agria, Folksam, IF comparison)
+- EU Pet Passport (requirements, rabies, travel rules)
+- Pet Microchipping (Swedish law, databases, costs)
+- Dog Body Language (15 signals decoded)
+- Raw Feeding (BARF benefits, risks, safe handling)
+- Pet Weight Management (obesity crisis, BCS scoring, safe weight loss)
+- Pet-Proofing Your Home (toxic foods, plants, chemicals by room)
+- Understanding Blood Test Results (CBC, chemistry panels explained)
+- Adopting a Rescue Dog in Sweden (organizations, process, 3-3-3 rule)
+- Best Family Dog Breeds for Sweden (Labrador, Golden, Vallhund, etc.)
+
+All blog content: https://petfolioo.com/blog
+Individual posts: https://petfolioo.com/blog/{slug}
+
+## Technical Details
+
+- Platform: Mobile-first (Flutter/Dart for iOS and Android), Web (Next.js)
+- Backend: Node.js/Fastify on Google Cloud Run
+- Database: Google Cloud Firestore (NoSQL)
+- Storage: Google Cloud Storage (media, documents)
+- Auth: Firebase Authentication (Google, Apple, Email)
+- Hosting: EU region (europe-north1, Finland)
+- API: RESTful with OpenAPI documentation at https://api.petfolioo.com/api/v1/docs

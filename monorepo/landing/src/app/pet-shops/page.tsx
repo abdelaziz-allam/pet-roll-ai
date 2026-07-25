@@ -12,13 +12,28 @@ export const metadata: Metadata = {
     'customer retention pet shop',
     'pet health profiles retail',
   ],
-  alternates: { canonical: 'https://petfolioo.com/pet-shops' },
+  alternates: {
+    canonical: 'https://petfolioo.com/pet-shops',
+    languages: {
+      'en': 'https://petfolioo.com/pet-shops',
+      'sv': 'https://petfolioo.com/pet-shops',
+      'x-default': 'https://petfolioo.com/pet-shops',
+    },
+  },
   openGraph: {
     title: 'Pet Shop Customer Engagement Platform | Petfolioo',
     description: 'Enhance customer experience with digital pet health profiles.',
     url: 'https://petfolioo.com/pet-shops',
+    images: [{ url: 'https://petfolioo.com/og/pet-shops', width: 1200, height: 630, alt: 'Petfolioo for Pet Shops' }],
   },
 };
+
+const relatedPosts = [
+  { title: 'Pet Microchipping in Sweden: Laws and Benefits', slug: 'pet-microchipping-sweden-guide' },
+  { title: 'Pet-Proofing Your Home: Room-by-Room Safety Checklist', slug: 'pet-proofing-home-safety-checklist' },
+  { title: 'Best Dog Breeds for Families with Children', slug: 'best-dog-breeds-families-children-sweden' },
+  { title: 'How to Deworm Your Dog: Schedule and Products', slug: 'how-to-deworm-dog-schedule-guide' },
+];
 
 export default function PetShopsPage() {
   const jsonLd = {
@@ -43,7 +58,7 @@ export default function PetShopsPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <SeoPageLayout breadcrumb="Pet Shops" breadcrumbUrl="/pet-shops">
+      <SeoPageLayout breadcrumb="Pet Shops" breadcrumbUrl="/pet-shops" relatedPosts={relatedPosts}>
         <div className="page-header">
           <h1>Digital Pet Health Profiles for Pet Shop Customers</h1>
           <p>

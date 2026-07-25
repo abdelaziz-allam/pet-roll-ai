@@ -2,6 +2,8 @@
 
 > Complete pet health management platform for modern pet parents and professional breeders.
 
+- Full documentation: https://petfolioo.com/llms-full.txt
+
 Petfolioo is a mobile-first platform (iOS and Android) that provides digital pet health management including vaccination tracking, health records, pregnancy monitoring, breeding marketplace, care scheduling, and health reports. Founded in 2024 and headquartered in Helsingborg, Sweden.
 
 ## Core Features

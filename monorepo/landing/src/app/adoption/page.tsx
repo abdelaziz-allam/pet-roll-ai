@@ -13,13 +13,28 @@ export const metadata: Metadata = {
     'digital pet adoption records',
     'shelter management health',
   ],
-  alternates: { canonical: 'https://petfolioo.com/adoption' },
+  alternates: {
+    canonical: 'https://petfolioo.com/adoption',
+    languages: {
+      'en': 'https://petfolioo.com/adoption',
+      'sv': 'https://petfolioo.com/adoption',
+      'x-default': 'https://petfolioo.com/adoption',
+    },
+  },
   openGraph: {
     title: 'Pet Adoption Health Records Platform | Petfolioo',
     description: 'Complete health histories for adopted pets. Support rescue animals with digital records.',
     url: 'https://petfolioo.com/adoption',
+    images: [{ url: 'https://petfolioo.com/og/adoption', width: 1200, height: 630, alt: 'Petfolioo for Pet Adoption' }],
   },
 };
+
+const relatedPosts = [
+  { title: 'Adopting a Rescue Dog in Sweden: Process, Costs, and Tips', slug: 'adopting-rescue-dog-sweden-guide' },
+  { title: 'Common Puppy Health Problems: Warning Signs', slug: 'common-puppy-health-problems-warning-signs' },
+  { title: 'Pet Microchipping in Sweden: Laws and Benefits', slug: 'pet-microchipping-sweden-guide' },
+  { title: 'Digital Pet Health Records: Why You Need One', slug: 'digital-pet-health-records-benefits' },
+];
 
 export default function AdoptionPage() {
   const jsonLd = {
@@ -44,7 +59,7 @@ export default function AdoptionPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <SeoPageLayout breadcrumb="Adoption" breadcrumbUrl="/adoption">
+      <SeoPageLayout breadcrumb="Adoption" breadcrumbUrl="/adoption" relatedPosts={relatedPosts}>
         <div className="page-header">
           <h1>Health Records for Pet Adoption and Rescue Animals</h1>
           <p>

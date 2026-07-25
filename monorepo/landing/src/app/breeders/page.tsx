@@ -15,13 +15,28 @@ export const metadata: Metadata = {
     'breeding health records',
     'responsible breeding platform',
   ],
-  alternates: { canonical: 'https://petfolioo.com/breeders' },
+  alternates: {
+    canonical: 'https://petfolioo.com/breeders',
+    languages: {
+      'en': 'https://petfolioo.com/breeders',
+      'sv': 'https://petfolioo.com/breeders',
+      'x-default': 'https://petfolioo.com/breeders',
+    },
+  },
   openGraph: {
     title: 'Professional Breeding Management Platform | Petfolioo',
     description: 'Manage pregnancies, track lineage, and find verified mating partners with Petfolioo.',
     url: 'https://petfolioo.com/breeders',
+    images: [{ url: 'https://petfolioo.com/og/breeders', width: 1200, height: 630, alt: 'Petfolioo for Breeders' }],
   },
 };
+
+const relatedPosts = [
+  { title: 'Dog Pregnancy Week by Week: Complete Guide for Breeders', slug: 'dog-pregnancy-week-by-week-guide' },
+  { title: 'Cat Pregnancy Signs and Care: A Complete Guide', slug: 'cat-pregnancy-signs-care-guide-breeders' },
+  { title: 'How to Choose a Reputable Dog Breeder', slug: 'how-to-choose-reputable-dog-breeder' },
+  { title: 'Best Dog Breeds for Families with Children', slug: 'best-dog-breeds-families-children-sweden' },
+];
 
 export default function BreedersPage() {
   const jsonLd = {
@@ -46,7 +61,7 @@ export default function BreedersPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <SeoPageLayout breadcrumb="Breeders" breadcrumbUrl="/breeders">
+      <SeoPageLayout breadcrumb="Breeders" breadcrumbUrl="/breeders" relatedPosts={relatedPosts}>
         <div className="page-header">
           <h1>Professional Breeding Management for Responsible Breeders</h1>
           <p>
@@ -71,8 +86,11 @@ export default function BreedersPage() {
           <p>
             Petfolioo&apos;s pregnancy tracker provides species-specific milestones for dogs, cats, and other
             species. Track expected delivery dates, weight changes, veterinary checkups, ultrasound results,
-            and behavioral changes throughout each stage of pregnancy. Support for multiple concurrent
-            pregnancies means you can manage your entire breeding program from one dashboard.
+            and behavioral changes throughout each stage of pregnancy. Read our detailed{' '}
+            <a href="/blog/dog-pregnancy-week-by-week-guide">dog pregnancy week-by-week guide</a> or{' '}
+            <a href="/blog/cat-pregnancy-signs-care-guide-breeders">cat pregnancy care guide</a> for more
+            information. Support for multiple concurrent pregnancies means you can manage your entire breeding
+            program from one dashboard.
           </p>
 
           <h2>The Mating Marketplace — Find Verified Partners</h2>

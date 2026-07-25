@@ -10,8 +10,16 @@ export const metadata: Metadata = {
     description:
       'Expert articles on pet health, vaccination schedules, breeding tips, and care guides.',
     url: 'https://petfolioo.com/blog',
+    images: [{ url: 'https://petfolioo.com/og/blog', width: 1200, height: 630, alt: 'Petfolioo Blog' }],
   },
-  alternates: { canonical: 'https://petfolioo.com/blog' },
+  alternates: {
+    canonical: 'https://petfolioo.com/blog',
+    languages: {
+      'en': 'https://petfolioo.com/blog',
+      'sv': 'https://petfolioo.com/blog',
+      'x-default': 'https://petfolioo.com/blog',
+    },
+  },
 };
 
 interface BlogPost {

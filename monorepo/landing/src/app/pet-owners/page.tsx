@@ -14,13 +14,28 @@ export const metadata: Metadata = {
     'pet care management',
     'pet health records app',
   ],
-  alternates: { canonical: 'https://petfolioo.com/pet-owners' },
+  alternates: {
+    canonical: 'https://petfolioo.com/pet-owners',
+    languages: {
+      'en': 'https://petfolioo.com/pet-owners',
+      'sv': 'https://petfolioo.com/pet-owners',
+      'x-default': 'https://petfolioo.com/pet-owners',
+    },
+  },
   openGraph: {
     title: 'Pet Health Management for Pet Owners | Petfolioo',
     description: 'Track vaccinations, manage health records, and keep your pets healthy with Petfolioo.',
     url: 'https://petfolioo.com/pet-owners',
+    images: [{ url: 'https://petfolioo.com/og/pet-owners', width: 1200, height: 630, alt: 'Petfolioo for Pet Owners' }],
   },
 };
+
+const relatedPosts = [
+  { title: 'Complete Dog Vaccination Schedule in Sweden 2025', slug: 'dog-vaccination-schedule-sweden-2025' },
+  { title: 'Digital Pet Health Records: Why Every Pet Owner Needs One', slug: 'digital-pet-health-records-benefits' },
+  { title: 'Flea and Tick Prevention for Pets in Sweden', slug: 'flea-tick-prevention-pets-sweden-seasonal' },
+  { title: 'Pet Weight Management Guide', slug: 'pet-weight-management-overweight-dog-cat' },
+];
 
 export default function PetOwnersPage() {
   const jsonLd = {
@@ -45,7 +60,7 @@ export default function PetOwnersPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <SeoPageLayout breadcrumb="Pet Owners" breadcrumbUrl="/pet-owners">
+      <SeoPageLayout breadcrumb="Pet Owners" breadcrumbUrl="/pet-owners" relatedPosts={relatedPosts}>
         <div className="page-header">
           <h1>Complete Pet Health Management for Modern Pet Owners</h1>
           <p>
@@ -70,7 +85,9 @@ export default function PetOwnersPage() {
             Never miss a booster shot again. Petfolioo&apos;s vaccination tracker stores your pet&apos;s complete
             immunization history including vaccine names, batch numbers, dates, and administering veterinarian.
             You receive timely reminders before each vaccination is due, with species-specific schedules that
-            distinguish between core and non-core vaccines.
+            distinguish between core and non-core vaccines. Learn more about{' '}
+            <a href="/blog/dog-vaccination-schedule-sweden-2025">dog vaccination schedules</a> and{' '}
+            <a href="/blog/cat-vaccination-guide-sweden">cat vaccination requirements</a> in Sweden.
           </p>
 
           <h2>Health Records Always at Your Fingertips</h2>
@@ -95,7 +112,7 @@ export default function PetOwnersPage() {
             Track different vaccination schedules, medications, and dietary needs without confusion.
           </p>
           <ul>
-            <li>Support for dogs, cats, birds, rabbits, reptiles, fish, horses, and more</li>
+            <li>Support for dogs, cats, <a href="/blog/bird-health-care-parrot-guide">birds</a>, <a href="/blog/rabbit-health-guide-common-illnesses">rabbits</a>, <a href="/blog/reptile-pet-care-health-guide">reptiles</a>, fish, <a href="/blog/horse-health-management-scandinavia-guide">horses</a>, and more</li>
             <li>Hundreds of breeds in the database with breed-specific health insights</li>
             <li>Individual profiles with photos, birth dates, and medical history</li>
             <li>Family sharing so multiple caregivers can access pet records</li>

@@ -5,7 +5,14 @@ import Footer from '@/components/Footer';
 export const metadata: Metadata = {
   title: 'Privacy Policy',
   description: 'Petfolioo privacy policy. How we collect, use, and protect your personal data and pet health information.',
-  alternates: { canonical: 'https://petfolioo.com/privacy' },
+  alternates: {
+    canonical: 'https://petfolioo.com/privacy',
+    languages: {
+      'en': 'https://petfolioo.com/privacy',
+      'sv': 'https://petfolioo.com/privacy',
+      'x-default': 'https://petfolioo.com/privacy',
+    },
+  },
   robots: { index: true, follow: true },
 };
 

@@ -7,6 +7,7 @@ interface SeoPageProps {
   children: React.ReactNode;
   breadcrumb: string;
   breadcrumbUrl: string;
+  relatedPosts?: { title: string; slug: string }[];
 }
 
 const seoPages = [
@@ -17,7 +18,7 @@ const seoPages = [
   { label: 'Adoption', href: '/adoption' },
 ];
 
-export default function SeoPageLayout({ children, breadcrumb, breadcrumbUrl }: SeoPageProps) {
+export default function SeoPageLayout({ children, breadcrumb, breadcrumbUrl, relatedPosts }: SeoPageProps) {
   return (
     <ScrollReveal>
       <Navbar />
@@ -37,6 +38,16 @@ export default function SeoPageLayout({ children, breadcrumb, breadcrumbUrl }: S
             <p>Download Petfolioo free on iOS and Android.</p>
             <a href="https://play.google.com/store/apps/details?id=com.petroll.pet_roll" className="btn btn-primary btn-lg" rel="noopener noreferrer" target="_blank">Download Free</a>
           </div>
+          {relatedPosts && relatedPosts.length > 0 && (
+            <div className="related-posts">
+              <h3>Related Articles</h3>
+              <ul>
+                {relatedPosts.map((post) => (
+                  <li key={post.slug}><Link href={`/blog/${post.slug}`}>{post.title}</Link></li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div className="cross-links">
             <h3>Explore More</h3>
             <ul>
@@ -45,6 +56,7 @@ export default function SeoPageLayout({ children, breadcrumb, breadcrumbUrl }: S
                 .map((p) => (
                   <li key={p.href}><Link href={p.href}>{p.label}</Link></li>
                 ))}
+              <li><Link href="/blog">Pet Health Blog</Link></li>
             </ul>
           </div>
         </div>

@@ -64,7 +64,14 @@ export async function generateMetadata({
       description,
       images: post.coverImageUrl ? [post.coverImageUrl] : undefined,
     },
-    alternates: { canonical: `https://petfolioo.com/blog/${post.slug}` },
+    alternates: {
+      canonical: `https://petfolioo.com/blog/${post.slug}`,
+      languages: {
+        'en': `https://petfolioo.com/blog/${post.slug}`,
+        'sv': `https://petfolioo.com/blog/${post.slug}`,
+        'x-default': `https://petfolioo.com/blog/${post.slug}`,
+      },
+    },
   };
 }
 

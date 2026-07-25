@@ -13,13 +13,28 @@ export const metadata: Metadata = {
     'vaccination records sharing',
     'vet clinic digital records',
   ],
-  alternates: { canonical: 'https://petfolioo.com/veterinarians' },
+  alternates: {
+    canonical: 'https://petfolioo.com/veterinarians',
+    languages: {
+      'en': 'https://petfolioo.com/veterinarians',
+      'sv': 'https://petfolioo.com/veterinarians',
+      'x-default': 'https://petfolioo.com/veterinarians',
+    },
+  },
   openGraph: {
     title: 'Digital Health Records for Veterinarians | Petfolioo',
     description: 'Access patient health histories and improve clinic efficiency with Petfolioo.',
     url: 'https://petfolioo.com/veterinarians',
+    images: [{ url: 'https://petfolioo.com/og/veterinarians', width: 1200, height: 630, alt: 'Petfolioo for Veterinarians' }],
   },
 };
+
+const relatedPosts = [
+  { title: 'How to Read Your Pet Blood Test Results', slug: 'how-to-read-pet-blood-test-results' },
+  { title: 'Pet Dental Care: Why Teeth Matter More Than You Think', slug: 'pet-dental-care-dog-cat-teeth' },
+  { title: 'Common Puppy Health Problems: Warning Signs', slug: 'common-puppy-health-problems-warning-signs' },
+  { title: 'Senior Dog Care: Health Tips for Aging Dogs', slug: 'senior-dog-care-health-tips-aging' },
+];
 
 export default function VeterinariansPage() {
   const jsonLd = {
@@ -44,7 +59,7 @@ export default function VeterinariansPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <SeoPageLayout breadcrumb="Veterinarians" breadcrumbUrl="/veterinarians">
+      <SeoPageLayout breadcrumb="Veterinarians" breadcrumbUrl="/veterinarians" relatedPosts={relatedPosts}>
         <div className="page-header">
           <h1>Digital Pet Health Records for Veterinary Professionals</h1>
           <p>

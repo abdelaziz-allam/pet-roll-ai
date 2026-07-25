@@ -5,7 +5,14 @@ import Footer from '@/components/Footer';
 export const metadata: Metadata = {
   title: 'Terms of Service',
   description: 'Petfolioo terms of service. Rules and conditions for using the Petfolioo pet health management platform.',
-  alternates: { canonical: 'https://petfolioo.com/terms' },
+  alternates: {
+    canonical: 'https://petfolioo.com/terms',
+    languages: {
+      'en': 'https://petfolioo.com/terms',
+      'sv': 'https://petfolioo.com/terms',
+      'x-default': 'https://petfolioo.com/terms',
+    },
+  },
   robots: { index: true, follow: true },
 };
 
