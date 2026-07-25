@@ -16,7 +16,17 @@ export default defineConfig({
     coverage: {
       reporter: ['text', 'lcov'],
       include: ['src/**/*.ts'],
-      exclude: ['src/**/*.test.ts', 'src/types/**'],
+      exclude: [
+        'src/**/*.test.ts',
+        'src/types/**',
+        'src/config/firebase.ts',
+        'src/config/env.ts',
+        'src/server.ts',
+        'src/app.ts',
+        'src/scripts/**',
+        'src/seed/**',
+        'src/data/**',
+      ],
     },
     setupFiles: ['./tests/setup.ts'],
   },
