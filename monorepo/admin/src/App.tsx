@@ -15,6 +15,7 @@ import AdminUsersPage from '@/pages/admin-users/AdminUsersPage';
 import CategoriesPage from '@/pages/categories/CategoriesPage';
 import HealthCertificationsPage from '@/pages/health-certifications/HealthCertificationsPage';
 import FeedbackPage from '@/pages/feedback/FeedbackPage';
+import BlogPage from '@/pages/blog/BlogPage';
 
 const App: React.FC = () => {
   return (
@@ -32,6 +33,7 @@ const App: React.FC = () => {
         <Route path="/mating" element={<MatingPage />} />
         <Route path="/health-certifications" element={<HealthCertificationsPage />} />
         <Route path="/feedback" element={<FeedbackPage />} />
+        <Route path="/blog" element={<BlogPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/admin-users" element={<AdminUsersPage />} />

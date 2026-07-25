@@ -16,6 +16,7 @@ import {
   MedicineBoxOutlined,
   ExperimentOutlined,
   CommentOutlined,
+  ReadOutlined,
 } from '@ant-design/icons';
 import { usePermission } from '@/hooks/usePermission';
 
@@ -73,6 +74,10 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
 
     if (canAccessPage('settings')) {
       items.push({ key: '/feedback', icon: <CommentOutlined />, label: 'Feedback' });
+    }
+
+    if (canAccessPage('settings')) {
+      items.push({ key: '/blog', icon: <ReadOutlined />, label: 'Blog' });
     }
 
     if (canAccessPage('admin_users')) {

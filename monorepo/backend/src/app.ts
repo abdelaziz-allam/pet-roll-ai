@@ -24,6 +24,7 @@ import { cronRoutes } from './modules/cron/cron.routes';
 import { verificationRoutes } from './modules/verification/verification.routes';
 import { feedbackRoutes } from './modules/feedback/feedback.routes';
 import { seoRoutes } from './modules/seo/seo.routes';
+import { blogRoutes } from './modules/blog/blog.routes';
 import { seedInitialData } from './seed/initial-data';
 
 export async function buildApp() {
@@ -129,6 +130,7 @@ export async function buildApp() {
     await api.register(taggedRoutes(verificationRoutes, 'Verification'), { prefix: '/verification' });
     await api.register(taggedRoutes(feedbackRoutes, 'Feedback'), { prefix: '/feedback' });
     await api.register(taggedRoutes(seoRoutes, 'SEO'), { prefix: '/seo' });
+    await api.register(taggedRoutes(blogRoutes, 'Blog'), { prefix: '/blog' });
   }, { prefix: '/api/v1' });
 
   await seedInitialData();
