@@ -82,4 +82,15 @@ export async function blogRoutes(fastify: FastifyInstance) {
     await blogService.update(id, { coverImageUrl: url });
     return reply.send({ url });
   });
+
+  fastify.post('/admin/upload-image', { preHandler: [requireAdminAuth] }, async (request, reply) => {
+    const file = await request.file();
+    if (!file) {
+      return reply.code(400).send({ message: 'No file uploaded' });
+    }
+
+    const buffer = await file.toBuffer();
+    const url = await blogService.uploadCoverImage(buffer, file.filename);
+    return reply.send({ url });
+  });
 }

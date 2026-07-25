@@ -41,12 +41,16 @@ function formatDate(ts: { _seconds: number } | null): string {
   return dayjs.unix(ts._seconds).format('MMM D, YYYY');
 }
 
+const API_BASE = import.meta.env.VITE_API_URL || '/api/v1';
+
 const BlogPage: React.FC = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
+  const [coverImageUrl, setCoverImageUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
   const [form] = Form.useForm();
 
   const fetchPosts = useCallback(async () => {
@@ -65,6 +69,7 @@ const BlogPage: React.FC = () => {
 
   const openCreate = () => {
     setEditingPost(null);
+    setCoverImageUrl('');
     form.resetFields();
     form.setFieldsValue({ isPublished: false, isFeatured: false });
     setDrawerOpen(true);
@@ -74,6 +79,7 @@ const BlogPage: React.FC = () => {
     try {
       const full = await api.get<BlogPost>(`/blog/admin/posts/${post.id}`);
       setEditingPost(full);
+      setCoverImageUrl(full.coverImageUrl || '');
       form.setFieldsValue({
         title: full.title,
         slug: full.slug,
@@ -84,7 +90,6 @@ const BlogPage: React.FC = () => {
         metaDescription: full.metaDescription,
         isPublished: full.isPublished,
         isFeatured: full.isFeatured,
-        coverImageUrl: full.coverImageUrl,
       });
       setDrawerOpen(true);
     } catch (err: any) {
@@ -95,11 +100,12 @@ const BlogPage: React.FC = () => {
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
+      const payload = { ...values, coverImageUrl };
       if (editingPost) {
-        await api.put(`/blog/admin/posts/${editingPost.id}`, values);
+        await api.put(`/blog/admin/posts/${editingPost.id}`, payload);
         message.success('Post updated');
       } else {
-        await api.post('/blog/admin/posts', values);
+        await api.post('/blog/admin/posts', payload);
         message.success('Post created');
       }
       setDrawerOpen(false);
@@ -107,6 +113,29 @@ const BlogPage: React.FC = () => {
     } catch (err: any) {
       if (err.message) message.error(err.message);
     }
+  };
+
+  const handleImageUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const token = localStorage.getItem('petroll_admin_token');
+      const res = await fetch(`${API_BASE}/blog/admin/upload-image`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      if (!res.ok) throw new Error('Upload failed');
+      const data = await res.json();
+      setCoverImageUrl(data.url);
+      message.success('Image uploaded');
+    } catch (err: any) {
+      message.error(err.message || 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
+    return false;
   };
 
   const handleDelete = (post: BlogPost) => {
@@ -249,8 +278,25 @@ const BlogPage: React.FC = () => {
             <TextArea rows={3} placeholder="Short summary..." maxLength={500} showCount />
           </Form.Item>
 
-          <Form.Item name="coverImageUrl" label="Cover Image URL">
-            <Input placeholder="https://storage.googleapis.com/..." />
+          <Form.Item label="Cover Image">
+            <Upload
+              accept="image/*"
+              showUploadList={false}
+              beforeUpload={handleImageUpload}
+            >
+              <Button icon={<UploadOutlined />} loading={uploading}>
+                {coverImageUrl ? 'Change Image' : 'Upload Image'}
+              </Button>
+            </Upload>
+            {coverImageUrl && (
+              <div style={{ marginTop: 8 }}>
+                <img
+                  src={coverImageUrl}
+                  alt="Cover preview"
+                  style={{ maxWidth: '100%', maxHeight: 160, borderRadius: 8, objectFit: 'cover' }}
+                />
+              </div>
+            )}
           </Form.Item>
 
           <Form.Item name="tags" label="Tags" extra="Comma-separated: health, dogs, vaccination">
