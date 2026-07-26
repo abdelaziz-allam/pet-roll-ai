@@ -10,6 +10,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/api_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/app_logo.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../main.dart';
 import '../home/home_screen.dart';
@@ -338,17 +339,7 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                Center(
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      gradient: AppTheme.primaryGradient,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Icon(Icons.pets, size: 40, color: Colors.white),
-                  ),
-                ),
+                const Center(child: AppLogo(size: 80)),
                 const SizedBox(height: 24),
                 const Center(
                   child: Text('Petfolioo', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),

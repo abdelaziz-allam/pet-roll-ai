@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/theme/app_theme.dart';
 import 'core/services/api_service.dart';
 import 'core/services/notification_service.dart';
+import 'core/widgets/app_logo.dart';
 import 'features/home/home_screen.dart';
 import 'features/auth/login_screen.dart';
 
@@ -121,15 +122,7 @@ class _SplashLoaderState extends State<SplashLoader> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                gradient: AppTheme.primaryGradient,
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: const Icon(Icons.pets, size: 50, color: Colors.white),
-            ),
+            const AppLogo(size: 100),
             const SizedBox(height: 24),
             const Text('Petfolioo', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),

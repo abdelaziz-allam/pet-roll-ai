@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../core/router/route_names.dart';
+import '../../../core/widgets/app_logo.dart';
 import '../../auth/providers/auth_provider.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -78,19 +79,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: AppColors.brandPrimary.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.pets,
-                        size: 60,
-                        color: AppColors.brandPrimary,
-                      ),
-                    ),
+                    const AppLogo(size: 120),
                     const SizedBox(height: 24),
                     Text(
                       'Pet Folioo',
