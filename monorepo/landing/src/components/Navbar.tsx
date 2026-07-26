@@ -42,11 +42,11 @@ export default function Navbar() {
           <span className="brand-text">Pet<span className="brand-accent">folioo</span></span>
         </Link>
         <ul className="navbar-links">
-          <li><a href="#features">Features</a></li>
-          <li><a href="#how-it-works">How it Works</a></li>
+          <li><Link href="/#features">Features</Link></li>
+          <li><Link href="/#how-it-works">How it Works</Link></li>
           <li><Link href="/blog">Blog</Link></li>
-          <li><a href="#testimonials">Testimonials</a></li>
-          <li><a href="#download" className="btn btn-primary btn-sm">Get the App</a></li>
+          <li><Link href="/#testimonials">Testimonials</Link></li>
+          <li><Link href="/#download" className="btn btn-primary btn-sm">Get the App</Link></li>
         </ul>
         <button
           className={`mobile-menu-btn${mobileOpen ? ' active' : ''}`}
@@ -60,11 +60,14 @@ export default function Navbar() {
       </div>
       {mobileOpen && (
         <div className="mobile-menu">
-          <a href="#features" onClick={() => setMobileOpen(false)}>Features</a>
-          <a href="#how-it-works" onClick={() => setMobileOpen(false)}>How it Works</a>
+          <Link href="/" onClick={() => setMobileOpen(false)}>Home</Link>
+          <Link href="/#features" onClick={() => setMobileOpen(false)}>Features</Link>
+          <Link href="/#how-it-works" onClick={() => setMobileOpen(false)}>How it Works</Link>
           <Link href="/blog" onClick={() => setMobileOpen(false)}>Blog</Link>
-          <a href="#testimonials" onClick={() => setMobileOpen(false)}>Testimonials</a>
-          <a href="#download" className="btn btn-primary btn-sm" onClick={() => setMobileOpen(false)}>Get the App</a>
+          <Link href="/pet-owners" onClick={() => setMobileOpen(false)}>Pet Owners</Link>
+          <Link href="/breeders" onClick={() => setMobileOpen(false)}>Breeders</Link>
+          <Link href="/veterinarians" onClick={() => setMobileOpen(false)}>Veterinarians</Link>
+          <Link href="/#download" className="btn btn-primary btn-sm" onClick={() => setMobileOpen(false)}>Get the App</Link>
         </div>
       )}
     </nav>

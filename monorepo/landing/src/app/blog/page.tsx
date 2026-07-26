@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
   title: 'Blog - Pet Health Tips & Guides',
@@ -71,10 +73,12 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
   const { data: posts, total, totalPages } = await getBlogPosts(currentPage);
 
   return (
+    <>
+    <Navbar />
     <main style={{ minHeight: '100vh', background: '#fafafa' }}>
       <section
         style={{
-          padding: '80px 24px 48px',
+          padding: '120px 24px 48px',
           textAlign: 'center',
           background: 'linear-gradient(135deg, #F1379D 0%, #722ed1 100%)',
           color: '#fff',
@@ -258,5 +262,7 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
         )}
       </section>
     </main>
+    <Footer />
+    </>
   );
 }

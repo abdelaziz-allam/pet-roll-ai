@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 interface BlogPost {
   id: string;
@@ -125,7 +127,8 @@ export default async function BlogPostPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <main style={{ minHeight: '100vh', background: '#fafafa' }}>
+      <Navbar />
+      <main style={{ minHeight: '100vh', background: '#fafafa', paddingTop: 64 }}>
         {post.coverImageUrl && (
           <div
             style={{
@@ -229,6 +232,7 @@ export default async function BlogPostPage({
           />
         </article>
       </main>
+      <Footer />
     </>
   );
 }
