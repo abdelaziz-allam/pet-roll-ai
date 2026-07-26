@@ -180,82 +180,96 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
               <nav
                 style={{
                   display: 'flex',
-                  justifyContent: 'center',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  gap: 8,
+                  gap: 16,
                   marginTop: 48,
-                  flexWrap: 'wrap',
                 }}
                 aria-label="Blog pagination"
               >
-                {currentPage > 1 && (
-                  <Link
-                    href={`/blog?page=${currentPage - 1}`}
-                    style={{
-                      padding: '8px 16px',
-                      borderRadius: 8,
-                      background: '#fff',
-                      border: '1px solid #ddd',
-                      textDecoration: 'none',
-                      color: '#333',
-                      fontSize: '0.9rem',
-                    }}
-                  >
-                    &larr; Previous
-                  </Link>
-                )}
-
-                {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
-                  let pageNum: number;
-                  if (totalPages <= 7) {
-                    pageNum = i + 1;
-                  } else if (currentPage <= 4) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 3) {
-                    pageNum = totalPages - 6 + i;
-                  } else {
-                    pageNum = currentPage - 3 + i;
-                  }
-                  return (
+                <p style={{ fontSize: '0.95rem', color: '#555', margin: 0, fontWeight: 500 }}>
+                  Page {currentPage} of {totalPages} &mdash; {total.toLocaleString()} articles total
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+                  {currentPage > 1 && (
                     <Link
-                      key={pageNum}
-                      href={`/blog?page=${pageNum}`}
+                      href={`/blog?page=${currentPage - 1}`}
                       style={{
-                        padding: '8px 14px',
+                        padding: '8px 16px',
                         borderRadius: 8,
-                        background: pageNum === currentPage ? '#F1379D' : '#fff',
-                        color: pageNum === currentPage ? '#fff' : '#333',
-                        border: pageNum === currentPage ? 'none' : '1px solid #ddd',
+                        background: '#fff',
+                        border: '1px solid #ddd',
                         textDecoration: 'none',
+                        color: '#333',
                         fontSize: '0.9rem',
-                        fontWeight: pageNum === currentPage ? 600 : 400,
                       }}
                     >
-                      {pageNum}
+                      &larr; Previous
                     </Link>
-                  );
-                })}
+                  )}
 
-                {currentPage < totalPages && (
-                  <Link
-                    href={`/blog?page=${currentPage + 1}`}
-                    style={{
-                      padding: '8px 16px',
-                      borderRadius: 8,
-                      background: '#fff',
-                      border: '1px solid #ddd',
-                      textDecoration: 'none',
-                      color: '#333',
-                      fontSize: '0.9rem',
-                    }}
-                  >
-                    Next &rarr;
-                  </Link>
-                )}
+                  {currentPage > 4 && totalPages > 7 && (
+                    <>
+                      <Link href="/blog?page=1" style={{ padding: '8px 14px', borderRadius: 8, background: '#fff', border: '1px solid #ddd', textDecoration: 'none', color: '#333', fontSize: '0.9rem' }}>1</Link>
+                      <span style={{ color: '#999' }}>...</span>
+                    </>
+                  )}
 
-                <span style={{ fontSize: '0.8rem', color: '#999', marginLeft: 12 }}>
-                  Page {currentPage} of {totalPages} ({total.toLocaleString()} articles)
-                </span>
+                  {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
+                    let pageNum: number;
+                    if (totalPages <= 7) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 4) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 3) {
+                      pageNum = totalPages - 6 + i;
+                    } else {
+                      pageNum = currentPage - 3 + i;
+                    }
+                    return (
+                      <Link
+                        key={pageNum}
+                        href={`/blog?page=${pageNum}`}
+                        style={{
+                          padding: '8px 14px',
+                          borderRadius: 8,
+                          background: pageNum === currentPage ? '#F1379D' : '#fff',
+                          color: pageNum === currentPage ? '#fff' : '#333',
+                          border: pageNum === currentPage ? 'none' : '1px solid #ddd',
+                          textDecoration: 'none',
+                          fontSize: '0.9rem',
+                          fontWeight: pageNum === currentPage ? 600 : 400,
+                        }}
+                      >
+                        {pageNum}
+                      </Link>
+                    );
+                  })}
+
+                  {currentPage < totalPages - 3 && totalPages > 7 && (
+                    <>
+                      <span style={{ color: '#999' }}>...</span>
+                      <Link href={`/blog?page=${totalPages}`} style={{ padding: '8px 14px', borderRadius: 8, background: '#fff', border: '1px solid #ddd', textDecoration: 'none', color: '#333', fontSize: '0.9rem' }}>{totalPages}</Link>
+                    </>
+                  )}
+
+                  {currentPage < totalPages && (
+                    <Link
+                      href={`/blog?page=${currentPage + 1}`}
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: 8,
+                        background: '#fff',
+                        border: '1px solid #ddd',
+                        textDecoration: 'none',
+                        color: '#333',
+                        fontSize: '0.9rem',
+                      }}
+                    >
+                      Next &rarr;
+                    </Link>
+                  )}
+                </div>
               </nav>
             )}
           </>
