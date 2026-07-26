@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -122,11 +123,13 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
                     }}
                   >
                     {post.coverImageUrl && (
-                      <div style={{ height: 200, overflow: 'hidden' }}>
-                        <img
+                      <div style={{ height: 200, overflow: 'hidden', position: 'relative' }}>
+                        <Image
                           src={post.coverImageUrl}
                           alt={post.title}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          fill
+                          style={{ objectFit: 'cover' }}
+                          sizes="(max-width: 768px) 100vw, 33vw"
                         />
                       </div>
                     )}

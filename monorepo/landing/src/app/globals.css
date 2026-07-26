@@ -363,3 +363,17 @@ nav.breadcrumb ol li + li::before { content: '/'; margin-right: 8px; color: var(
 }
 
 ::selection { background: rgba(241, 55, 157, 0.15); color: var(--text); }
+
+/* Blog content styles */
+.blog-content h2 { font-size: 1.5rem; font-weight: 600; margin: 2rem 0 0.75rem; color: var(--text); font-family: 'Poppins', sans-serif; }
+.blog-content h3 { font-size: 1.2rem; font-weight: 600; margin: 1.5rem 0 0.5rem; color: var(--text); }
+.blog-content p { margin-bottom: 1rem; }
+.blog-content ul, .blog-content ol { margin: 0.5rem 0 1.5rem 1.5rem; }
+.blog-content li { margin-bottom: 0.5rem; line-height: 1.7; }
+.blog-content strong { color: #1a1a2e; }
+.blog-content a { color: var(--primary); text-decoration: underline; }
+.blog-content blockquote { border-left: 4px solid var(--primary); padding: 1rem 1.5rem; margin: 1.5rem 0; background: var(--gradient-subtle); border-radius: 0 8px 8px 0; }
+.blog-content img { max-width: 100%; height: auto; border-radius: 8px; margin: 1rem 0; }
+.blog-content table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+.blog-content th, .blog-content td { padding: 0.75rem; border: 1px solid #e5e7eb; text-align: left; }
+.blog-content th { background: var(--bg-soft); font-weight: 600; }

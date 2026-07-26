@@ -3,6 +3,11 @@ const nextConfig = {
   output: 'standalone',
   poweredByHeader: false,
   compress: true,
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+    ],
+  },
   redirects: async () => [
     {
       source: '/:path*',

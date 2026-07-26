@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -32,6 +33,31 @@ async function getPost(slug: string): Promise<BlogPost | null> {
     return await res.json();
   } catch {
     return null;
+  }
+}
+
+async function getRelatedPosts(tags: string, currentSlug: string): Promise<BlogPost[]> {
+  try {
+    const primaryTag = tags.split(',')[0]?.trim();
+    if (!primaryTag) return [];
+    const res = await fetch(`${API_URL}/blog/posts?limit=50&page=1`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    const posts = (json.data || []) as BlogPost[];
+    const related = posts
+      .filter((p) => p.slug !== currentSlug && p.tags?.includes(primaryTag))
+      .slice(0, 6);
+    if (related.length < 6) {
+      const more = posts
+        .filter((p) => p.slug !== currentSlug && !related.find((r) => r.id === p.id))
+        .slice(0, 6 - related.length);
+      related.push(...more);
+    }
+    return related;
+  } catch {
+    return [];
   }
 }
 
@@ -94,9 +120,15 @@ export default async function BlogPostPage({
   const post = await getPost(params.slug);
   if (!post) notFound();
 
+  const relatedPosts = await getRelatedPosts(post.tags || '', post.slug);
+
   const publishedISO = post.publishedDate
     ? new Date(post.publishedDate._seconds * 1000).toISOString()
     : new Date(post.createdAt._seconds * 1000).toISOString();
+
+  const wordCount = post.content
+    ? post.content.replace(/<[^>]+>/g, '').split(/\s+/).length
+    : 0;
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -116,9 +148,19 @@ export default async function BlogPostPage({
     datePublished: publishedISO,
     dateModified: publishedISO,
     mainEntityOfPage: `https://petfolioo.com/blog/${post.slug}`,
-    wordCount: post.content.replace(/<[^>]+>/g, '').split(/\s+/).length,
+    wordCount,
     timeRequired: `PT${post.readingTimeMinutes}M`,
     keywords: post.tags,
+  };
+
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://petfolioo.com' },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://petfolioo.com/blog' },
+      { '@type': 'ListItem', position: 3, name: post.title, item: `https://petfolioo.com/blog/${post.slug}` },
+    ],
   };
 
   return (
@@ -127,21 +169,21 @@ export default async function BlogPostPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
       <Navbar />
       <main style={{ minHeight: '100vh', background: '#fafafa', paddingTop: 64 }}>
         {post.coverImageUrl && (
-          <div
-            style={{
-              width: '100%',
-              height: 360,
-              overflow: 'hidden',
-              position: 'relative',
-            }}
-          >
-            <img
+          <div style={{ width: '100%', height: 360, overflow: 'hidden', position: 'relative' }}>
+            <Image
               src={post.coverImageUrl}
               alt={post.title}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              fill
+              style={{ objectFit: 'cover' }}
+              priority
+              sizes="100vw"
             />
             <div
               style={{
@@ -154,29 +196,26 @@ export default async function BlogPostPage({
         )}
 
         <article
-          style={{
-            maxWidth: 760,
-            margin: '0 auto',
-            padding: '48px 24px 80px',
-          }}
+          style={{ maxWidth: 760, margin: '0 auto', padding: '48px 24px 80px' }}
+          itemScope
+          itemType="https://schema.org/BlogPosting"
         >
-          <Link
-            href="/blog"
-            style={{
-              color: '#F1379D',
-              textDecoration: 'none',
-              fontSize: '0.9rem',
-              fontWeight: 500,
-            }}
-          >
-            &larr; Back to Blog
-          </Link>
+          <nav aria-label="Breadcrumb" style={{ marginBottom: 16 }}>
+            <ol style={{ display: 'flex', gap: 8, listStyle: 'none', padding: 0, margin: 0, fontSize: '0.85rem', color: '#888' }}>
+              <li><Link href="/" style={{ color: '#888', textDecoration: 'none' }}>Home</Link></li>
+              <li>/</li>
+              <li><Link href="/blog" style={{ color: '#F1379D', textDecoration: 'none' }}>Blog</Link></li>
+              <li>/</li>
+              <li style={{ color: '#555', maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</li>
+            </ol>
+          </nav>
 
           <h1
+            itemProp="headline"
             style={{
               fontSize: '2.2rem',
               fontWeight: 700,
-              marginTop: 24,
+              marginTop: 16,
               marginBottom: 16,
               lineHeight: 1.2,
               fontFamily: 'Poppins',
@@ -196,8 +235,10 @@ export default async function BlogPostPage({
               flexWrap: 'wrap',
             }}
           >
-            <span style={{ fontWeight: 500, color: '#333' }}>{post.author}</span>
-            <span>{formatDate(post.publishedDate || post.createdAt)}</span>
+            <span itemProp="author" style={{ fontWeight: 500, color: '#333' }}>{post.author}</span>
+            <time itemProp="datePublished" dateTime={publishedISO}>
+              {formatDate(post.publishedDate || post.createdAt)}
+            </time>
             <span>{post.readingTimeMinutes} min read</span>
           </div>
 
@@ -223,14 +264,64 @@ export default async function BlogPostPage({
 
           <div
             className="blog-content"
-            style={{
-              fontSize: '1.05rem',
-              lineHeight: 1.8,
-              color: '#333',
-            }}
+            itemProp="articleBody"
+            style={{ fontSize: '1.05rem', lineHeight: 1.8, color: '#333' }}
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
         </article>
+
+        {relatedPosts.length > 0 && (
+          <section style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 80px' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: 24, fontFamily: 'Poppins' }}>
+              Related Articles
+            </h2>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                gap: 24,
+              }}
+            >
+              {relatedPosts.map((related) => (
+                <Link
+                  key={related.id}
+                  href={`/blog/${related.slug}`}
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <article
+                    style={{
+                      background: '#fff',
+                      borderRadius: 12,
+                      overflow: 'hidden',
+                      boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+                      transition: 'transform 0.2s, box-shadow 0.2s',
+                    }}
+                  >
+                    {related.coverImageUrl && (
+                      <div style={{ height: 160, position: 'relative' }}>
+                        <Image
+                          src={related.coverImageUrl}
+                          alt={related.title}
+                          fill
+                          style={{ objectFit: 'cover' }}
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                      </div>
+                    )}
+                    <div style={{ padding: 16 }}>
+                      <h3 style={{ fontSize: '1rem', fontWeight: 600, margin: 0, lineHeight: 1.3 }}>
+                        {related.title}
+                      </h3>
+                      <p style={{ fontSize: '0.85rem', color: '#666', margin: '8px 0 0', lineHeight: 1.4 }}>
+                        {related.excerpt?.slice(0, 100)}...
+                      </p>
+                    </div>
+                  </article>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
       <Footer />
     </>
