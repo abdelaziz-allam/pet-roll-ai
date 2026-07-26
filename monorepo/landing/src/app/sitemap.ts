@@ -8,8 +8,17 @@ async function getBlogSlugs(): Promise<{ slug: string; updatedAt?: { _seconds: n
 
   try {
     while (true) {
-      const res = await fetch(`${apiUrl}/blog/posts?limit=${limit}&page=${page}`, { next: { revalidate: 3600 } });
-      if (!res.ok) break;
+      let res: Response | null = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        res = await fetch(`${apiUrl}/blog/posts?limit=${limit}&page=${page}`, { next: { revalidate: 3600 } });
+        if (res.ok) break;
+        if (res.status === 429) {
+          await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+          continue;
+        }
+        break;
+      }
+      if (!res || !res.ok) break;
       const json = await res.json();
       const posts = json.data || [];
       if (posts.length === 0) break;
