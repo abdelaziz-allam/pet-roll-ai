@@ -1,8 +1,18 @@
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
 
-export default function HomePage() {
+export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
+  const t = await getTranslations({ locale, namespace: 'hero' });
+  const f = await getTranslations({ locale, namespace: 'features' });
+  const h = await getTranslations({ locale, namespace: 'howItWorks' });
+  const tm = await getTranslations({ locale, namespace: 'testimonials' });
+  const d = await getTranslations({ locale, namespace: 'download' });
+
   return (
     <ScrollReveal>
       <Navbar />
@@ -20,49 +30,34 @@ export default function HomePage() {
           <div className="hero-content">
             <div className="hero-badge reveal">
               <span className="badge-dot"></span>
-              Trusted by 10,000+ pet parents worldwide
+              {t('badge')}
             </div>
             <h1 className="reveal">
-              Your Pet&apos;s Health,<br />
-              <span className="gradient-text">All in One Place</span>
+              {t('title1')}<br />
+              <span className="gradient-text">{t('title2')}</span>
             </h1>
             <p className="hero-subtitle reveal">
-              Track vaccinations, manage health records, monitor pregnancies,
-              and find the perfect breeding partner — all from one beautiful app.
+              {t('subtitle')}
             </p>
             <div className="hero-buttons reveal">
               <a href="#download" className="btn btn-primary btn-lg">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 21.99 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.09997 21.99C7.78997 22.03 6.79997 20.68 5.95997 19.47C4.24997 17 2.93997 12.45 4.69997 9.39C5.56997 7.87 7.12997 6.91 8.81997 6.88C10.1 6.86 11.32 7.75 12.11 7.75C12.89 7.75 14.37 6.68 15.92 6.84C16.57 6.87 18.39 7.1 19.56 8.82C19.47 8.88 17.39 10.1 17.41 12.63C17.44 15.65 20.06 16.66 20.09 16.67C20.06 16.74 19.67 18.11 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z" /></svg>
-                Download for iOS
+                {t('downloadIOS')}
               </a>
               <a href="#download" className="btn btn-dark btn-lg">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z" /></svg>
-                Get on Android
+                {t('downloadAndroid')}
               </a>
             </div>
             <div className="hero-stats reveal">
-              <div className="hero-stat"><div className="hero-stat-number">10K+</div><div className="hero-stat-label">Pet Owners</div></div>
+              <div className="hero-stat"><div className="hero-stat-number">10K+</div><div className="hero-stat-label">{t('statOwners')}</div></div>
               <div className="stat-divider"></div>
-              <div className="hero-stat"><div className="hero-stat-number">25K+</div><div className="hero-stat-label">Pets Managed</div></div>
+              <div className="hero-stat"><div className="hero-stat-number">25K+</div><div className="hero-stat-label">{t('statPets')}</div></div>
               <div className="stat-divider"></div>
-              <div className="hero-stat"><div className="hero-stat-number">50K+</div><div className="hero-stat-label">Health Records</div></div>
+              <div className="hero-stat"><div className="hero-stat-number">50K+</div><div className="hero-stat-label">{t('statRecords')}</div></div>
               <div className="stat-divider"></div>
-              <div className="hero-stat"><div className="hero-stat-number">4.9</div><div className="hero-stat-label">App Rating</div></div>
+              <div className="hero-stat"><div className="hero-stat-number">4.9</div><div className="hero-stat-label">{t('statRating')}</div></div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Social Proof */}
-      <section className="social-proof">
-        <div className="container">
-          <p className="social-proof-text">Featured in</p>
-          <div className="logos-row">
-            <div className="logo-item">TechCrunch</div>
-            <div className="logo-item">Product Hunt</div>
-            <div className="logo-item">Forbes</div>
-            <div className="logo-item">Wired</div>
-            <div className="logo-item">The Verge</div>
           </div>
         </div>
       </section>
@@ -71,40 +66,40 @@ export default function HomePage() {
       <section className="features" id="features">
         <div className="container">
           <div className="section-header reveal">
-            <span className="section-tag">Features</span>
-            <h2>Everything Your Pet Needs</h2>
-            <p>Comprehensive pet health management tools designed for modern pet parents and breeders.</p>
+            <span className="section-tag">{f('tag')}</span>
+            <h2>{f('title')}</h2>
+            <p>{f('subtitle')}</p>
           </div>
           <div className="features-grid">
             <div className="feature-card reveal">
               <div className="feature-icon-wrap"><div className="feature-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M12 8v4M12 16h.01" /></svg></div></div>
-              <h3>Vaccination Tracker</h3>
-              <p>Never miss a vaccine. Get smart reminders and keep a complete immunization history for each pet.</p>
+              <h3>{f('vaccination')}</h3>
+              <p>{f('vaccinationDesc')}</p>
             </div>
             <div className="feature-card reveal">
               <div className="feature-icon-wrap"><div className="feature-icon feature-icon-blue"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg></div></div>
-              <h3>Health Records</h3>
-              <p>Digital health records with vet visits, surgeries, lab results, and medications all in one secure place.</p>
+              <h3>{f('records')}</h3>
+              <p>{f('recordsDesc')}</p>
             </div>
             <div className="feature-card reveal">
               <div className="feature-icon-wrap"><div className="feature-icon feature-icon-purple"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg></div></div>
-              <h3>Pregnancy Monitor</h3>
-              <p>Track pregnancy milestones week by week, monitor weight changes, and prepare for delivery day.</p>
+              <h3>{f('pregnancy')}</h3>
+              <p>{f('pregnancyDesc')}</p>
             </div>
             <div className="feature-card reveal">
               <div className="feature-icon-wrap"><div className="feature-icon feature-icon-orange"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg></div></div>
-              <h3>Mating Marketplace</h3>
-              <p>Find verified breeding partners with health certifications, lineage info, and direct messaging.</p>
+              <h3>{f('mating')}</h3>
+              <p>{f('matingDesc')}</p>
             </div>
             <div className="feature-card reveal">
               <div className="feature-icon-wrap"><div className="feature-icon feature-icon-green"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg></div></div>
-              <h3>Smart Schedules</h3>
-              <p>Automated feeding, medication, grooming, and exercise reminders customized for your pet&apos;s routine.</p>
+              <h3>{f('scheduling')}</h3>
+              <p>{f('schedulingDesc')}</p>
             </div>
             <div className="feature-card reveal">
               <div className="feature-icon-wrap"><div className="feature-icon feature-icon-red"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg></div></div>
-              <h3>Health Reports</h3>
-              <p>Generate PDF health reports for vet visits, travel documents, or breed certification applications.</p>
+              <h3>{f('reports')}</h3>
+              <p>{f('reportsDesc')}</p>
             </div>
           </div>
         </div>
@@ -114,28 +109,24 @@ export default function HomePage() {
       <section className="how-it-works" id="how-it-works">
         <div className="container">
           <div className="section-header reveal">
-            <span className="section-tag">How it Works</span>
-            <h2>Get Started in Minutes</h2>
-            <p>Simple setup, powerful results. Your pet deserves the best.</p>
+            <span className="section-tag">{h('tag')}</span>
+            <h2>{h('title')}</h2>
+            <p>{h('subtitle')}</p>
           </div>
           <div className="steps-container">
             <div className="steps-line"></div>
             <div className="steps">
               <div className="step reveal">
                 <div className="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg></div>
-                <div className="step-content"><span className="step-number">Step 1</span><h3>Create Account</h3><p>Sign up with email or social login in seconds. Free forever for up to 3 pets.</p></div>
+                <div className="step-content"><span className="step-number">Step 1</span><h3>{h('step1')}</h3><p>{h('step1Desc')}</p></div>
               </div>
               <div className="step reveal">
                 <div className="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" /></svg></div>
-                <div className="step-content"><span className="step-number">Step 2</span><h3>Add Your Pets</h3><p>Enter your pet&apos;s details, breed, age, and upload adorable photos.</p></div>
+                <div className="step-content"><span className="step-number">Step 2</span><h3>{h('step2')}</h3><p>{h('step2Desc')}</p></div>
               </div>
               <div className="step reveal">
                 <div className="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg></div>
-                <div className="step-content"><span className="step-number">Step 3</span><h3>Track Health</h3><p>Log records, set schedules, and get intelligent reminders.</p></div>
-              </div>
-              <div className="step reveal">
-                <div className="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /><line x1="4" y1="22" x2="4" y2="15" /></svg></div>
-                <div className="step-content"><span className="step-number">Step 4</span><h3>Stay Connected</h3><p>Connect with breeders, share reports with your vet, and join the community.</p></div>
+                <div className="step-content"><span className="step-number">Step 3</span><h3>{h('step3')}</h3><p>{h('step3Desc')}</p></div>
               </div>
             </div>
           </div>
@@ -146,9 +137,9 @@ export default function HomePage() {
       <section className="testimonials" id="testimonials">
         <div className="container">
           <div className="section-header reveal">
-            <span className="section-tag">Testimonials</span>
-            <h2>Loved by Pet Parents</h2>
-            <p>See what our community has to say about Petfolioo.</p>
+            <span className="section-tag">{tm('tag')}</span>
+            <h2>{tm('title')}</h2>
+            <p>{tm('subtitle')}</p>
           </div>
           <div className="testimonials-grid">
             <div className="testimonial-card reveal">
@@ -175,19 +166,18 @@ export default function HomePage() {
         <div className="container">
           <div className="cta-box reveal">
             <div className="cta-content">
-              <h2>Ready to Give Your Pet<br />the Best Care?</h2>
-              <p>Join thousands of pet owners who trust Petfolioo for their pet&apos;s health management. Download free today.</p>
+              <h2>{d('title')}</h2>
+              <p>{d('subtitle')}</p>
               <div className="cta-buttons">
                 <a href="https://apps.apple.com/app/petfolioo" className="store-btn store-btn-apple" rel="noopener noreferrer" target="_blank">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 21.99 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.09997 21.99C7.78997 22.03 6.79997 20.68 5.95997 19.47C4.24997 17 2.93997 12.45 4.69997 9.39C5.56997 7.87 7.12997 6.91 8.81997 6.88C10.1 6.86 11.32 7.75 12.11 7.75C12.89 7.75 14.37 6.68 15.92 6.84C16.57 6.87 18.39 7.1 19.56 8.82C19.47 8.88 17.39 10.1 17.41 12.63C17.44 15.65 20.06 16.66 20.09 16.67C20.06 16.74 19.67 18.11 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z" /></svg>
-                  <div className="store-btn-text"><span className="store-btn-small">Download on the</span><span className="store-btn-big">App Store</span></div>
+                  <div className="store-btn-text"><span className="store-btn-small">Download on the</span><span className="store-btn-big">{d('appStore')}</span></div>
                 </a>
                 <a href="https://play.google.com/store/apps/details?id=com.petroll.pet_roll" className="store-btn store-btn-google" rel="noopener noreferrer" target="_blank">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z" /></svg>
-                  <div className="store-btn-text"><span className="store-btn-small">Get it on</span><span className="store-btn-big">Google Play</span></div>
+                  <div className="store-btn-text"><span className="store-btn-small">Get it on</span><span className="store-btn-big">{d('googlePlay')}</span></div>
                 </a>
               </div>
-              <div className="cta-note">Free to use &bull; No credit card required &bull; Cancel anytime</div>
             </div>
           </div>
         </div>

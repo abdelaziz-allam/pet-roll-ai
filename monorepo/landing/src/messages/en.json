@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "title": "Petfolioo - Complete Pet Health Management Platform",
+    "description": "Track vaccinations, manage health records, monitor pregnancies, and find breeding partners. The all-in-one pet health app.",
+    "keywords": "pet health management, pet vaccination tracker, pet health records, dog health app, cat health app"
+  },
+  "nav": {
+    "features": "Features",
+    "howItWorks": "How it Works",
+    "blog": "Blog",
+    "testimonials": "Testimonials",
+    "getApp": "Get the App",
+    "home": "Home",
+    "petOwners": "Pet Owners",
+    "breeders": "Breeders",
+    "veterinarians": "Veterinarians",
+    "language": "Language"
+  },
+  "hero": {
+    "badge": "Trusted by 10,000+ pet parents worldwide",
+    "title1": "Your Pet's Health,",
+    "title2": "All in One Place",
+    "subtitle": "Track vaccinations, manage health records, monitor pregnancies, and find the perfect breeding partner — all from one beautiful app.",
+    "downloadIOS": "Download for iOS",
+    "downloadAndroid": "Get on Android",
+    "statOwners": "Pet Owners",
+    "statPets": "Pets Managed",
+    "statRecords": "Health Records",
+    "statRating": "App Rating"
+  },
+  "features": {
+    "tag": "Features",
+    "title": "Everything Your Pet Needs",
+    "subtitle": "Comprehensive pet health management tools designed for modern pet parents and breeders.",
+    "vaccination": "Vaccination Tracker",
+    "vaccinationDesc": "Never miss a vaccine. Get smart reminders and keep a complete immunization history for each pet.",
+    "records": "Health Records",
+    "recordsDesc": "Digital health records with vet visits, surgeries, lab results, and medications all in one secure place.",
+    "pregnancy": "Pregnancy Monitor",
+    "pregnancyDesc": "Track pregnancy milestones week by week, monitor weight changes, and prepare for delivery day.",
+    "mating": "Mating Marketplace",
+    "matingDesc": "Find verified breeding partners with health certifications, lineage info, and direct messaging.",
+    "scheduling": "Smart Scheduling",
+    "schedulingDesc": "Automated reminders for vet visits, medications, grooming, and vaccination boosters.",
+    "reports": "Health Reports",
+    "reportsDesc": "Generate comprehensive PDF reports to share with vets, boarding facilities, or insurance providers."
+  },
+  "howItWorks": {
+    "tag": "How it Works",
+    "title": "Getting Started is Easy",
+    "subtitle": "From download to full pet health management in under 2 minutes.",
+    "step1": "Download & Sign Up",
+    "step1Desc": "Get the app from App Store or Google Play. Sign up with email, Google, or Apple in seconds.",
+    "step2": "Add Your Pets",
+    "step2Desc": "Add your pets with basic info — name, species, breed, and date of birth. Upload their photo.",
+    "step3": "Start Tracking",
+    "step3Desc": "Log vaccinations, set reminders, record vet visits, and explore the breeding marketplace."
+  },
+  "testimonials": {
+    "tag": "Testimonials",
+    "title": "Loved by Pet Parents",
+    "subtitle": "See what our community says about Petfolioo."
+  },
+  "download": {
+    "title": "Ready to Take Better Care of Your Pet?",
+    "subtitle": "Join thousands of pet parents who trust Petfolioo for their pet's health management.",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
+  },
+  "footer": {
+    "description": "The complete pet health management platform for modern pet parents and professional breeders.",
+    "product": "Product",
+    "company": "Company",
+    "legal": "Legal",
+    "about": "About Us",
+    "careers": "Careers",
+    "contact": "Contact",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "rights": "All rights reserved."
+  },
+  "blog": {
+    "title": "Pet Health Blog",
+    "subtitle": "{count} expert articles on pet health, care, and wellness.",
+    "noPostsYet": "No posts yet. Check back soon!",
+    "pageOf": "Page {current} of {total} — {count} articles total",
+    "previous": "Previous",
+    "next": "Next",
+    "backToBlog": "Back to Blog",
+    "minRead": "{minutes} min read",
+    "relatedArticles": "Related Articles",
+    "home": "Home",
+    "readMore": "Read more"
+  },
+  "petOwners": {
+    "title": "For Pet Owners",
+    "subtitle": "Everything you need to keep your pet healthy, happy, and thriving."
+  },
+  "breeders": {
+    "title": "For Breeders",
+    "subtitle": "Professional tools for responsible breeders. Manage lineage, health records, and find mating partners."
+  },
+  "veterinarians": {
+    "title": "For Veterinarians",
+    "subtitle": "Streamline your practice with digital health records and direct communication with pet owners."
+  }
+}

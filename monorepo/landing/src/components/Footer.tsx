@@ -1,6 +1,11 @@
-import Link from 'next/link';
+'use client';
+
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 
 export default function Footer() {
+  const t = useTranslations('footer');
+
   return (
     <footer className="footer">
       <div className="container">
@@ -25,7 +30,7 @@ export default function Footer() {
               </svg>
               <span>Pet<span className="brand-accent">folioo</span></span>
             </Link>
-            <p>The complete pet health management platform for modern pet parents and professional breeders.</p>
+            <p>{t('description')}</p>
             <div className="footer-socials">
               <a href="https://twitter.com/petfolioo" className="social-link" aria-label="Twitter" rel="noopener noreferrer" target="_blank">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
@@ -42,36 +47,36 @@ export default function Footer() {
             </div>
           </div>
           <div>
-            <h4>Product</h4>
+            <h4>{t('product')}</h4>
             <ul>
-              <li><a href="#features">Features</a></li>
-              <li><Link href="/pet-owners">For Pet Owners</Link></li>
-              <li><Link href="/breeders">For Breeders</Link></li>
-              <li><Link href="/veterinarians">For Veterinarians</Link></li>
+              <li><a href="#features">{t('product')}</a></li>
+              <li><Link href="/pet-owners">{t('about')}</Link></li>
+              <li><Link href="/breeders">{t('about')}</Link></li>
+              <li><Link href="/veterinarians">{t('about')}</Link></li>
               <li><Link href="/blog">Blog</Link></li>
             </ul>
           </div>
           <div>
-            <h4>Company</h4>
+            <h4>{t('company')}</h4>
             <ul>
-              <li><Link href="/pet-shops">For Pet Shops</Link></li>
-              <li><Link href="/adoption">Adoption</Link></li>
+              <li><Link href="/pet-shops">{t('about')}</Link></li>
+              <li><Link href="/adoption">{t('about')}</Link></li>
               <li><a href="https://admin.petfolioo.com" rel="noopener noreferrer" target="_blank">Admin Portal</a></li>
               <li><a href="https://api.petfolioo.com/docs" rel="noopener noreferrer" target="_blank">API Docs</a></li>
             </ul>
           </div>
           <div>
-            <h4>Legal</h4>
+            <h4>{t('legal')}</h4>
             <ul>
-              <li><Link href="/privacy">Privacy Policy</Link></li>
-              <li><Link href="/terms">Terms of Service</Link></li>
-              <li><Link href="/privacy#cookies">Cookie Policy</Link></li>
+              <li><Link href="/privacy">{t('privacy')}</Link></li>
+              <li><Link href="/terms">{t('terms')}</Link></li>
+              <li><Link href="/privacy#cookies">Cookies</Link></li>
               <li><Link href="/privacy#gdpr">GDPR</Link></li>
             </ul>
           </div>
         </div>
         <div className="footer-bottom">
-          <p>&copy; 2024 Petfolioo AB. All rights reserved. Helsingborg, Sweden.</p>
+          <p>&copy; 2024 Petfolioo AB. {t('rights')} Helsingborg, Sweden.</p>
         </div>
       </div>
     </footer>

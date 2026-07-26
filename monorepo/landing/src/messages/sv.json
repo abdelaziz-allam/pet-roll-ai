@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "title": "Petfolioo - Komplett Plattform för Djurhälsa",
+    "description": "Spåra vaccinationer, hantera hälsojournaler, övervaka dräktigheter och hitta avelspartners. Allt-i-ett-appen för ditt husdjurs hälsa.",
+    "keywords": "djurhälsa hantering, vaccinationspårning husdjur, hälsojournaler husdjur, hund hälsa app, katt hälsa app"
+  },
+  "nav": {
+    "features": "Funktioner",
+    "howItWorks": "Hur Det Fungerar",
+    "blog": "Blogg",
+    "testimonials": "Omdömen",
+    "getApp": "Hämta Appen",
+    "home": "Hem",
+    "petOwners": "Djurägare",
+    "breeders": "Uppfödare",
+    "veterinarians": "Veterinärer",
+    "language": "Språk"
+  },
+  "hero": {
+    "badge": "Betrodd av över 10 000 djurägare världen över",
+    "title1": "Ditt Husdjurs Hälsa,",
+    "title2": "Allt på Ett Ställe",
+    "subtitle": "Spåra vaccinationer, hantera hälsojournaler, övervaka dräktigheter och hitta den perfekta avelspartnern — allt från en vacker app.",
+    "downloadIOS": "Ladda ner för iOS",
+    "downloadAndroid": "Hämta för Android",
+    "statOwners": "Djurägare",
+    "statPets": "Hanterade Husdjur",
+    "statRecords": "Hälsojournaler",
+    "statRating": "Appbetyg"
+  },
+  "features": {
+    "tag": "Funktioner",
+    "title": "Allt Ditt Husdjur Behöver",
+    "subtitle": "Omfattande verktyg för djurhälsa designade för moderna djurägare och uppfödare.",
+    "vaccination": "Vaccinationspårning",
+    "vaccinationDesc": "Missa aldrig en vaccination. Få smarta påminnelser och håll en komplett vaccinationshistorik för varje husdjur.",
+    "records": "Hälsojournaler",
+    "recordsDesc": "Digitala hälsojournaler med veterinärbesök, operationer, labbresultat och mediciner på en säker plats.",
+    "pregnancy": "Dräktighetsövervakning",
+    "pregnancyDesc": "Följ dräktighetens milstolpar vecka för vecka, övervaka vikförändringar och förbered dig för förlossningsdagen.",
+    "mating": "Avelsmarknad",
+    "matingDesc": "Hitta verifierade avelspartners med hälsocertifikat, härstamningsinformation och direktmeddelanden.",
+    "scheduling": "Smart Schemaläggning",
+    "schedulingDesc": "Automatiska påminnelser för veterinärbesök, mediciner, pälsvård och påfyllnadsvaccinationer.",
+    "reports": "Hälsorapporter",
+    "reportsDesc": "Generera omfattande PDF-rapporter att dela med veterinärer, hundpensionat eller försäkringsbolag."
+  },
+  "howItWorks": {
+    "tag": "Hur Det Fungerar",
+    "title": "Enkelt att Komma Igång",
+    "subtitle": "Från nedladdning till fullständig hälsohantering på under 2 minuter.",
+    "step1": "Ladda Ner & Registrera Dig",
+    "step1Desc": "Hämta appen från App Store eller Google Play. Registrera dig med e-post, Google eller Apple på sekunder.",
+    "step2": "Lägg Till Dina Husdjur",
+    "step2Desc": "Lägg till dina husdjur med grundläggande info — namn, art, ras och födelsedatum. Ladda upp deras foto.",
+    "step3": "Börja Spåra",
+    "step3Desc": "Registrera vaccinationer, ställ in påminnelser, notera veterinärbesök och utforska avelsmarknaden."
+  },
+  "testimonials": {
+    "tag": "Omdömen",
+    "title": "Älskad av Djurägare",
+    "subtitle": "Se vad vårt community säger om Petfolioo."
+  },
+  "download": {
+    "title": "Redo att Ta Bättre Hand om Ditt Husdjur?",
+    "subtitle": "Gå med tusentals djurägare som litar på Petfolioo för sina husdjurs hälsohantering.",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
+  },
+  "footer": {
+    "description": "Den kompletta plattformen för djurhälsa för moderna djurägare och professionella uppfödare.",
+    "product": "Produkt",
+    "company": "Företag",
+    "legal": "Juridiskt",
+    "about": "Om Oss",
+    "careers": "Karriar",
+    "contact": "Kontakt",
+    "privacy": "Integritetspolicy",
+    "terms": "Användarvillkor",
+    "rights": "Alla rättigheter förbehållna."
+  },
+  "blog": {
+    "title": "Blogg om Djurhälsa",
+    "subtitle": "{count} expertartiklar om djurhälsa, vård och välmående.",
+    "noPostsYet": "Inga inlägg ännu. Kom tillbaka snart!",
+    "pageOf": "Sida {current} av {total} — {count} artiklar totalt",
+    "previous": "Föregående",
+    "next": "Nästa",
+    "backToBlog": "Tillbaka till Bloggen",
+    "minRead": "{minutes} min lästid",
+    "relatedArticles": "Relaterade Artiklar",
+    "home": "Hem",
+    "readMore": "Läs mer"
+  },
+  "petOwners": {
+    "title": "För Djurägare",
+    "subtitle": "Allt du behöver för att hålla ditt husdjur friskt, lyckligt och vitalt."
+  },
+  "breeders": {
+    "title": "För Uppfödare",
+    "subtitle": "Professionella verktyg för ansvarsfulla uppfödare. Hantera härstamning, hälsojournaler och hitta avelspartners."
+  },
+  "veterinarians": {
+    "title": "För Veterinärer",
+    "subtitle": "Effektivisera din praktik med digitala hälsojournaler och direkt kommunikation med djurägare."
+  }
+}

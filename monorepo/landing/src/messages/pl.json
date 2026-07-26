@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "title": "Petfolioo - Kompleksowa Platforma Zarządzania Zdrowiem Zwierząt",
+    "description": "Monitoruj szczepienia, zarządzaj dokumentacją medyczną, śledź ciąże i znajdź partnerow do hodowli. Aplikacja all-in-one do zdrowia Twojego zwierzęcia.",
+    "keywords": "zarządzanie zdrowiem zwierząt, tracker szczepień zwierząt, dokumentacja medyczna zwierząt, aplikacja zdrowie psa, aplikacja zdrowie kota"
+  },
+  "nav": {
+    "features": "Funkcje",
+    "howItWorks": "Jak To Działa",
+    "blog": "Blog",
+    "testimonials": "Opinie",
+    "getApp": "Pobierz Aplikację",
+    "home": "Strona Główna",
+    "petOwners": "Właściciele",
+    "breeders": "Hodowcy",
+    "veterinarians": "Weterynarze",
+    "language": "Język"
+  },
+  "hero": {
+    "badge": "Zaufanie ponad 10 000 właścicieli zwierząt na całym świecie",
+    "title1": "Zdrowie Twojego Zwierzęcia,",
+    "title2": "Wszystko w Jednym Miejscu",
+    "subtitle": "Monitoruj szczepienia, zarządzaj dokumentacją medyczną, śledź ciąże i znajdź idealnego partnera do hodowli — wszystko z jednej pięknej aplikacji.",
+    "downloadIOS": "Pobierz na iOS",
+    "downloadAndroid": "Pobierz na Androida",
+    "statOwners": "Właściciele Zwierząt",
+    "statPets": "Zarządzane Zwierzęta",
+    "statRecords": "Dokumentacja Medyczna",
+    "statRating": "Ocena Aplikacji"
+  },
+  "features": {
+    "tag": "Funkcje",
+    "title": "Wszystko, Czego Potrzebuje Twoje Zwierzę",
+    "subtitle": "Kompleksowe narzędzia do zarządzania zdrowiem zwierząt, zaprojektowane dla nowoczesnych właścicieli i hodowców.",
+    "vaccination": "Tracker Szczepień",
+    "vaccinationDesc": "Nigdy nie przegap szczepienia. Otrzymuj inteligentne przypomnienia i prowadź pełną historię szczepień każdego zwierzęcia.",
+    "records": "Dokumentacja Medyczna",
+    "recordsDesc": "Cyfrowa dokumentacja medyczna z wizytami u weterynarza, operacjami, wynikami badań i lekami w jednym bezpiecznym miejscu.",
+    "pregnancy": "Monitor Ciąży",
+    "pregnancyDesc": "Śledź kamienie milowe ciąży tydzień po tygodniu, monitoruj zmiany wagi i przygotuj się na dzień porodu.",
+    "mating": "Rynek Hodowlany",
+    "matingDesc": "Znajdź zweryfikowanych partnerów hodowlanych z certyfikatami zdrowia, informacjami o rodowodzie i bezpośrednią komunikacją.",
+    "scheduling": "Inteligentne Planowanie",
+    "schedulingDesc": "Automatyczne przypomnienia o wizytach u weterynarza, lekach, pielęgnacji i szczepieniach przypominających.",
+    "reports": "Raporty Zdrowotne",
+    "reportsDesc": "Generuj kompleksowe raporty PDF do udostępniania weterynarzom, hotelom dla zwierząt lub ubezpieczycielom."
+  },
+  "howItWorks": {
+    "tag": "Jak To Działa",
+    "title": "Rozpoczęcie Jest Łatwe",
+    "subtitle": "Od pobrania do pełnego zarządzania zdrowiem zwierzęcia w mniej niż 2 minuty.",
+    "step1": "Pobierz i Zarejestruj Się",
+    "step1Desc": "Pobierz aplikację z App Store lub Google Play. Zarejestruj się przez e-mail, Google lub Apple w kilka sekund.",
+    "step2": "Dodaj Swoje Zwierzęta",
+    "step2Desc": "Dodaj swoje zwierzęta z podstawowymi informacjami — imię, gatunek, rasa i data urodzenia. Prześlij ich zdjęcie.",
+    "step3": "Zacznij Monitorować",
+    "step3Desc": "Rejestruj szczepienia, ustawiaj przypomnienia, notuj wizyty u weterynarza i eksploruj rynek hodowlany."
+  },
+  "testimonials": {
+    "tag": "Opinie",
+    "title": "Kochane przez Właścicieli Zwierząt",
+    "subtitle": "Zobacz, co nasza społeczność mówi o Petfolioo."
+  },
+  "download": {
+    "title": "Gotowy, by Lepiej Zadbać o Swoje Zwierzę?",
+    "subtitle": "Dołącz do tysięcy właścicieli, którzy ufają Petfolioo w zarządzaniu zdrowiem swoich zwierząt.",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
+  },
+  "footer": {
+    "description": "Kompleksowa platforma zarządzania zdrowiem zwierząt dla nowoczesnych właścicieli i profesjonalnych hodowców.",
+    "product": "Produkt",
+    "company": "Firma",
+    "legal": "Prawne",
+    "about": "O Nas",
+    "careers": "Kariera",
+    "contact": "Kontakt",
+    "privacy": "Polityka Prywatności",
+    "terms": "Regulamin",
+    "rights": "Wszelkie prawa zastrzeżone."
+  },
+  "blog": {
+    "title": "Blog o Zdrowiu Zwierząt",
+    "subtitle": "{count} eksperckich artykułów o zdrowiu, opiece i dobrostanie zwierząt.",
+    "noPostsYet": "Brak wpisów. Wróć wkrótce!",
+    "pageOf": "Strona {current} z {total} — {count} artykułów łącznie",
+    "previous": "Poprzednia",
+    "next": "Następna",
+    "backToBlog": "Powrót do Bloga",
+    "minRead": "{minutes} min czytania",
+    "relatedArticles": "Powiązane Artykuły",
+    "home": "Strona Główna",
+    "readMore": "Czytaj więcej"
+  },
+  "petOwners": {
+    "title": "Dla Właścicieli Zwierząt",
+    "subtitle": "Wszystko, czego potrzebujesz, aby Twoje zwierzę było zdrowe, szczęśliwe i pełne energii."
+  },
+  "breeders": {
+    "title": "Dla Hodowców",
+    "subtitle": "Profesjonalne narzędzia dla odpowiedzialnych hodowców. Zarządzaj rodowodami, dokumentacją medyczną i znajdź partnerów hodowlanych."
+  },
+  "veterinarians": {
+    "title": "Dla Weterynarzy",
+    "subtitle": "Usprawnij swoją praktykę dzięki cyfrowej dokumentacji medycznej i bezpośredniej komunikacji z właścicielami zwierząt."
+  }
+}

@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import ScrollReveal from './ScrollReveal';

@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "title": "Petfolioo - Compleet Platform voor Diergezondheid",
+    "description": "Volg vaccinaties, beheer gezondheidsgegevens, monitor zwangerschappen en vind fokpartners. De alles-in-één app voor diergezondheid.",
+    "keywords": "diergezondheid beheer, vaccinatie tracker huisdieren, gezondheidsgegevens huisdieren, hond gezondheid app, kat gezondheid app"
+  },
+  "nav": {
+    "features": "Functies",
+    "howItWorks": "Hoe Het Werkt",
+    "blog": "Blog",
+    "testimonials": "Ervaringen",
+    "getApp": "Download de App",
+    "home": "Home",
+    "petOwners": "Eigenaren",
+    "breeders": "Fokkers",
+    "veterinarians": "Dierenartsen",
+    "language": "Taal"
+  },
+  "hero": {
+    "badge": "Vertrouwd door meer dan 10.000 huisdiereigenaren wereldwijd",
+    "title1": "De Gezondheid van Je Huisdier,",
+    "title2": "Alles op Één Plek",
+    "subtitle": "Volg vaccinaties, beheer gezondheidsgegevens, monitor zwangerschappen en vind de perfecte fokpartner — alles vanuit één prachtige app.",
+    "downloadIOS": "Download voor iOS",
+    "downloadAndroid": "Download voor Android",
+    "statOwners": "Huisdiereigenaren",
+    "statPets": "Beheerde Huisdieren",
+    "statRecords": "Gezondheidsgegevens",
+    "statRating": "App Beoordeling"
+  },
+  "features": {
+    "tag": "Functies",
+    "title": "Alles Wat Je Huisdier Nodig Heeft",
+    "subtitle": "Uitgebreide tools voor diergezondheid, ontworpen voor moderne huisdiereigenaren en fokkers.",
+    "vaccination": "Vaccinatie Tracker",
+    "vaccinationDesc": "Mis nooit een vaccinatie. Ontvang slimme herinneringen en bewaar een compleet vaccinatieoverzicht voor elk huisdier.",
+    "records": "Gezondheidsgegevens",
+    "recordsDesc": "Digitale gezondheidsgegevens met dierenarsbezoeken, operaties, laboratoriumresultaten en medicijnen op één veilige plek.",
+    "pregnancy": "Zwangerschapsmonitor",
+    "pregnancyDesc": "Volg zwangerschapsmijlpalen week voor week, monitor gewichtsveranderingen en bereid je voor op de bevalling.",
+    "mating": "Fok Marktplaats",
+    "matingDesc": "Vind geverifieerde fokpartners met gezondheidscertificaten, stamboomgegevens en directe berichtgeving.",
+    "scheduling": "Slimme Planning",
+    "schedulingDesc": "Automatische herinneringen voor dierenarsbezoeken, medicijnen, verzorging en herhalingsvaccinaties.",
+    "reports": "Gezondheidsrapporten",
+    "reportsDesc": "Genereer uitgebreide PDF-rapporten om te delen met dierenartsen, pensions of verzekeringsmaatschappijen."
+  },
+  "howItWorks": {
+    "tag": "Hoe Het Werkt",
+    "title": "Beginnen is Eenvoudig",
+    "subtitle": "Van download tot volledig gezondheidsbeheer in minder dan 2 minuten.",
+    "step1": "Download & Registreer",
+    "step1Desc": "Download de app uit de App Store of Google Play. Registreer met e-mail, Google of Apple in seconden.",
+    "step2": "Voeg Je Huisdieren Toe",
+    "step2Desc": "Voeg je huisdieren toe met basisgegevens — naam, diersoort, ras en geboortedatum. Upload hun foto.",
+    "step3": "Begin met Bijhouden",
+    "step3Desc": "Registreer vaccinaties, stel herinneringen in, noteer dierenarsbezoeken en verken de fokmarktplaats."
+  },
+  "testimonials": {
+    "tag": "Ervaringen",
+    "title": "Geliefd bij Huisdiereigenaren",
+    "subtitle": "Ontdek wat onze community zegt over Petfolioo."
+  },
+  "download": {
+    "title": "Klaar om Beter voor Je Huisdier te Zorgen?",
+    "subtitle": "Sluit je aan bij duizenden huisdiereigenaren die vertrouwen op Petfolioo voor het gezondheidsbeheer van hun huisdier.",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
+  },
+  "footer": {
+    "description": "Het complete platform voor diergezondheid voor moderne huisdiereigenaren en professionele fokkers.",
+    "product": "Product",
+    "company": "Bedrijf",
+    "legal": "Juridisch",
+    "about": "Over Ons",
+    "careers": "Vacatures",
+    "contact": "Contact",
+    "privacy": "Privacybeleid",
+    "terms": "Servicevoorwaarden",
+    "rights": "Alle rechten voorbehouden."
+  },
+  "blog": {
+    "title": "Diergezondheid Blog",
+    "subtitle": "{count} expertartikelen over diergezondheid, verzorging en welzijn.",
+    "noPostsYet": "Nog geen berichten. Kom snel terug!",
+    "pageOf": "Pagina {current} van {total} — {count} artikelen totaal",
+    "previous": "Vorige",
+    "next": "Volgende",
+    "backToBlog": "Terug naar Blog",
+    "minRead": "{minutes} min leestijd",
+    "relatedArticles": "Gerelateerde Artikelen",
+    "home": "Home",
+    "readMore": "Lees meer"
+  },
+  "petOwners": {
+    "title": "Voor Huisdiereigenaren",
+    "subtitle": "Alles wat je nodig hebt om je huisdier gezond, blij en vitaal te houden."
+  },
+  "breeders": {
+    "title": "Voor Fokkers",
+    "subtitle": "Professionele tools voor verantwoorde fokkers. Beheer stambomen, gezondheidsgegevens en vind fokpartners."
+  },
+  "veterinarians": {
+    "title": "Voor Dierenartsen",
+    "subtitle": "Stroomlijn je praktijk met digitale gezondheidsgegevens en directe communicatie met huisdiereigenaren."
+  }
+}

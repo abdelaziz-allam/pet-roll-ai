@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
 import SeoPageLayout from '@/components/SeoPageLayout';
 
 export const metadata: Metadata = {
@@ -36,7 +37,9 @@ const relatedPosts = [
   { title: 'Digital Pet Health Records: Why You Need One', slug: 'digital-pet-health-records-benefits' },
 ];
 
-export default function AdoptionPage() {
+export default async function AdoptionPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',

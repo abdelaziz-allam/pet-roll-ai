@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
 import SeoPageLayout from '@/components/SeoPageLayout';
 
 export const metadata: Metadata = {
@@ -38,7 +39,9 @@ const relatedPosts = [
   { title: 'Best Dog Breeds for Families with Children', slug: 'best-dog-breeds-families-children-sweden' },
 ];
 
-export default function BreedersPage() {
+export default async function BreedersPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',

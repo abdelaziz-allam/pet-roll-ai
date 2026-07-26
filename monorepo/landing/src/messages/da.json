@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "title": "Petfolioo - Komplet Platform til Dyresundhed",
+    "description": "Spør vaccinationer, administrer sundhedsjournaler, overvåg drægtigheder og find avlspartnere. Alt-i-én appen til dit kæledyrs sundhed.",
+    "keywords": "dyresundhed styring, vaccinationssporing kæledyr, sundhedsjournaler kæledyr, hund sundhed app, kat sundhed app"
+  },
+  "nav": {
+    "features": "Funktioner",
+    "howItWorks": "Sådan Virker Det",
+    "blog": "Blog",
+    "testimonials": "Anmeldelser",
+    "getApp": "Hent Appen",
+    "home": "Hjem",
+    "petOwners": "Kæledyrsejere",
+    "breeders": "Opdrættere",
+    "veterinarians": "Dyrlæger",
+    "language": "Sprog"
+  },
+  "hero": {
+    "badge": "Betroet af over 10.000 kæledyrsejere verden over",
+    "title1": "Dit Kæledyrs Sundhed,",
+    "title2": "Alt på Ét Sted",
+    "subtitle": "Spør vaccinationer, administrer sundhedsjournaler, overvåg drægtigheder og find den perfekte avlspartner — alt fra én smuk app.",
+    "downloadIOS": "Download til iOS",
+    "downloadAndroid": "Hent til Android",
+    "statOwners": "Kæledyrsejere",
+    "statPets": "Administrerede Kæledyr",
+    "statRecords": "Sundhedsjournaler",
+    "statRating": "App Vurdering"
+  },
+  "features": {
+    "tag": "Funktioner",
+    "title": "Alt Dit Kæledyr Har Brug For",
+    "subtitle": "Omfattende værktøjer til dyresundhed designet til moderne kæledyrsejere og opdrættere.",
+    "vaccination": "Vaccinationssporing",
+    "vaccinationDesc": "Gå aldrig glip af en vaccination. Få smarte påmindelser og hold en komplet vaccinationshistorik for hvert kæledyr.",
+    "records": "Sundhedsjournaler",
+    "recordsDesc": "Digitale sundhedsjournaler med dyrlægebesøg, operationer, laboratorieresultater og medicin på ét sikkert sted.",
+    "pregnancy": "Drægtighedsovervågning",
+    "pregnancyDesc": "Følg drægtighedens milepæle uge for uge, overvåg vægtændringer og forbered dig på fødselsdagen.",
+    "mating": "Avlsmarkedsplads",
+    "matingDesc": "Find verificerede avlspartnere med sundhedscertifikater, stamtavleoplysninger og direkte beskeder.",
+    "scheduling": "Smart Planlægning",
+    "schedulingDesc": "Automatiske påmindelser om dyrlægebesøg, medicin, pleje og boostervaccinationer.",
+    "reports": "Sundhedsrapporter",
+    "reportsDesc": "Generer omfattende PDF-rapporter til deling med dyrlæger, kæledyrspensioner eller forsikringsselskaber."
+  },
+  "howItWorks": {
+    "tag": "Sådan Virker Det",
+    "title": "Nemt at Komme i Gang",
+    "subtitle": "Fra download til fuld sundhedsstyring på under 2 minutter.",
+    "step1": "Download & Tilmeld Dig",
+    "step1Desc": "Hent appen fra App Store eller Google Play. Tilmeld dig med e-mail, Google eller Apple på sekunder.",
+    "step2": "Tilføj Dine Kæledyr",
+    "step2Desc": "Tilføj dine kæledyr med grundlæggende info — navn, art, race og fødselsdato. Upload deres foto.",
+    "step3": "Begynd at Spore",
+    "step3Desc": "Registrer vaccinationer, sæt påmindelser, noter dyrlægebesøg og udforsk avlsmarkedspladsen."
+  },
+  "testimonials": {
+    "tag": "Anmeldelser",
+    "title": "Elsket af Kæledyrsejere",
+    "subtitle": "Se hvad vores fællesskab siger om Petfolioo."
+  },
+  "download": {
+    "title": "Klar til at Tage Bedre Vare på Dit Kæledyr?",
+    "subtitle": "Slut dig til tusindvis af kæledyrsejere der stoler på Petfolioo til deres kæledyrs sundhedsstyring.",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
+  },
+  "footer": {
+    "description": "Den komplette platform til dyresundhed for moderne kæledyrsejere og professionelle opdrættere.",
+    "product": "Produkt",
+    "company": "Virksomhed",
+    "legal": "Juridisk",
+    "about": "Om Os",
+    "careers": "Karriere",
+    "contact": "Kontakt",
+    "privacy": "Privatlivspolitik",
+    "terms": "Servicevilkår",
+    "rights": "Alle rettigheder forbeholdes."
+  },
+  "blog": {
+    "title": "Blog om Dyresundhed",
+    "subtitle": "{count} ekspertartikler om dyresundhed, pleje og trivsel.",
+    "noPostsYet": "Ingen indlæg endnu. Kom tilbage snart!",
+    "pageOf": "Side {current} af {total} — {count} artikler i alt",
+    "previous": "Forrige",
+    "next": "Næste",
+    "backToBlog": "Tilbage til Bloggen",
+    "minRead": "{minutes} min læsetid",
+    "relatedArticles": "Relaterede Artikler",
+    "home": "Hjem",
+    "readMore": "Læs mere"
+  },
+  "petOwners": {
+    "title": "For Kæledyrsejere",
+    "subtitle": "Alt du behøver for at holde dit kæledyr sundt, glad og i topform."
+  },
+  "breeders": {
+    "title": "For Opdrættere",
+    "subtitle": "Professionelle værktøjer til ansvarlige opdrættere. Administrer stamtavler, sundhedsjournaler og find avlspartnere."
+  },
+  "veterinarians": {
+    "title": "For Dyrlæger",
+    "subtitle": "Effektiviser din praksis med digitale sundhedsjournaler og direkte kommunikation med kæledyrsejere."
+  }
+}

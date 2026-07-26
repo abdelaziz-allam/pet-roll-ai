@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -64,9 +65,10 @@ async function getRelatedPosts(tags: string, currentSlug: string): Promise<BlogP
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const post = await getPost(params.slug);
+  const { slug } = await params;
+  const post = await getPost(slug);
   if (!post) return { title: 'Post Not Found' };
 
   const title = post.metaTitle || post.title;
@@ -115,12 +117,15 @@ function formatDate(ts: { _seconds: number } | null): string {
 export default async function BlogPostPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ locale: string; slug: string }>;
 }) {
-  const post = await getPost(params.slug);
+  const { locale, slug } = await params;
+  setRequestLocale(locale);
+  const post = await getPost(slug);
   if (!post) notFound();
 
   const relatedPosts = await getRelatedPosts(post.tags || '', post.slug);
+  const t = await getTranslations({ locale, namespace: 'blog' });
 
   const publishedISO = post.publishedDate
     ? new Date(post.publishedDate._seconds * 1000).toISOString()

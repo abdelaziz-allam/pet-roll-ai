@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
 import SeoPageLayout from '@/components/SeoPageLayout';
 
 export const metadata: Metadata = {
@@ -35,7 +36,9 @@ const relatedPosts = [
   { title: 'How to Deworm Your Dog: Schedule and Products', slug: 'how-to-deworm-dog-schedule-guide' },
 ];
 
-export default function PetShopsPage() {
+export default async function PetShopsPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',

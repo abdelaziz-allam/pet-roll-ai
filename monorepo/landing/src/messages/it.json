@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "title": "Petfolioo - Piattaforma Completa per la Gestione della Salute degli Animali",
+    "description": "Monitora le vaccinazioni, gestisci le cartelle cliniche, segui le gravidanze e trova partner per l'accoppiamento. L'app tutto-in-uno per la salute del tuo animale.",
+    "keywords": "gestione salute animali, tracker vaccinazioni animali, cartelle cliniche animali, app salute cane, app salute gatto"
+  },
+  "nav": {
+    "features": "Funzionalità",
+    "howItWorks": "Come Funziona",
+    "blog": "Blog",
+    "testimonials": "Testimonianze",
+    "getApp": "Scarica l'App",
+    "home": "Home",
+    "petOwners": "Proprietari",
+    "breeders": "Allevatori",
+    "veterinarians": "Veterinari",
+    "language": "Lingua"
+  },
+  "hero": {
+    "badge": "Scelto da oltre 10.000 genitori di animali in tutto il mondo",
+    "title1": "La Salute del Tuo Animale,",
+    "title2": "Tutto in Un Unico Posto",
+    "subtitle": "Monitora le vaccinazioni, gestisci le cartelle cliniche, segui le gravidanze e trova il partner ideale per l'accoppiamento — tutto da un'unica bellissima app.",
+    "downloadIOS": "Scarica per iOS",
+    "downloadAndroid": "Scarica per Android",
+    "statOwners": "Proprietari",
+    "statPets": "Animali Gestiti",
+    "statRecords": "Cartelle Cliniche",
+    "statRating": "Valutazione App"
+  },
+  "features": {
+    "tag": "Funzionalità",
+    "title": "Tutto Ciò di Cui il Tuo Animale Ha Bisogno",
+    "subtitle": "Strumenti completi per la gestione della salute degli animali, progettati per i moderni proprietari e allevatori.",
+    "vaccination": "Tracker Vaccinazioni",
+    "vaccinationDesc": "Non perdere mai una vaccinazione. Ricevi promemoria intelligenti e mantieni una cronologia completa delle immunizzazioni per ogni animale.",
+    "records": "Cartelle Cliniche",
+    "recordsDesc": "Cartelle cliniche digitali con visite veterinarie, interventi chirurgici, risultati di laboratorio e farmaci, tutto in un unico posto sicuro.",
+    "pregnancy": "Monitor Gravidanza",
+    "pregnancyDesc": "Segui le tappe della gravidanza settimana per settimana, monitora i cambiamenti di peso e preparati per il giorno del parto.",
+    "mating": "Marketplace Accoppiamento",
+    "matingDesc": "Trova partner di allevamento verificati con certificazioni sanitarie, informazioni sulla genealogia e messaggistica diretta.",
+    "scheduling": "Pianificazione Intelligente",
+    "schedulingDesc": "Promemoria automatici per visite veterinarie, farmaci, toelettatura e richiami vaccinali.",
+    "reports": "Rapporti Sanitari",
+    "reportsDesc": "Genera rapporti PDF completi da condividere con veterinari, strutture di pensione o assicurazioni."
+  },
+  "howItWorks": {
+    "tag": "Come Funziona",
+    "title": "Iniziare è Facile",
+    "subtitle": "Dal download alla gestione completa della salute del tuo animale in meno di 2 minuti.",
+    "step1": "Scarica e Registrati",
+    "step1Desc": "Scarica l'app da App Store o Google Play. Registrati con email, Google o Apple in pochi secondi.",
+    "step2": "Aggiungi i Tuoi Animali",
+    "step2Desc": "Aggiungi i tuoi animali con le informazioni base — nome, specie, razza e data di nascita. Carica la loro foto.",
+    "step3": "Inizia a Monitorare",
+    "step3Desc": "Registra le vaccinazioni, imposta promemoria, annota le visite veterinarie ed esplora il marketplace di allevamento."
+  },
+  "testimonials": {
+    "tag": "Testimonianze",
+    "title": "Amato dai Genitori di Animali",
+    "subtitle": "Scopri cosa dice la nostra comunità su Petfolioo."
+  },
+  "download": {
+    "title": "Pronto a Prenderti Meglio Cura del Tuo Animale?",
+    "subtitle": "Unisciti a migliaia di proprietari che si affidano a Petfolioo per la gestione della salute dei loro animali.",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
+  },
+  "footer": {
+    "description": "La piattaforma completa per la gestione della salute degli animali per proprietari moderni e allevatori professionisti.",
+    "product": "Prodotto",
+    "company": "Azienda",
+    "legal": "Legale",
+    "about": "Chi Siamo",
+    "careers": "Lavora con Noi",
+    "contact": "Contatti",
+    "privacy": "Informativa sulla Privacy",
+    "terms": "Termini di Servizio",
+    "rights": "Tutti i diritti riservati."
+  },
+  "blog": {
+    "title": "Blog Salute Animali",
+    "subtitle": "{count} articoli esperti sulla salute, cura e benessere degli animali.",
+    "noPostsYet": "Nessun articolo ancora. Torna presto!",
+    "pageOf": "Pagina {current} di {total} — {count} articoli totali",
+    "previous": "Precedente",
+    "next": "Successivo",
+    "backToBlog": "Torna al Blog",
+    "minRead": "{minutes} min di lettura",
+    "relatedArticles": "Articoli Correlati",
+    "home": "Home",
+    "readMore": "Leggi di più"
+  },
+  "petOwners": {
+    "title": "Per i Proprietari",
+    "subtitle": "Tutto ciò di cui hai bisogno per mantenere il tuo animale sano, felice e in forma."
+  },
+  "breeders": {
+    "title": "Per gli Allevatori",
+    "subtitle": "Strumenti professionali per allevatori responsabili. Gestisci genealogia, cartelle cliniche e trova partner per l'accoppiamento."
+  },
+  "veterinarians": {
+    "title": "Per i Veterinari",
+    "subtitle": "Ottimizza il tuo studio con cartelle cliniche digitali e comunicazione diretta con i proprietari degli animali."
+  }
+}

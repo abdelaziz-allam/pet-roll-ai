@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "title": "Petfolioo - Plataforma Completa de Gestão de Saúde Animal",
+    "description": "Acompanhe vacinas, gerencie registros de saúde, monitore gestações e encontre parceiros de criação. O app tudo-em-um para a saúde do seu pet.",
+    "keywords": "gestão saúde animal, rastreador vacinas pets, registros saúde animais, app saúde cão, app saúde gato"
+  },
+  "nav": {
+    "features": "Funcionalidades",
+    "howItWorks": "Como Funciona",
+    "blog": "Blog",
+    "testimonials": "Depoimentos",
+    "getApp": "Baixar o App",
+    "home": "Início",
+    "petOwners": "Tutores",
+    "breeders": "Criadores",
+    "veterinarians": "Veterinários",
+    "language": "Idioma"
+  },
+  "hero": {
+    "badge": "Confiado por mais de 10.000 tutores de pets em todo o mundo",
+    "title1": "A Saúde do Seu Pet,",
+    "title2": "Tudo em Um Só Lugar",
+    "subtitle": "Acompanhe vacinas, gerencie registros de saúde, monitore gestações e encontre o parceiro de criação perfeito — tudo em um único app bonito.",
+    "downloadIOS": "Baixar para iOS",
+    "downloadAndroid": "Baixar para Android",
+    "statOwners": "Tutores de Pets",
+    "statPets": "Pets Gerenciados",
+    "statRecords": "Registros de Saúde",
+    "statRating": "Avaliação do App"
+  },
+  "features": {
+    "tag": "Funcionalidades",
+    "title": "Tudo Que Seu Pet Precisa",
+    "subtitle": "Ferramentas completas de gestão de saúde animal projetadas para tutores e criadores modernos.",
+    "vaccination": "Rastreador de Vacinas",
+    "vaccinationDesc": "Nunca perca uma vacina. Receba lembretes inteligentes e mantenha um histórico completo de imunizações de cada pet.",
+    "records": "Registros de Saúde",
+    "recordsDesc": "Registros de saúde digitais com consultas veterinárias, cirurgias, resultados de exames e medicamentos em um só lugar seguro.",
+    "pregnancy": "Monitor de Gestação",
+    "pregnancyDesc": "Acompanhe marcos da gestação semana a semana, monitore mudanças de peso e prepare-se para o dia do parto.",
+    "mating": "Marketplace de Criação",
+    "matingDesc": "Encontre parceiros de criação verificados com certificações de saúde, informações de linhagem e mensagens diretas.",
+    "scheduling": "Agendamento Inteligente",
+    "schedulingDesc": "Lembretes automáticos para consultas veterinárias, medicamentos, banho e tosa e reforços de vacinas.",
+    "reports": "Relatórios de Saúde",
+    "reportsDesc": "Gere relatórios PDF completos para compartilhar com veterinários, hotéis para pets ou seguradoras."
+  },
+  "howItWorks": {
+    "tag": "Como Funciona",
+    "title": "Começar é Fácil",
+    "subtitle": "Do download à gestão completa da saúde do seu pet em menos de 2 minutos.",
+    "step1": "Baixe e Cadastre-se",
+    "step1Desc": "Baixe o app na App Store ou Google Play. Cadastre-se com e-mail, Google ou Apple em segundos.",
+    "step2": "Adicione Seus Pets",
+    "step2Desc": "Adicione seus pets com informações básicas — nome, espécie, raça e data de nascimento. Envie a foto deles.",
+    "step3": "Comece a Acompanhar",
+    "step3Desc": "Registre vacinas, configure lembretes, anote consultas veterinárias e explore o marketplace de criação."
+  },
+  "testimonials": {
+    "tag": "Depoimentos",
+    "title": "Amado por Tutores de Pets",
+    "subtitle": "Veja o que nossa comunidade diz sobre o Petfolioo."
+  },
+  "download": {
+    "title": "Pronto para Cuidar Melhor do Seu Pet?",
+    "subtitle": "Junte-se a milhares de tutores que confiam no Petfolioo para a gestão de saúde dos seus pets.",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
+  },
+  "footer": {
+    "description": "A plataforma completa de gestão de saúde animal para tutores modernos e criadores profissionais.",
+    "product": "Produto",
+    "company": "Empresa",
+    "legal": "Legal",
+    "about": "Sobre Nós",
+    "careers": "Carreiras",
+    "contact": "Contato",
+    "privacy": "Política de Privacidade",
+    "terms": "Termos de Serviço",
+    "rights": "Todos os direitos reservados."
+  },
+  "blog": {
+    "title": "Blog de Saúde Animal",
+    "subtitle": "{count} artigos especializados sobre saúde, cuidados e bem-estar animal.",
+    "noPostsYet": "Nenhuma publicação ainda. Volte em breve!",
+    "pageOf": "Página {current} de {total} — {count} artigos no total",
+    "previous": "Anterior",
+    "next": "Próximo",
+    "backToBlog": "Voltar ao Blog",
+    "minRead": "{minutes} min de leitura",
+    "relatedArticles": "Artigos Relacionados",
+    "home": "Início",
+    "readMore": "Leia mais"
+  },
+  "petOwners": {
+    "title": "Para Tutores de Pets",
+    "subtitle": "Tudo que você precisa para manter seu pet saudável, feliz e cheio de energia."
+  },
+  "breeders": {
+    "title": "Para Criadores",
+    "subtitle": "Ferramentas profissionais para criadores responsáveis. Gerencie linhagem, registros de saúde e encontre parceiros de criação."
+  },
+  "veterinarians": {
+    "title": "Para Veterinários",
+    "subtitle": "Otimize sua clínica com registros de saúde digitais e comunicação direta com os tutores dos pets."
+  }
+}

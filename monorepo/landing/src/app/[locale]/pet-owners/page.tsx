@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
 import SeoPageLayout from '@/components/SeoPageLayout';
 
 export const metadata: Metadata = {
@@ -37,7 +38,9 @@ const relatedPosts = [
   { title: 'Pet Weight Management Guide', slug: 'pet-weight-management-overweight-dog-cat' },
 ];
 
-export default function PetOwnersPage() {
+export default async function PetOwnersPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',

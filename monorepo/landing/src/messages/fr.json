@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "title": "Petfolioo - Plateforme complète de gestion de la santé animale",
+    "description": "Suivez les vaccinations, gérez les dossiers de santé, surveillez les gestations et trouvez des partenaires de reproduction. L'application tout-en-un pour la santé animale.",
+    "keywords": "gestion santé animale, suivi vaccination animal, dossiers santé animal, application santé chien, application santé chat"
+  },
+  "nav": {
+    "features": "Fonctionnalités",
+    "howItWorks": "Comment ça marche",
+    "blog": "Blog",
+    "testimonials": "Témoignages",
+    "getApp": "Télécharger l'app",
+    "home": "Accueil",
+    "petOwners": "Propriétaires",
+    "breeders": "Éleveurs",
+    "veterinarians": "Vétérinaires",
+    "language": "Langue"
+  },
+  "hero": {
+    "badge": "Approuvé par plus de 10 000 propriétaires d'animaux dans le monde",
+    "title1": "La santé de votre animal,",
+    "title2": "Tout en un seul endroit",
+    "subtitle": "Suivez les vaccinations, gérez les dossiers de santé, surveillez les gestations et trouvez le partenaire de reproduction idéal — le tout depuis une seule application.",
+    "downloadIOS": "Télécharger pour iOS",
+    "downloadAndroid": "Télécharger pour Android",
+    "statOwners": "Propriétaires",
+    "statPets": "Animaux gérés",
+    "statRecords": "Dossiers de santé",
+    "statRating": "Note de l'app"
+  },
+  "features": {
+    "tag": "Fonctionnalités",
+    "title": "Tout ce dont votre animal a besoin",
+    "subtitle": "Outils complets de gestion de la santé animale conçus pour les propriétaires modernes et les éleveurs.",
+    "vaccination": "Suivi vaccinal",
+    "vaccinationDesc": "Ne manquez plus aucun vaccin. Rappels intelligents et historique complet des immunisations pour chaque animal.",
+    "records": "Dossiers de santé",
+    "recordsDesc": "Dossiers numériques avec visites vétérinaires, chirurgies, résultats d'analyses et médicaments en un seul endroit sécurisé.",
+    "pregnancy": "Suivi de gestation",
+    "pregnancyDesc": "Suivez les étapes de la gestation semaine par semaine, surveillez les changements de poids et préparez-vous pour la mise bas.",
+    "mating": "Place de marché reproduction",
+    "matingDesc": "Trouvez des partenaires de reproduction vérifiés avec certificats de santé, informations de lignée et messagerie directe.",
+    "scheduling": "Planification intelligente",
+    "schedulingDesc": "Rappels automatiques pour les visites vétérinaires, médicaments, toilettage et rappels de vaccination.",
+    "reports": "Rapports de santé",
+    "reportsDesc": "Générez des rapports PDF complets à partager avec les vétérinaires, pensions ou assureurs."
+  },
+  "howItWorks": {
+    "tag": "Comment ça marche",
+    "title": "Démarrer est simple",
+    "subtitle": "Du téléchargement à la gestion complète de la santé animale en moins de 2 minutes.",
+    "step1": "Télécharger et s'inscrire",
+    "step1Desc": "Téléchargez l'app depuis l'App Store ou Google Play. Inscrivez-vous en secondes avec email, Google ou Apple.",
+    "step2": "Ajouter vos animaux",
+    "step2Desc": "Ajoutez vos animaux avec les infos de base — nom, espèce, race et date de naissance. Téléchargez leur photo.",
+    "step3": "Commencer le suivi",
+    "step3Desc": "Enregistrez les vaccinations, définissez des rappels, notez les visites vétérinaires et explorez la place de marché."
+  },
+  "testimonials": {
+    "tag": "Témoignages",
+    "title": "Adoré par les propriétaires d'animaux",
+    "subtitle": "Découvrez ce que notre communauté dit de Petfolioo."
+  },
+  "download": {
+    "title": "Prêt à mieux prendre soin de votre animal ?",
+    "subtitle": "Rejoignez des milliers de propriétaires qui font confiance à Petfolioo pour la gestion de la santé de leurs animaux.",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
+  },
+  "footer": {
+    "description": "La plateforme complète de gestion de la santé animale pour les propriétaires modernes et les éleveurs professionnels.",
+    "product": "Produit",
+    "company": "Entreprise",
+    "legal": "Mentions légales",
+    "about": "À propos",
+    "careers": "Carrières",
+    "contact": "Contact",
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions d'utilisation",
+    "rights": "Tous droits réservés."
+  },
+  "blog": {
+    "title": "Blog Santé Animale",
+    "subtitle": "{count} articles d'experts sur la santé, les soins et le bien-être animal.",
+    "noPostsYet": "Pas encore d'articles. Revenez bientôt !",
+    "pageOf": "Page {current} sur {total} — {count} articles au total",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "backToBlog": "Retour au Blog",
+    "minRead": "{minutes} min de lecture",
+    "relatedArticles": "Articles connexes",
+    "home": "Accueil",
+    "readMore": "Lire la suite"
+  },
+  "petOwners": {
+    "title": "Pour les propriétaires",
+    "subtitle": "Tout ce dont vous avez besoin pour garder votre animal en bonne santé et heureux."
+  },
+  "breeders": {
+    "title": "Pour les éleveurs",
+    "subtitle": "Outils professionnels pour les éleveurs responsables. Gérez la lignée, les dossiers de santé et trouvez des partenaires."
+  },
+  "veterinarians": {
+    "title": "Pour les vétérinaires",
+    "subtitle": "Optimisez votre cabinet avec des dossiers numériques et une communication directe avec les propriétaires."
+  }
+}

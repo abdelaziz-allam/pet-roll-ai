@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "title": "Petfolioo - Täydellinen Lemmikkien Terveydenhallinnan Alusta",
+    "description": "Seuraa rokotuksia, hallitse terveystietoja, tarkkaile tiineyksiä ja löydä jalostuskumppaneita. Kaikki yhdessä -sovellus lemmikkisi terveydelle.",
+    "keywords": "lemmikin terveyden hallinta, rokotusseuranta lemmikit, terveystiedot lemmikit, koira terveys sovellus, kissa terveys sovellus"
+  },
+  "nav": {
+    "features": "Ominaisuudet",
+    "howItWorks": "Näin Se Toimii",
+    "blog": "Blogi",
+    "testimonials": "Arvostelut",
+    "getApp": "Lataa Sovellus",
+    "home": "Etusivu",
+    "petOwners": "Lemmikonomistajat",
+    "breeders": "Kasvattajat",
+    "veterinarians": "Eläinlääkärit",
+    "language": "Kieli"
+  },
+  "hero": {
+    "badge": "Yli 10 000 lemmikonomistajan luottama maailmanlaajuisesti",
+    "title1": "Lemmikkisi Terveys,",
+    "title2": "Kaikki Yhdessä Paikassa",
+    "subtitle": "Seuraa rokotuksia, hallitse terveystietoja, tarkkaile tiineyksiä ja löydä täydellinen jalostuskumppani — kaikki yhdestä kauniista sovelluksesta.",
+    "downloadIOS": "Lataa iOS:lle",
+    "downloadAndroid": "Lataa Androidille",
+    "statOwners": "Lemmikonomistajat",
+    "statPets": "Hallitut Lemmikit",
+    "statRecords": "Terveystiedot",
+    "statRating": "Sovelluksen Arvosana"
+  },
+  "features": {
+    "tag": "Ominaisuudet",
+    "title": "Kaikki Mitä Lemmikkisi Tarvitsee",
+    "subtitle": "Kattavat lemmikkien terveydenhallinnan työkalut suunniteltu moderneille lemmikonomistajille ja kasvattajille.",
+    "vaccination": "Rokotusseuranta",
+    "vaccinationDesc": "Älä koskaan unohda rokotusta. Saa älykkäitä muistutuksia ja pidä täydellinen rokotushistoria jokaiselle lemmikille.",
+    "records": "Terveystiedot",
+    "recordsDesc": "Digitaaliset terveystiedot eläinlääkärikäynneistä, leikkauksista, laboratoriotuloksista ja lääkkeistä yhdessä turvallisessa paikassa.",
+    "pregnancy": "Tiineysseuranta",
+    "pregnancyDesc": "Seuraa tiineyden virstanpylväitä viikko viikolta, tarkkaile painonmuutoksia ja valmistaudu synnytyspäivään.",
+    "mating": "Jalostusmarkkinapaikka",
+    "matingDesc": "Löydä vahvistettuja jalostuskumppaneita terveystodistuksineen, sukutietoineen ja suoraviesteineen.",
+    "scheduling": "Älykäs Aikataulutus",
+    "schedulingDesc": "Automaattiset muistutukset eläinlääkärikäynneistä, lääkkeistä, hoidoista ja tehosterokotuksista.",
+    "reports": "Terveysraportit",
+    "reportsDesc": "Luo kattavat PDF-raportit jaettavaksi eläinlääkäreille, hoitoloille tai vakuutusyhtiöille."
+  },
+  "howItWorks": {
+    "tag": "Näin Se Toimii",
+    "title": "Aloittaminen on Helppoa",
+    "subtitle": "Lataamisesta täyteen terveyden hallintaan alle 2 minuutissa.",
+    "step1": "Lataa & Rekisteröidy",
+    "step1Desc": "Lataa sovellus App Storesta tai Google Playsta. Rekisteröidy sähköpostilla, Googlella tai Applella sekunneissa.",
+    "step2": "Lisää Lemmikkisi",
+    "step2Desc": "Lisää lemmikkisi perustiedoilla — nimi, laji, rotu ja syntymäaika. Lataa niiden kuva.",
+    "step3": "Aloita Seuranta",
+    "step3Desc": "Kirjaa rokotukset, aseta muistutuksia, merkitse eläinlääkärikäynnit ja tutustu jalostusmarkkinapaikkaan."
+  },
+  "testimonials": {
+    "tag": "Arvostelut",
+    "title": "Lemmikonomistajien Suosikki",
+    "subtitle": "Katso mitä yhteisömme sanoo Petfolioosta."
+  },
+  "download": {
+    "title": "Valmis Huolehtimaan Lemmikistäsi Paremmin?",
+    "subtitle": "Liity tuhansien lemmikonomistajien joukkoon, jotka luottavat Petfolioohon lemmikkiensä terveyden hallinnassa.",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
+  },
+  "footer": {
+    "description": "Täydellinen lemmikkien terveydenhallinnan alusta moderneille lemmikonomistajille ja ammattimaisille kasvattajille.",
+    "product": "Tuote",
+    "company": "Yritys",
+    "legal": "Oikeudelliset",
+    "about": "Tietoa Meista",
+    "careers": "Työpaikat",
+    "contact": "Yhteystiedot",
+    "privacy": "Tietosuojakäytäntö",
+    "terms": "Käyttöehdot",
+    "rights": "Kaikki oikeudet pidätetään."
+  },
+  "blog": {
+    "title": "Lemmikkien Terveysblogi",
+    "subtitle": "{count} asiantuntija-artikkelia lemmikkien terveydestä, hoidosta ja hyvinvoinnista.",
+    "noPostsYet": "Ei vielä julkaisuja. Palaa pian!",
+    "pageOf": "Sivu {current} / {total} — {count} artikkelia yhteensä",
+    "previous": "Edellinen",
+    "next": "Seuraava",
+    "backToBlog": "Takaisin Blogiin",
+    "minRead": "{minutes} min lukuaika",
+    "relatedArticles": "Aiheeseen Liittyvät Artikkelit",
+    "home": "Etusivu",
+    "readMore": "Lue lisää"
+  },
+  "petOwners": {
+    "title": "Lemmikonomistajille",
+    "subtitle": "Kaikki mitä tarvitset pitääksesi lemmikkisi terveennä, onnellisena ja elinvoimaisena."
+  },
+  "breeders": {
+    "title": "Kasvattajille",
+    "subtitle": "Ammattimaiset työkalut vastuullisille kasvattajille. Hallitse sukutauluja, terveystietoja ja löydä jalostuskumppaneita."
+  },
+  "veterinarians": {
+    "title": "Eläinlääkäreille",
+    "subtitle": "Tehosta vastaanottosi toimintaa digitaalisilla terveystiedoilla ja suoralla viestinnällä lemmikonomistajien kanssa."
+  }
+}

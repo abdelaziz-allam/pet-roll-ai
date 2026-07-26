@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "title": "Petfolioo - Komplette Plattform für Tiergesundheit",
+    "description": "Impfungen verfolgen, Gesundheitsakten verwalten, Trächtigkeiten überwachen und Zuchtpartner finden. Die All-in-One-App für Tiergesundheit.",
+    "keywords": "Tiergesundheit, Impf-Tracker Haustier, Gesundheitsakten Tier, Hunde-Gesundheits-App, Katzen-App"
+  },
+  "nav": {
+    "features": "Funktionen",
+    "howItWorks": "So funktioniert's",
+    "blog": "Blog",
+    "testimonials": "Bewertungen",
+    "getApp": "App herunterladen",
+    "home": "Startseite",
+    "petOwners": "Tierbesitzer",
+    "breeders": "Züchter",
+    "veterinarians": "Tierärzte",
+    "language": "Sprache"
+  },
+  "hero": {
+    "badge": "Vertraut von über 10.000 Tiereltern weltweit",
+    "title1": "Die Gesundheit Ihres Tieres,",
+    "title2": "Alles an einem Ort",
+    "subtitle": "Impfungen verfolgen, Gesundheitsakten verwalten, Trächtigkeiten überwachen und den perfekten Zuchtpartner finden — alles in einer App.",
+    "downloadIOS": "Für iOS herunterladen",
+    "downloadAndroid": "Für Android herunterladen",
+    "statOwners": "Tierbesitzer",
+    "statPets": "Verwaltete Tiere",
+    "statRecords": "Gesundheitsakten",
+    "statRating": "App-Bewertung"
+  },
+  "features": {
+    "tag": "Funktionen",
+    "title": "Alles was Ihr Tier braucht",
+    "subtitle": "Umfassende Tools für die Tiergesundheit, entwickelt für moderne Tiereltern und Züchter.",
+    "vaccination": "Impf-Tracker",
+    "vaccinationDesc": "Keine Impfung mehr verpassen. Intelligente Erinnerungen und vollständige Impfhistorie für jedes Tier.",
+    "records": "Gesundheitsakten",
+    "recordsDesc": "Digitale Akten mit Tierarztbesuchen, Operationen, Laborergebnissen und Medikamenten an einem sicheren Ort.",
+    "pregnancy": "Trächtigkeitsmonitor",
+    "pregnancyDesc": "Trächtigkeitsmeilensteine Woche für Woche verfolgen, Gewichtsveränderungen überwachen und auf den Geburtstermin vorbereiten.",
+    "mating": "Zucht-Marktplatz",
+    "matingDesc": "Verifizierte Zuchtpartner mit Gesundheitszertifikaten, Abstammungsinformationen und Direktnachrichten finden.",
+    "scheduling": "Intelligente Terminplanung",
+    "schedulingDesc": "Automatische Erinnerungen für Tierarztbesuche, Medikamente, Pflege und Auffrischungsimpfungen.",
+    "reports": "Gesundheitsberichte",
+    "reportsDesc": "Umfassende PDF-Berichte erstellen, die Sie mit Tierärzten, Pensionen oder Versicherungen teilen können."
+  },
+  "howItWorks": {
+    "tag": "So funktioniert's",
+    "title": "Der Einstieg ist einfach",
+    "subtitle": "Vom Download zur vollständigen Tiergesundheitsverwaltung in unter 2 Minuten.",
+    "step1": "Herunterladen & Registrieren",
+    "step1Desc": "App aus dem App Store oder Google Play herunterladen. In Sekunden mit E-Mail, Google oder Apple registrieren.",
+    "step2": "Tiere hinzufügen",
+    "step2Desc": "Tiere mit Grunddaten hinzufügen — Name, Art, Rasse und Geburtsdatum. Foto hochladen.",
+    "step3": "Tracking starten",
+    "step3Desc": "Impfungen erfassen, Erinnerungen setzen, Tierarztbesuche protokollieren und den Zucht-Marktplatz erkunden."
+  },
+  "testimonials": {
+    "tag": "Bewertungen",
+    "title": "Geliebt von Tiereltern",
+    "subtitle": "Sehen Sie, was unsere Community über Petfolioo sagt."
+  },
+  "download": {
+    "title": "Bereit, sich besser um Ihr Tier zu kümmern?",
+    "subtitle": "Schließen Sie sich Tausenden von Tiereltern an, die Petfolioo für die Gesundheitsverwaltung ihrer Tiere vertrauen.",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
+  },
+  "footer": {
+    "description": "Die komplette Plattform für Tiergesundheit für moderne Tiereltern und professionelle Züchter.",
+    "product": "Produkt",
+    "company": "Unternehmen",
+    "legal": "Rechtliches",
+    "about": "Über uns",
+    "careers": "Karriere",
+    "contact": "Kontakt",
+    "privacy": "Datenschutz",
+    "terms": "Nutzungsbedingungen",
+    "rights": "Alle Rechte vorbehalten."
+  },
+  "blog": {
+    "title": "Tiergesundheits-Blog",
+    "subtitle": "{count} Fachartikel über Tiergesundheit, Pflege und Wohlbefinden.",
+    "noPostsYet": "Noch keine Beiträge. Schauen Sie bald wieder vorbei!",
+    "pageOf": "Seite {current} von {total} — {count} Artikel insgesamt",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "backToBlog": "Zurück zum Blog",
+    "minRead": "{minutes} Min. Lesezeit",
+    "relatedArticles": "Verwandte Artikel",
+    "home": "Startseite",
+    "readMore": "Weiterlesen"
+  },
+  "petOwners": {
+    "title": "Für Tierbesitzer",
+    "subtitle": "Alles, was Sie brauchen, um Ihr Tier gesund, glücklich und vital zu halten."
+  },
+  "breeders": {
+    "title": "Für Züchter",
+    "subtitle": "Professionelle Tools für verantwortungsvolle Züchter. Abstammung, Gesundheitsakten und Zuchtpartner verwalten."
+  },
+  "veterinarians": {
+    "title": "Für Tierärzte",
+    "subtitle": "Optimieren Sie Ihre Praxis mit digitalen Gesundheitsakten und direkter Kommunikation mit Tierbesitzern."
+  }
+}
