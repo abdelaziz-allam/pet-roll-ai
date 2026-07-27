@@ -2,6 +2,8 @@
 
 The Admin Users page allows you to manage the administrator accounts that have access to the Petfolioo admin portal. Here you can create new admins, assign roles, configure granular permissions, and control account status.
 
+![Admin Users](/docs/screenshots/admin-users.png)
+
 ---
 
 ## Overview

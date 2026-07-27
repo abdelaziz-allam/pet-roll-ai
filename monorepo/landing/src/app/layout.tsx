@@ -41,7 +41,7 @@ function StructuredData() {
       name: 'Petfolioo',
       alternateName: ['Pet Folioo', 'Petfolio'],
       description: 'Complete pet health management platform for modern pet parents and professional breeders.',
-      inLanguage: ['en', 'de', 'fr', 'it', 'es', 'nl', 'pl', 'sv', 'pt', 'da', 'no', 'fi'],
+      inLanguage: ['en', 'sv', 'de', 'fr', 'it', 'es', 'nl', 'pl', 'pt', 'da', 'no', 'fi'],
       potentialAction: {
         '@type': 'SearchAction',
         target: {
@@ -74,7 +74,7 @@ function StructuredData() {
         '@type': 'ContactPoint',
         contactType: 'customer support',
         email: 'support@petfolioo.com',
-        availableLanguage: ['English', 'German', 'French', 'Italian', 'Spanish', 'Dutch', 'Polish', 'Swedish', 'Portuguese', 'Danish', 'Norwegian', 'Finnish'],
+        availableLanguage: ['English', 'Swedish', 'German', 'French', 'Italian', 'Spanish', 'Dutch', 'Polish', 'Portuguese', 'Danish', 'Norwegian', 'Finnish'],
       },
       sameAs: [
         'https://twitter.com/petfolioo',

@@ -66,15 +66,14 @@ export default function DocsPage() {
   async function loadAllForSearch() {
     const lang = i18n.language.split('-')[0];
     const contents = new Map<string, string>();
-    for (const cat of docsStructure) {
-      for (const article of cat.articles) {
-        try {
-          let res = await fetch(`/docs/content/${lang}/${article.key}.md`);
-          if (!res.ok) res = await fetch(`/docs/content/en/${article.key}.md`);
-          if (res.ok) contents.set(article.key, await res.text());
-        } catch {}
-      }
-    }
+    const articles = docsStructure.flatMap(cat => cat.articles);
+    await Promise.all(articles.map(async (article) => {
+      try {
+        let res = await fetch(`/docs/content/${lang}/${article.key}.md`);
+        if (!res.ok) res = await fetch(`/docs/content/en/${article.key}.md`);
+        if (res.ok) contents.set(article.key, await res.text());
+      } catch {}
+    }));
     setAllContents(contents);
   }
 

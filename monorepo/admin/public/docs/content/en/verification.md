@@ -2,6 +2,8 @@
 
 The Breeder Verification module allows administrators to review, approve, reject, and revoke breeder verification requests. Verified breeders receive a trust badge visible to buyers, signaling that their kennel meets platform standards.
 
+![Verification](/docs/screenshots/verification.png)
+
 ---
 
 ## Verification Requests Table

@@ -2,6 +2,8 @@
 
 The Mating Marketplace module provides administrators with oversight of the platform's pet breeding matchmaking system. Monitor match requests, track successful pairings, and view breeder performance rankings.
 
+![Mating Management](/docs/screenshots/mating.png)
+
 ---
 
 ## Navigation Tabs

@@ -2,6 +2,8 @@
 
 The Feedback Management page allows administrators to view, respond to, and organize user feedback submitted through the Petfolioo mobile application. This is your central hub for understanding user needs, tracking bugs, and managing feature suggestions.
 
+![Feedback](/docs/screenshots/feedback.png)
+
 ---
 
 ## Overview

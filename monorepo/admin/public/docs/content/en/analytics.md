@@ -2,6 +2,8 @@
 
 The Analytics page provides visual insights into platform usage, user growth, pet demographics, and health activity. Use these charts to understand trends, measure engagement, and make data-driven decisions about the Petfolioo platform.
 
+![Analytics](/docs/screenshots/analytics.png)
+
 ---
 
 ## Overview

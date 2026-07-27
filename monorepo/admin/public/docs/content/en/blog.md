@@ -2,6 +2,8 @@
 
 The Blog CMS module allows administrators to create, edit, publish, and manage blog posts displayed on the Petfolioo public website. Use this tool to share pet care tips, platform news, breeder spotlights, and educational content with your community.
 
+![Blog CMS](/docs/screenshots/blog.png)
+
 ---
 
 ## Blog Posts Table

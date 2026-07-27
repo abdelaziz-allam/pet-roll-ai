@@ -2,6 +2,8 @@
 
 The Health Certifications module allows administrators to manage and verify pet health certificates submitted by veterinarians or pet owners. This ensures that pets listed on the platform have valid, up-to-date health documentation.
 
+![Health Records](/docs/screenshots/health-certifications.png)
+
 ---
 
 ## Certifications Table

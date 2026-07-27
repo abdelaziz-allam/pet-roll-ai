@@ -4,20 +4,20 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import HttpBackend from 'i18next-http-backend';
 
 export const supportedLocales = [
-  'en', 'de', 'fr', 'it', 'es', 'nl', 'pl', 'sv', 'pt', 'da', 'no', 'fi',
+  'en', 'sv', 'de', 'fr', 'it', 'es', 'nl', 'pl', 'pt', 'da', 'no', 'fi',
 ] as const;
 
 export type SupportedLocale = (typeof supportedLocales)[number];
 
 export const localeNames: Record<SupportedLocale, string> = {
   en: 'English',
+  sv: 'Svenska',
   de: 'Deutsch',
   fr: 'Français',
   it: 'Italiano',
   es: 'Español',
   nl: 'Nederlands',
   pl: 'Polski',
-  sv: 'Svenska',
   pt: 'Português',
   da: 'Dansk',
   no: 'Norsk',

@@ -2,6 +2,8 @@
 
 The Dashboard is the first screen you see after logging in to the Petfolioo Admin Portal. It provides a real-time overview of platform health through key performance indicators (KPIs), interactive charts, and recent activity feeds. Use the dashboard to monitor growth trends, identify areas needing attention, and track platform engagement at a glance.
 
+![Dashboard](/docs/screenshots/dashboard.png)
+
 ---
 
 ## KPI Cards

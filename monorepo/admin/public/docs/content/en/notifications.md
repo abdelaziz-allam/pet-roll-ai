@@ -2,6 +2,8 @@
 
 The Notifications page enables administrators to compose and send push notifications to Petfolioo mobile app users. You can target specific audience segments, review notification history, and follow best practices for effective communication.
 
+![Notifications](/docs/screenshots/notifications.png)
+
 ---
 
 ## Overview

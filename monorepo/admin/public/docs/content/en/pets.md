@@ -2,6 +2,8 @@
 
 The Pet Registry is the central module for viewing and managing all pets registered on the Petfolioo platform. From this module, administrators can browse the complete pet catalog, view detailed profiles, review health certification statuses, and take moderation actions such as banning pets that violate platform policies.
 
+![Pet Registry](/docs/screenshots/pets.png)
+
 ---
 
 ## Pet Listing Table

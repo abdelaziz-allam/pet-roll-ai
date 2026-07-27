@@ -2,6 +2,8 @@
 
 The Settings page provides system-wide configuration options for the Petfolioo platform. Settings are organized into three tabs: General, Notifications, and Security. Changes made here affect the behavior of both the admin portal and the mobile application.
 
+![Settings](/docs/screenshots/settings.png)
+
 ---
 
 ## Overview

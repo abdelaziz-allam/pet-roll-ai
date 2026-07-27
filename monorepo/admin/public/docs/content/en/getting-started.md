@@ -4,6 +4,8 @@ Welcome to the Petfolioo Admin Portal. This guide walks you through your first l
 
 The admin portal is a web-based management console for the Petfolioo pet health and breeding platform. From here, administrators can manage users, pets, categories, health records, breeding programs, and platform settings.
 
+![Login Page](/docs/screenshots/login.png)
+
 ---
 
 ## Logging In

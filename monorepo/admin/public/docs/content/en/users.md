@@ -2,6 +2,8 @@
 
 The App Users module provides complete management of all user accounts on the Petfolioo platform. Administrators can view user profiles, create new accounts, edit details, assign roles, and take moderation actions. This module is accessible to users with `super_admin` or `admin` roles.
 
+![App Users](/docs/screenshots/users.png)
+
 ---
 
 ## User Listing Table

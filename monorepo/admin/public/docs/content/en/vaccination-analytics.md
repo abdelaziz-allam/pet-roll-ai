@@ -2,6 +2,8 @@
 
 The Vaccination Analytics module provides administrators with insights into vaccination trends across the platform. Use this dashboard to understand which vaccines are most commonly administered, identify regional patterns, and track overall vaccination coverage.
 
+![Vaccination Analytics](/docs/screenshots/vaccination-analytics.png)
+
 ---
 
 ## Dashboard Overview

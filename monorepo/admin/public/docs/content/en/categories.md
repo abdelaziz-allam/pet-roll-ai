@@ -2,6 +2,8 @@
 
 The Pet Categories module allows administrators to define and manage the classification system used for organizing pets on the Petfolioo platform. Categories represent pet species or types and are used across the application for filtering, search, and organization. Each category includes a name, label, emoji icon, description, and active status.
 
+![Pet Categories](/docs/screenshots/categories.png)
+
 ---
 
 ## Categories Listing
