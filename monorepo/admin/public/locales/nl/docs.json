@@ -1,0 +1,41 @@
+{
+  "title": "Gebruikershandleiding",
+  "subtitle": "Volledige gids voor het beheer van het Petfolioo Admin Portaal",
+  "searchPlaceholder": "Zoek in documentatie...",
+  "searchNoResults": "Geen resultaten voor \"{{query}}\"",
+  "searchResults": "{{count}} resultaat gevonden",
+  "searchResults_plural": "{{count}} resultaten gevonden",
+  "tableOfContents": "Inhoudsopgave",
+  "onThisPage": "Op deze pagina",
+  "backToTop": "Terug naar boven",
+  "lastUpdated": "Laatst bijgewerkt",
+  "readingTime": "{{minutes}} min leestijd",
+  "relatedArticles": "Gerelateerde artikelen",
+  "nextArticle": "Volgende",
+  "prevArticle": "Vorige",
+  "categories": {
+    "gettingStarted": "Aan de slag",
+    "petManagement": "Dierbeheer",
+    "userManagement": "Gebruikersbeheer",
+    "verification": "Verificatie & Gezondheid",
+    "marketplace": "Marktplaats",
+    "content": "Content & Communicatie",
+    "administration": "Administratie"
+  },
+  "articles": {
+    "gettingStarted": "Aan de slag",
+    "dashboard": "Dashboard",
+    "pets": "Dierenregister",
+    "users": "App-gebruikers",
+    "categories": "Categorieën",
+    "verification": "Fokkerverificatie",
+    "mating": "Fokmarktplaats",
+    "healthCertifications": "Gezondheidscertificaten",
+    "vaccinationAnalytics": "Vaccinatieanalyses",
+    "feedback": "Feedbackbeheer",
+    "blog": "Blog CMS",
+    "notifications": "Meldingen",
+    "adminUsers": "Beheerders",
+    "settings": "Instellingen"
+  }
+}

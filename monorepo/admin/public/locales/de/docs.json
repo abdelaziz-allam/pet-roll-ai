@@ -1,0 +1,41 @@
+{
+  "title": "Benutzerhandbuch",
+  "subtitle": "Komplettanleitung zur Verwaltung des Petfolioo Admin-Portals",
+  "searchPlaceholder": "Dokumentation durchsuchen...",
+  "searchNoResults": "Keine Ergebnisse für \"{{query}}\"",
+  "searchResults": "{{count}} Ergebnis gefunden",
+  "searchResults_plural": "{{count}} Ergebnisse gefunden",
+  "tableOfContents": "Inhaltsverzeichnis",
+  "onThisPage": "Auf dieser Seite",
+  "backToTop": "Nach oben",
+  "lastUpdated": "Zuletzt aktualisiert",
+  "readingTime": "{{minutes}} Min. Lesezeit",
+  "relatedArticles": "Verwandte Artikel",
+  "nextArticle": "Weiter",
+  "prevArticle": "Zurück",
+  "categories": {
+    "gettingStarted": "Erste Schritte",
+    "petManagement": "Tierverwaltung",
+    "userManagement": "Benutzerverwaltung",
+    "verification": "Verifizierung & Gesundheit",
+    "marketplace": "Marktplatz",
+    "content": "Inhalte & Kommunikation",
+    "administration": "Administration"
+  },
+  "articles": {
+    "gettingStarted": "Erste Schritte",
+    "dashboard": "Dashboard",
+    "pets": "Tierregister",
+    "users": "App-Benutzer",
+    "categories": "Tierkategorien",
+    "verification": "Züchterverifizierung",
+    "mating": "Zuchtmarktplatz",
+    "healthCertifications": "Gesundheitszertifikate",
+    "vaccinationAnalytics": "Impfanalysen",
+    "feedback": "Feedbackverwaltung",
+    "blog": "Blog CMS",
+    "notifications": "Benachrichtigungen",
+    "adminUsers": "Admin-Benutzer",
+    "settings": "Einstellungen"
+  }
+}

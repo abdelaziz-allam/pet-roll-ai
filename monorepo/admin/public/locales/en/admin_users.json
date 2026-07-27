@@ -1,0 +1,33 @@
+{
+  "title": "Admin Users",
+  "createAdmin": "Create Admin",
+  "editAdmin": "Edit Admin",
+  "email": "Email",
+  "displayName": "Display Name",
+  "password": "Password",
+  "role": "Role",
+  "roles": {
+    "super_admin": "Super Admin",
+    "admin": "Admin",
+    "moderator": "Moderator",
+    "viewer": "Viewer"
+  },
+  "roleDescriptions": {
+    "super_admin": "Full unrestricted access to all features and settings.",
+    "admin": "Can manage all content and users, but cannot modify system settings.",
+    "moderator": "Can review and moderate content (verifications, health certs, feedback).",
+    "viewer": "Read-only access to dashboards and reports."
+  },
+  "status": "Status",
+  "statuses": {
+    "active": "Active",
+    "suspended": "Suspended"
+  },
+  "permissions": "Permissions",
+  "permissionsHelp": "Configure page-level access and actions for this admin.",
+  "pageAccess": "Page Access",
+  "allowedActions": "Allowed Actions",
+  "deleteAdmin": "Delete Admin",
+  "deleteConfirm": "Are you sure you want to delete this admin? This action cannot be undone.",
+  "cannotDeleteSuper": "Super Admin accounts cannot be deleted."
+}

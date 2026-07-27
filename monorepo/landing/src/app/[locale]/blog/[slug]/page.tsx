@@ -105,9 +105,9 @@ export async function generateMetadata({
   };
 }
 
-function formatDate(ts: { _seconds: number } | null): string {
+function formatDate(ts: { _seconds: number } | null, locale: string): string {
   if (!ts) return '';
-  return new Date(ts._seconds * 1000).toLocaleDateString('en-US', {
+  return new Date(ts._seconds * 1000).toLocaleDateString(locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -207,7 +207,7 @@ export default async function BlogPostPage({
         >
           <nav aria-label="Breadcrumb" style={{ marginBottom: 16 }}>
             <ol style={{ display: 'flex', gap: 8, listStyle: 'none', padding: 0, margin: 0, fontSize: '0.85rem', color: '#888' }}>
-              <li><Link href="/" style={{ color: '#888', textDecoration: 'none' }}>Home</Link></li>
+              <li><Link href="/" style={{ color: '#888', textDecoration: 'none' }}>{t('home')}</Link></li>
               <li>/</li>
               <li><Link href="/blog" style={{ color: '#F1379D', textDecoration: 'none' }}>Blog</Link></li>
               <li>/</li>
@@ -242,9 +242,9 @@ export default async function BlogPostPage({
           >
             <span itemProp="author" style={{ fontWeight: 500, color: '#333' }}>{post.author}</span>
             <time itemProp="datePublished" dateTime={publishedISO}>
-              {formatDate(post.publishedDate || post.createdAt)}
+              {formatDate(post.publishedDate || post.createdAt, locale)}
             </time>
-            <span>{post.readingTimeMinutes} min read</span>
+            <span>{t('minRead', { minutes: post.readingTimeMinutes })}</span>
           </div>
 
           {post.tags && (
@@ -278,7 +278,7 @@ export default async function BlogPostPage({
         {relatedPosts.length > 0 && (
           <section style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 80px' }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: 24, fontFamily: 'Poppins' }}>
-              Related Articles
+              {t('relatedArticles')}
             </h2>
             <div
               style={{

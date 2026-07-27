@@ -1,0 +1,41 @@
+{
+  "title": "Manuale utente",
+  "subtitle": "Guida completa alla gestione del portale admin Petfolioo",
+  "searchPlaceholder": "Cerca nella documentazione...",
+  "searchNoResults": "Nessun risultato per \"{{query}}\"",
+  "searchResults": "{{count}} risultato trovato",
+  "searchResults_plural": "{{count}} risultati trovati",
+  "tableOfContents": "Indice",
+  "onThisPage": "In questa pagina",
+  "backToTop": "Torna su",
+  "lastUpdated": "Ultimo aggiornamento",
+  "readingTime": "{{minutes}} min di lettura",
+  "relatedArticles": "Articoli correlati",
+  "nextArticle": "Avanti",
+  "prevArticle": "Precedente",
+  "categories": {
+    "gettingStarted": "Per iniziare",
+    "petManagement": "Gestione animali",
+    "userManagement": "Gestione utenti",
+    "verification": "Verifica & Salute",
+    "marketplace": "Mercato",
+    "content": "Contenuti & Comunicazione",
+    "administration": "Amministrazione"
+  },
+  "articles": {
+    "gettingStarted": "Per iniziare",
+    "dashboard": "Dashboard",
+    "pets": "Registro animali",
+    "users": "Utenti app",
+    "categories": "Categorie",
+    "verification": "Verifica allevatore",
+    "mating": "Mercato riproduzione",
+    "healthCertifications": "Certificati sanitari",
+    "vaccinationAnalytics": "Analisi vaccinazioni",
+    "feedback": "Gestione feedback",
+    "blog": "Blog CMS",
+    "notifications": "Notifiche",
+    "adminUsers": "Amministratori",
+    "settings": "Impostazioni"
+  }
+}

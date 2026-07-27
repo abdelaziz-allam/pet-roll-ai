@@ -1,0 +1,41 @@
+{
+  "title": "Käyttöohje",
+  "subtitle": "Täydellinen opas Petfolioo Admin -portaalin hallintaan",
+  "searchPlaceholder": "Hae dokumentaatiosta...",
+  "searchNoResults": "Ei tuloksia haulle \"{{query}}\"",
+  "searchResults": "{{count}} tulos löytyi",
+  "searchResults_plural": "{{count}} tulosta löytyi",
+  "tableOfContents": "Sisällysluettelo",
+  "onThisPage": "Tällä sivulla",
+  "backToTop": "Takaisin ylös",
+  "lastUpdated": "Viimeksi päivitetty",
+  "readingTime": "{{minutes}} min lukuaika",
+  "relatedArticles": "Aiheeseen liittyvät artikkelit",
+  "nextArticle": "Seuraava",
+  "prevArticle": "Edellinen",
+  "categories": {
+    "gettingStarted": "Aloitus",
+    "petManagement": "Eläinten hallinta",
+    "userManagement": "Käyttäjähallinta",
+    "verification": "Vahvistus & Terveys",
+    "marketplace": "Markkinapaikka",
+    "content": "Sisältö & Viestintä",
+    "administration": "Hallinto"
+  },
+  "articles": {
+    "gettingStarted": "Aloitus",
+    "dashboard": "Hallintapaneeli",
+    "pets": "Eläinrekisteri",
+    "users": "Sovelluskäyttäjät",
+    "categories": "Kategoriat",
+    "verification": "Kasvattajan vahvistus",
+    "mating": "Jalostusmarkkina",
+    "healthCertifications": "Terveystodistukset",
+    "vaccinationAnalytics": "Rokotusanalytiikka",
+    "feedback": "Palautehallinta",
+    "blog": "Blogi CMS",
+    "notifications": "Ilmoitukset",
+    "adminUsers": "Ylläpitäjät",
+    "settings": "Asetukset"
+  }
+}

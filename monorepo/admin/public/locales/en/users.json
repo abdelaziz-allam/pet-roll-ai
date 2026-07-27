@@ -1,0 +1,38 @@
+{
+  "title": "App Users",
+  "searchPlaceholder": "Search by name or email...",
+  "createUser": "Create User",
+  "editUser": "Edit User",
+  "viewUser": "View User",
+  "displayName": "Display Name",
+  "email": "Email",
+  "phone": "Phone",
+  "role": "Role",
+  "roles": {
+    "user": "User",
+    "moderator": "Moderator",
+    "admin": "Admin"
+  },
+  "roleDescriptions": {
+    "user": "Standard app user with access to basic pet management features.",
+    "moderator": "Can moderate content and manage listings in the marketplace.",
+    "admin": "Full access to all app features and user management."
+  },
+  "status": "Status",
+  "verified": "Verified",
+  "unverified": "Unverified",
+  "verifiedBreeder": "Verified Breeder",
+  "petCount": "Pets",
+  "joinDate": "Join Date",
+  "timezone": "Timezone",
+  "country": "Country",
+  "city": "City",
+  "changeRole": "Change Role",
+  "banUser": "Ban User",
+  "unbanUser": "Unban User",
+  "banReason": "Reason for banning",
+  "createNote": "App users authenticate via Firebase Auth (Google, Apple, Phone OTP). No password needed.",
+  "banned": "Banned",
+  "active": "Active",
+  "suspended": "Suspended"
+}

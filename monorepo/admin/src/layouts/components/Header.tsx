@@ -11,6 +11,7 @@ import {
 } from '@ant-design/icons';
 import { useAuth } from '@/hooks/useAuth';
 import { getRoleBadgeColor } from '@/utils/format';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const { Header: AntHeader } = Layout;
 const { Text } = Typography;
@@ -104,6 +105,7 @@ const Header: React.FC<HeaderProps> = ({ collapsed, onCollapse, onLogout }) => {
       </Space>
 
       <Space size={isMobile ? 12 : 20}>
+        <LanguageSwitcher />
         {!isMobile && <SearchOutlined style={{ fontSize: 18, cursor: 'pointer' }} />}
         <Badge count={3} size="small">
           <BellOutlined style={{ fontSize: 18, cursor: 'pointer' }} />

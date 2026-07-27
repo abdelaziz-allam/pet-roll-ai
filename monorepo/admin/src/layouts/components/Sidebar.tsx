@@ -17,6 +17,7 @@ import {
   ExperimentOutlined,
   CommentOutlined,
   ReadOutlined,
+  BookOutlined,
 } from '@ant-design/icons';
 import { usePermission } from '@/hooks/usePermission';
 
@@ -87,6 +88,9 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
     if (canAccessPage('settings')) {
       items.push({ key: '/settings', icon: <SettingOutlined />, label: 'Settings' });
     }
+
+    items.push({ type: 'divider' } as any);
+    items.push({ key: '/docs', icon: <BookOutlined />, label: 'User Manual' });
 
     return items;
   }, [canAccessPage]);

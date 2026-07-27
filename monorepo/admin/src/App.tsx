@@ -16,6 +16,7 @@ import CategoriesPage from '@/pages/categories/CategoriesPage';
 import HealthCertificationsPage from '@/pages/health-certifications/HealthCertificationsPage';
 import FeedbackPage from '@/pages/feedback/FeedbackPage';
 import BlogPage from '@/pages/blog/BlogPage';
+import DocsPage from '@/pages/docs/DocsPage';
 
 const App: React.FC = () => {
   return (
@@ -38,6 +39,7 @@ const App: React.FC = () => {
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/admin-users" element={<AdminUsersPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/docs" element={<DocsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

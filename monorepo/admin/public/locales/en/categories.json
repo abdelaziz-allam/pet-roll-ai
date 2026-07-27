@@ -1,0 +1,17 @@
+{
+  "title": "Pet Categories",
+  "createCategory": "Create Category",
+  "editCategory": "Edit Category",
+  "name": "Name",
+  "nameHelp": "URL-friendly slug (e.g. 'dog', 'cat', 'rabbit').",
+  "label": "Label",
+  "labelHelp": "Display name shown to users.",
+  "icon": "Icon",
+  "iconHelp": "Choose an emoji to represent this category.",
+  "description": "Description",
+  "isActive": "Active",
+  "seedDefaults": "Seed Defaults",
+  "seedConfirm": "This will add default pet categories. Existing categories will not be affected.",
+  "deleteCategory": "Delete Category",
+  "deleteConfirm": "Are you sure you want to delete this category? Pets in this category will become uncategorized."
+}

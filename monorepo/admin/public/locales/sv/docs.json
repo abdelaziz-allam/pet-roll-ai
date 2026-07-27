@@ -1,0 +1,41 @@
+{
+  "title": "Användarmanual",
+  "subtitle": "Komplett guide för hantering av Petfolioo Admin-portalen",
+  "searchPlaceholder": "Sök i dokumentationen...",
+  "searchNoResults": "Inga resultat för \"{{query}}\"",
+  "searchResults": "{{count}} resultat hittat",
+  "searchResults_plural": "{{count}} resultat hittade",
+  "tableOfContents": "Innehållsförteckning",
+  "onThisPage": "På denna sida",
+  "backToTop": "Till toppen",
+  "lastUpdated": "Senast uppdaterad",
+  "readingTime": "{{minutes}} min lästid",
+  "relatedArticles": "Relaterade artiklar",
+  "nextArticle": "Nästa",
+  "prevArticle": "Föregående",
+  "categories": {
+    "gettingStarted": "Kom igång",
+    "petManagement": "Djurhantering",
+    "userManagement": "Användarhantering",
+    "verification": "Verifiering & Hälsa",
+    "marketplace": "Marknadsplats",
+    "content": "Innehåll & Kommunikation",
+    "administration": "Administration"
+  },
+  "articles": {
+    "gettingStarted": "Kom igång",
+    "dashboard": "Instrumentpanel",
+    "pets": "Djurregister",
+    "users": "Appanvändare",
+    "categories": "Djurkategorier",
+    "verification": "Uppfödarverifiering",
+    "mating": "Parningsmarknad",
+    "healthCertifications": "Hälsointyg",
+    "vaccinationAnalytics": "Vaccinationsanalyser",
+    "feedback": "Feedbackhantering",
+    "blog": "Blogg CMS",
+    "notifications": "Notifikationer",
+    "adminUsers": "Adminanvändare",
+    "settings": "Inställningar"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "title": "Notifications",
+  "composeNotification": "Compose Notification",
+  "notificationTitle": "Title",
+  "message": "Message",
+  "messagePlaceholder": "Write your notification message...",
+  "audience": "Audience",
+  "audiences": {
+    "all": "All Users",
+    "dogOwners": "Dog Owners",
+    "catOwners": "Cat Owners",
+    "verifiedBreeders": "Verified Breeders"
+  },
+  "send": "Send Notification",
+  "sendConfirm": "Are you sure you want to send this notification?",
+  "history": "Notification History",
+  "sentAt": "Sent",
+  "recipients": "Recipients",
+  "recipientCount": "{{count}} recipient",
+  "recipientCount_plural": "{{count}} recipients",
+  "noHistory": "No notifications sent yet."
+}

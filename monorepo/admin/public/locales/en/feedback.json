@@ -1,0 +1,35 @@
+{
+  "title": "Feedback Management",
+  "searchPlaceholder": "Search feedback...",
+  "allFeedback": "All Feedback",
+  "todoList": "TODO List",
+  "stats": {
+    "total": "Total",
+    "open": "Open",
+    "replied": "Replied",
+    "todo": "TODO"
+  },
+  "type": "Type",
+  "types": {
+    "bug": "Bug Report",
+    "suggestion": "Suggestion",
+    "general": "General"
+  },
+  "status": "Status",
+  "statuses": {
+    "open": "Open",
+    "replied": "Replied",
+    "closed": "Closed"
+  },
+  "dateRange": "Date Range",
+  "todosOnly": "TODOs Only",
+  "reply": "Reply",
+  "replyPlaceholder": "Type your reply...",
+  "replyHelp": "This reply will be visible to the user in the app.",
+  "closeFeedback": "Close",
+  "pinTodo": "Pin as TODO",
+  "unpinTodo": "Unpin TODO",
+  "previousReplies": "Previous Replies",
+  "submittedBy": "Submitted by",
+  "submittedAt": "Submitted"
+}

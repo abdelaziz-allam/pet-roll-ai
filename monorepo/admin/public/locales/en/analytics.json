@@ -1,0 +1,23 @@
+{
+  "title": "Analytics",
+  "userGrowth": "User Growth",
+  "speciesDistribution": "Species Distribution",
+  "popularBreeds": "Popular Breeds",
+  "healthActivity": "Health Activity",
+  "timeRange": "Time Range",
+  "last7Days": "Last 7 days",
+  "last30Days": "Last 30 days",
+  "last90Days": "Last 90 days",
+  "lastYear": "Last year",
+  "vaccinationAnalytics": "Vaccination Analytics",
+  "topVaccines": "Top Vaccines",
+  "totalVaccinations": "Total Vaccinations",
+  "uniqueVaccines": "Unique Vaccines",
+  "petsVaccinated": "Pets Vaccinated",
+  "speciesBreakdown": "Species Breakdown",
+  "topLocations": "Top Locations",
+  "rank": "Rank",
+  "vaccine": "Vaccine",
+  "count": "Count",
+  "timePeriod": "Time Period"
+}

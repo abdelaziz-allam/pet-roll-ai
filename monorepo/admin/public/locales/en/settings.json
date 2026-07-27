@@ -1,0 +1,32 @@
+{
+  "title": "Settings",
+  "tabs": {
+    "general": "General",
+    "notifications": "Notifications",
+    "security": "Security"
+  },
+  "general": {
+    "appName": "Application Name",
+    "supportEmail": "Support Email",
+    "defaultLanguage": "Default Language",
+    "maintenanceMode": "Maintenance Mode",
+    "maintenanceWarning": "When enabled, the mobile app will show a maintenance screen to all users.",
+    "saved": "Settings saved successfully."
+  },
+  "notificationSettings": {
+    "vaccinationReminders": "Vaccination Reminders",
+    "pregnancyAlerts": "Pregnancy Alerts",
+    "matingUpdates": "Mating Updates",
+    "reminderDays": "Reminder Days Before Due",
+    "reminderDaysHelp": "Number of days before a vaccination is due to send a reminder."
+  },
+  "security": {
+    "rateLimit": "Rate Limit (requests/min)",
+    "accessTokenExpiry": "Access Token Expiry (hours)",
+    "refreshTokenExpiry": "Refresh Token Expiry (days)",
+    "maxPhotoSize": "Max Photo Size (MB)",
+    "maxAvatarSize": "Max Avatar Size (MB)",
+    "allowedFileTypes": "Allowed File Types",
+    "allowedFileTypesHelp": "Comma-separated list of allowed MIME types for uploads."
+  }
+}
