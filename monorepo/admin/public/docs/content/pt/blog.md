@@ -4,6 +4,15 @@ O módulo Blog CMS permite aos administradores criar, editar, publicar e gerir a
 
 ![Blog CMS](/docs/screenshots/blog.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | Full access |
+> | Admin | Full access |
+> | Moderator | View, Edit |
+> | Viewer | View only |
+
 ---
 
 ## Tabela de Artigos do Blog

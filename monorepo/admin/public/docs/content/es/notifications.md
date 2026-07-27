@@ -4,6 +4,15 @@ La pagina de Notificaciones permite a los administradores componer y enviar noti
 
 ![Notifications](/docs/screenshots/notifications.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Send, Delete |
+> | Admin | View, Send |
+> | Moderator | View |
+> | Viewer | View only |
+
 ---
 
 ## Vista General

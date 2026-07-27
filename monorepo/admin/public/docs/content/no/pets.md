@@ -4,6 +4,15 @@ Dyreregisteret er den sentrale modulen for a vise og administrere alle dyr regis
 
 ![Pet Registry](/docs/screenshots/pets.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Edit, Delete |
+> | Admin | View, Edit, Delete |
+> | Moderator | View, Edit |
+> | Viewer | View only |
+
 ---
 
 ## Dyrelistetabell

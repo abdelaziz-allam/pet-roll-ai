@@ -4,6 +4,15 @@ La page Analyses fournit des informations visuelles sur l'utilisation de la plat
 
 ![Analytics](/docs/screenshots/analytics.png)
 
+> **Access:** Super Admin, Admin, Viewer
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Export |
+> | Admin | View, Export |
+> | Moderator | No access |
+> | Viewer | View only |
+
 ---
 
 ## Vue d'ensemble

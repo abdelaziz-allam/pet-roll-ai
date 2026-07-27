@@ -4,6 +4,15 @@ Strona Powiadomienia umożliwia administratorom tworzenie i wysyłanie powiadomi
 
 ![Notifications](/docs/screenshots/notifications.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Send, Delete |
+> | Admin | View, Send |
+> | Moderator | View |
+> | Viewer | View only |
+
 ---
 
 ## Przegląd

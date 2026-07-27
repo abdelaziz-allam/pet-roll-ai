@@ -4,6 +4,15 @@ Modulet Opdrætterverificering giver administratorer mulighed for at gennemgå, 
 
 ![Verification](/docs/screenshots/verification.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Approve, Reject |
+> | Admin | View, Approve, Reject |
+> | Moderator | View, Approve, Reject |
+> | Viewer | View only |
+
 ---
 
 ## Tabel over verificeringsanmodninger

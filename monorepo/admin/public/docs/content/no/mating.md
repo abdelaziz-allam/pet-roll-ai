@@ -4,6 +4,15 @@ Modulen Avlsmarked gir administratorer oversikt over plattformens parringssystem
 
 ![Mating Management](/docs/screenshots/mating.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Edit, Delete, Moderate |
+> | Admin | View, Edit, Delete, Moderate |
+> | Moderator | View, Moderate |
+> | Viewer | View only |
+
 ---
 
 ## Navigasjonsfaner

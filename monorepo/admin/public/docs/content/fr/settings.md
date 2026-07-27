@@ -4,6 +4,15 @@ La page Parametres fournit des options de configuration systeme pour la platefor
 
 ![Settings](/docs/screenshots/settings.png)
 
+> **Access:** Super Admin only
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Edit |
+> | Admin | No access |
+> | Moderator | No access |
+> | Viewer | No access |
+
 ---
 
 ## Vue d'ensemble

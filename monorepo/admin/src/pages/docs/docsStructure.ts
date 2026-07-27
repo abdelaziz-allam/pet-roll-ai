@@ -17,6 +17,10 @@ export const docsStructure: DocCategory[] = [
     articles: [
       { key: 'getting-started', title: 'Getting Started', description: 'Login, navigation, and first steps' },
       { key: 'roles-permissions', title: 'Roles & Permissions', description: 'User roles, access control, and permission matrix' },
+      { key: 'quickstart-super-admin', title: 'Quick Start: Super Admin', description: 'Your first day as a Super Admin' },
+      { key: 'quickstart-admin', title: 'Quick Start: Admin', description: 'Your first day as an Admin' },
+      { key: 'quickstart-moderator', title: 'Quick Start: Moderator', description: 'Your first day as a Moderator' },
+      { key: 'quickstart-viewer', title: 'Quick Start: Viewer', description: 'Your first day as a Viewer' },
     ],
   },
   {
@@ -67,6 +71,15 @@ export const docsStructure: DocCategory[] = [
     articles: [
       { key: 'settings', title: 'Settings', description: 'App configuration and security' },
       { key: 'analytics', title: 'Analytics', description: 'User growth and engagement charts' },
+    ],
+  },
+  {
+    key: 'reference',
+    label: 'Reference',
+    articles: [
+      { key: 'glossary', title: 'Glossary', description: 'Platform terminology and definitions' },
+      { key: 'troubleshooting', title: 'Troubleshooting', description: 'Common issues and solutions' },
+      { key: 'changelog', title: "What's New", description: 'Recent updates and changes' },
     ],
   },
 ];

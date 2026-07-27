@@ -4,6 +4,15 @@ A página de Gestão de Feedback permite aos administradores visualizar, respond
 
 ![Feedback](/docs/screenshots/feedback.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | Full access |
+> | Admin | Full access |
+> | Moderator | View, Respond |
+> | Viewer | View only |
+
 ---
 
 ## Visão Geral

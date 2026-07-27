@@ -4,6 +4,15 @@ De module Fokkerverificatie stelt beheerders in staat om verificatieverzoeken va
 
 ![Verification](/docs/screenshots/verification.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Approve, Reject |
+> | Admin | View, Approve, Reject |
+> | Moderator | View, Approve, Reject |
+> | Viewer | View only |
+
 ---
 
 ## Verificatieverzoekentabel

@@ -4,6 +4,15 @@ O Dashboard é o primeiro ecrã que vê após iniciar sessão no Portal Administ
 
 ![Dashboard](/docs/screenshots/dashboard.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View |
+> | Admin | View |
+> | Moderator | View |
+> | Viewer | View |
+
 ---
 
 ## Cartões de KPI

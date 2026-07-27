@@ -4,6 +4,15 @@ El modulo de Certificaciones de Salud permite a los administradores gestionar y 
 
 ![Health Records](/docs/screenshots/health-certifications.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | Full access |
+> | Admin | Full access |
+> | Moderator | View, Edit |
+> | Viewer | View only |
+
 ---
 
 ## Tabla de Certificaciones

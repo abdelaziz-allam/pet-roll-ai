@@ -4,6 +4,15 @@ Sidan Feedbackhantering låter administratörer visa, svara på och organisera a
 
 ![Feedback](/docs/screenshots/feedback.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | Full access |
+> | Admin | Full access |
+> | Moderator | View, Respond |
+> | Viewer | View only |
+
 ---
 
 ## Översikt

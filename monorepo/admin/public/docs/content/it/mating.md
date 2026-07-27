@@ -4,6 +4,15 @@ Il modulo Mercato Riproduzione fornisce agli amministratori la supervisione del 
 
 ![Mating Management](/docs/screenshots/mating.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Edit, Delete, Moderate |
+> | Admin | View, Edit, Delete, Moderate |
+> | Moderator | View, Moderate |
+> | Viewer | View only |
+
 ---
 
 ## Schede di Navigazione

@@ -4,6 +4,15 @@ De module App-gebruikers biedt volledig beheer van alle gebruikersaccounts op he
 
 ![App Users](/docs/screenshots/users.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Create, Edit, Ban, Delete, Export |
+> | Admin | View, Create, Edit, Ban |
+> | Moderator | View, Ban |
+> | Viewer | View only |
+
 ---
 
 ## Gebruikerslijsttabel

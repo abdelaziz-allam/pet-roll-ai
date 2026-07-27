@@ -4,6 +4,15 @@ Sidan Notifikationer gör det möjligt för administratörer att skapa och skick
 
 ![Notifications](/docs/screenshots/notifications.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Send, Delete |
+> | Admin | View, Send |
+> | Moderator | View |
+> | Viewer | View only |
+
 ---
 
 ## Översikt

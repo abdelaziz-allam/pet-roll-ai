@@ -4,6 +4,15 @@ Il modulo Verifica Allevatore consente agli amministratori di revisionare, appro
 
 ![Verification](/docs/screenshots/verification.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Approve, Reject |
+> | Admin | View, Approve, Reject |
+> | Moderator | View, Approve, Reject |
+> | Viewer | View only |
+
 ---
 
 ## Tabella Richieste di Verifica

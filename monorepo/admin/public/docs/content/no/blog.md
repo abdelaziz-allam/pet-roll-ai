@@ -4,6 +4,15 @@ Blogg CMS-modulen lar administratorer opprette, redigere, publisere og administr
 
 ![Blog CMS](/docs/screenshots/blog.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | Full access |
+> | Admin | Full access |
+> | Moderator | View, Edit |
+> | Viewer | View only |
+
 ---
 
 ## Blogginnleggstabell

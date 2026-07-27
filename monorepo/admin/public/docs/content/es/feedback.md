@@ -4,6 +4,15 @@ La pagina de Gestion de Retroalimentacion permite a los administradores ver, res
 
 ![Feedback](/docs/screenshots/feedback.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | Full access |
+> | Admin | Full access |
+> | Moderator | View, Respond |
+> | Viewer | View only |
+
 ---
 
 ## Vista General

@@ -4,6 +4,15 @@ Die Admin-Benutzer-Seite ermöglicht es Ihnen, die Administratorkonten zu verwal
 
 ![Admin Users](/docs/screenshots/admin-users.png)
 
+> **Access:** Super Admin only
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Create, Edit, Delete, Manage Permissions |
+> | Admin | No access |
+> | Moderator | No access |
+> | Viewer | No access |
+
 ---
 
 ## Überblick

@@ -4,6 +4,15 @@ Het Dashboard is het eerste scherm dat u ziet na het inloggen op het Petfolioo A
 
 ![Dashboard](/docs/screenshots/dashboard.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View |
+> | Admin | View |
+> | Moderator | View |
+> | Viewer | View |
+
 ---
 
 ## KPI-kaarten

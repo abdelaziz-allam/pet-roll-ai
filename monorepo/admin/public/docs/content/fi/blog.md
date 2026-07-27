@@ -4,6 +4,15 @@ Blogi-CMS-moduuli mahdollistaa ylläpitäjien luoda, muokata, julkaista ja halli
 
 ![Blog CMS](/docs/screenshots/blog.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | Full access |
+> | Admin | Full access |
+> | Moderator | View, Edit |
+> | Viewer | View only |
+
 ---
 
 ## Blogikirjoitusten taulukko

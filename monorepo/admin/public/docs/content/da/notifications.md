@@ -4,6 +4,15 @@ Notifikationssiden giver administratorer mulighed for at sammensætte og sende p
 
 ![Notifications](/docs/screenshots/notifications.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Send, Delete |
+> | Admin | View, Send |
+> | Moderator | View |
+> | Viewer | View only |
+
 ---
 
 ## Oversigt

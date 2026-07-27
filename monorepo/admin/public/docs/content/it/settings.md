@@ -4,6 +4,15 @@ La pagina Impostazioni fornisce opzioni di configurazione a livello di sistema p
 
 ![Settings](/docs/screenshots/settings.png)
 
+> **Access:** Super Admin only
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Edit |
+> | Admin | No access |
+> | Moderator | No access |
+> | Viewer | No access |
+
 ---
 
 ## Panoramica

@@ -4,6 +4,15 @@ Panel główny to pierwszy ekran widoczny po zalogowaniu do Panelu Administracyj
 
 ![Dashboard](/docs/screenshots/dashboard.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View |
+> | Admin | View |
+> | Moderator | View |
+> | Viewer | View |
+
 ---
 
 ## Karty KPI

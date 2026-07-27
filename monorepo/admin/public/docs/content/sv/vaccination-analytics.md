@@ -4,6 +4,15 @@ Modulen Vaccinationsanalys ger administratörer insikter i vaccinationstrender �
 
 ![Vaccination Analytics](/docs/screenshots/vaccination-analytics.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Export |
+> | Admin | View, Export |
+> | Moderator | View |
+> | Viewer | View only |
+
 ---
 
 ## Översikt av instrumentpanelen

@@ -4,6 +4,15 @@ El modulo del Mercado de Cria proporciona a los administradores supervision del 
 
 ![Mating Management](/docs/screenshots/mating.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Edit, Delete, Moderate |
+> | Admin | View, Edit, Delete, Moderate |
+> | Moderator | View, Moderate |
+> | Viewer | View only |
+
 ---
 
 ## Pestanas de Navegacion

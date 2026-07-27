@@ -4,6 +4,15 @@ Analysesiden giver visuel indsigt i platformbrug, brugervækst, kæledyrsdemogra
 
 ![Analytics](/docs/screenshots/analytics.png)
 
+> **Access:** Super Admin, Admin, Viewer
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Export |
+> | Admin | View, Export |
+> | Moderator | No access |
+> | Viewer | View only |
+
 ---
 
 ## Oversigt

@@ -4,6 +4,15 @@ El Panel de Control es la primera pantalla que ve despues de iniciar sesion en e
 
 ![Dashboard](/docs/screenshots/dashboard.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View |
+> | Admin | View |
+> | Moderator | View |
+> | Viewer | View |
+
 ---
 
 ## Tarjetas KPI

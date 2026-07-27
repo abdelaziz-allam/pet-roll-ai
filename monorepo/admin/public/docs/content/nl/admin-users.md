@@ -4,6 +4,15 @@ De pagina Beheerders stelt u in staat de beheerdersaccounts te beheren die toega
 
 ![Admin Users](/docs/screenshots/admin-users.png)
 
+> **Access:** Super Admin only
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Create, Edit, Delete, Manage Permissions |
+> | Admin | No access |
+> | Moderator | No access |
+> | Viewer | No access |
+
 ---
 
 ## Overzicht

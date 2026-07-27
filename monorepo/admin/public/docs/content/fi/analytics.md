@@ -4,6 +4,15 @@ Analytiikka-sivu tarjoaa visuaalisia näkemyksiä alustan käytöstä, käyttäj
 
 ![Analytics](/docs/screenshots/analytics.png)
 
+> **Access:** Super Admin, Admin, Viewer
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Export |
+> | Admin | View, Export |
+> | Moderator | No access |
+> | Viewer | View only |
+
 ---
 
 ## Yleiskatsaus

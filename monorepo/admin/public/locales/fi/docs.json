@@ -20,7 +20,8 @@
     "verification": "Vahvistus & Terveys",
     "marketplace": "Markkinapaikka",
     "content": "Sisältö & Viestintä",
-    "administration": "Hallinto"
+    "administration": "Hallinto",
+    "reference": "Viitteet"
   },
   "articles": {
     "gettingStarted": "Aloitus",
@@ -37,6 +38,14 @@
     "blog": "Blogi CMS",
     "notifications": "Ilmoitukset",
     "adminUsers": "Ylläpitäjät",
-    "settings": "Asetukset"
-  }
+    "settings": "Asetukset",
+    "quickstartSuperAdmin": "Pikaopas: Super Admin",
+    "quickstartAdmin": "Pikaopas: Admin",
+    "quickstartModerator": "Pikaopas: Moderator",
+    "quickstartViewer": "Pikaopas: Viewer",
+    "glossary": "Sanasto",
+    "troubleshooting": "Vianmääritys",
+    "changelog": "Uutiset"
+  },
+  "printArticle": "Tulosta / Tallenna PDF:nä"
 }

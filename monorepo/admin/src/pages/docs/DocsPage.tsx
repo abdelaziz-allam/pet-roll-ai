@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Layout, Input, Typography, Breadcrumb, Anchor, Empty, Spin } from 'antd';
-import { SearchOutlined, BookOutlined, HomeOutlined } from '@ant-design/icons';
+import { Layout, Input, Typography, Breadcrumb, Anchor, Empty, Spin, Button, Tooltip } from 'antd';
+import { SearchOutlined, BookOutlined, HomeOutlined, PrinterOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import Fuse from 'fuse.js';
 import DocsSidebar from './components/DocsSidebar';
@@ -135,13 +135,22 @@ export default function DocsPage() {
         {!searchQuery && <DocsSidebar activeKey={activeArticle} onSelect={navigateToArticle} />}
       </Sider>
       <Content style={{ padding: '32px 48px', maxWidth: 900 }}>
-        <Breadcrumb style={{ marginBottom: 24 }}>
-          <Breadcrumb.Item><HomeOutlined /> Admin</Breadcrumb.Item>
-          <Breadcrumb.Item>{t('title')}</Breadcrumb.Item>
-          <Breadcrumb.Item>
-            {docsStructure.flatMap(c => c.articles).find(a => a.key === activeArticle)?.title || activeArticle}
-          </Breadcrumb.Item>
-        </Breadcrumb>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+          <Breadcrumb>
+            <Breadcrumb.Item><HomeOutlined /> Admin</Breadcrumb.Item>
+            <Breadcrumb.Item>{t('title')}</Breadcrumb.Item>
+            <Breadcrumb.Item>
+              {docsStructure.flatMap(c => c.articles).find(a => a.key === activeArticle)?.title || activeArticle}
+            </Breadcrumb.Item>
+          </Breadcrumb>
+          <Tooltip title={t('printArticle')}>
+            <Button
+              icon={<PrinterOutlined />}
+              onClick={() => (window as any).__docsPrint?.()}
+              type="text"
+            />
+          </Tooltip>
+        </div>
         {loading ? (
           <div style={{ textAlign: 'center', padding: 80 }}><Spin size="large" /></div>
         ) : (

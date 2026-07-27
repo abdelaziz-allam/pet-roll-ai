@@ -4,6 +4,15 @@ Kojelauta on ensimmäinen näkymä kirjautumisen jälkeen Petfolioo-hallintaport
 
 ![Dashboard](/docs/screenshots/dashboard.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View |
+> | Admin | View |
+> | Moderator | View |
+> | Viewer | View |
+
 ---
 
 ## KPI-kortit

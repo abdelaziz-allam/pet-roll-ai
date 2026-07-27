@@ -4,6 +4,15 @@ Sidan Inställningar ger systemövergripande konfigurationsalternativ för Petfo
 
 ![Settings](/docs/screenshots/settings.png)
 
+> **Access:** Super Admin only
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Edit |
+> | Admin | No access |
+> | Moderator | No access |
+> | Viewer | No access |
+
 ---
 
 ## Översikt

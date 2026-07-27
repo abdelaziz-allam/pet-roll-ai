@@ -4,6 +4,15 @@ La page Gestion des retours permet aux administrateurs de consulter, repondre et
 
 ![Feedback](/docs/screenshots/feedback.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | Full access |
+> | Admin | Full access |
+> | Moderator | View, Respond |
+> | Viewer | View only |
+
 ---
 
 ## Vue d'ensemble

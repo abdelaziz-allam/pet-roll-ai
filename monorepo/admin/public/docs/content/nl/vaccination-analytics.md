@@ -4,6 +4,15 @@ De module Vaccinatieanalyses biedt beheerders inzichten in vaccinatietrends op h
 
 ![Vaccination Analytics](/docs/screenshots/vaccination-analytics.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Export |
+> | Admin | View, Export |
+> | Moderator | View |
+> | Viewer | View only |
+
 ---
 
 ## Dashboardoverzicht

@@ -4,6 +4,15 @@ Modul Gieldy kojarzen zapewnia administratorom nadzor nad systemem kojarzenia zw
 
 ![Mating Management](/docs/screenshots/mating.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Edit, Delete, Moderate |
+> | Admin | View, Edit, Delete, Moderate |
+> | Moderator | View, Moderate |
+> | Viewer | View only |
+
 ---
 
 ## Zakladki nawigacyjne

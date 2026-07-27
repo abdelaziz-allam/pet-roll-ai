@@ -4,6 +4,15 @@ Das Zuchtmarktplatz-Modul bietet Administratoren einen Überblick über das Zuch
 
 ![Mating Management](/docs/screenshots/mating.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Edit, Delete, Moderate |
+> | Admin | View, Edit, Delete, Moderate |
+> | Moderator | View, Moderate |
+> | Viewer | View only |
+
 ---
 
 ## Navigations-Tabs

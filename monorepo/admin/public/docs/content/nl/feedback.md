@@ -4,6 +4,15 @@ De pagina Feedbackbeheer stelt beheerders in staat om gebruikersfeedback te beki
 
 ![Feedback](/docs/screenshots/feedback.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | Full access |
+> | Admin | Full access |
+> | Moderator | View, Respond |
+> | Viewer | View only |
+
 ---
 
 ## Overzicht

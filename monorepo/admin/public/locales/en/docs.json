@@ -13,6 +13,7 @@
   "relatedArticles": "Related articles",
   "nextArticle": "Next",
   "prevArticle": "Previous",
+  "printArticle": "Print / Save as PDF",
   "categories": {
     "gettingStarted": "Getting Started",
     "petManagement": "Pet Management",
@@ -20,11 +21,16 @@
     "verification": "Verification & Health",
     "marketplace": "Marketplace",
     "content": "Content & Communication",
-    "administration": "Administration"
+    "administration": "Administration",
+    "reference": "Reference"
   },
   "articles": {
     "gettingStarted": "Getting Started",
     "rolesPermissions": "Roles & Permissions",
+    "quickstartSuperAdmin": "Quick Start: Super Admin",
+    "quickstartAdmin": "Quick Start: Admin",
+    "quickstartModerator": "Quick Start: Moderator",
+    "quickstartViewer": "Quick Start: Viewer",
     "dashboard": "Dashboard",
     "pets": "Pet Registry",
     "users": "App Users",
@@ -37,6 +43,9 @@
     "blog": "Blog CMS",
     "notifications": "Notifications",
     "adminUsers": "Admin Users",
-    "settings": "Settings"
+    "settings": "Settings",
+    "glossary": "Glossary",
+    "troubleshooting": "Troubleshooting",
+    "changelog": "What's New"
   }
 }

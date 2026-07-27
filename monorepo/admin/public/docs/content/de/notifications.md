@@ -4,6 +4,15 @@ Die Benachrichtigungsseite ermöglicht es Administratoren, Push-Benachrichtigung
 
 ![Notifications](/docs/screenshots/notifications.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Send, Delete |
+> | Admin | View, Send |
+> | Moderator | View |
+> | Viewer | View only |
+
 ---
 
 ## Überblick

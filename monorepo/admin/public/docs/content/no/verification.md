@@ -4,6 +4,15 @@ Modulen for oppdretter-verifisering lar administratorer gjennomgå, godkjenne, a
 
 ![Verification](/docs/screenshots/verification.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Approve, Reject |
+> | Admin | View, Approve, Reject |
+> | Moderator | View, Approve, Reject |
+> | Viewer | View only |
+
 ---
 
 ## Tabell over verifiseringsforespørsler

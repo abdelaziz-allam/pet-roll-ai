@@ -4,6 +4,15 @@ Le module Categories d'animaux permet aux administrateurs de definir et gerer le
 
 ![Pet Categories](/docs/screenshots/categories.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | Full access |
+> | Admin | Full access |
+> | Moderator | View, Edit |
+> | Viewer | View only |
+
 ---
 
 ## Liste des categories

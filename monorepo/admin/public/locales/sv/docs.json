@@ -20,7 +20,8 @@
     "verification": "Verifiering & Hälsa",
     "marketplace": "Marknadsplats",
     "content": "Innehåll & Kommunikation",
-    "administration": "Administration"
+    "administration": "Administration",
+    "reference": "Referens"
   },
   "articles": {
     "gettingStarted": "Kom igång",
@@ -37,6 +38,14 @@
     "blog": "Blogg CMS",
     "notifications": "Notifikationer",
     "adminUsers": "Adminanvändare",
-    "settings": "Inställningar"
-  }
+    "settings": "Inställningar",
+    "quickstartSuperAdmin": "Snabbstart: Super Admin",
+    "quickstartAdmin": "Snabbstart: Admin",
+    "quickstartModerator": "Snabbstart: Moderator",
+    "quickstartViewer": "Snabbstart: Viewer",
+    "glossary": "Ordlista",
+    "troubleshooting": "Felsökning",
+    "changelog": "Nyheter"
+  },
+  "printArticle": "Skriv ut / Spara som PDF"
 }

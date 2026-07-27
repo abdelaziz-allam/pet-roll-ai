@@ -4,6 +4,15 @@ Instrumentpanelen är den första skärmen du ser efter att du har loggat in på
 
 ![Dashboard](/docs/screenshots/dashboard.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View |
+> | Admin | View |
+> | Moderator | View |
+> | Viewer | View |
+
 ---
 
 ## KPI-kort

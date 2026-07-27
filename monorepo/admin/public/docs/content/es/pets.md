@@ -4,6 +4,15 @@ El Registro de Mascotas es el modulo central para ver y gestionar todas las masc
 
 ![Pet Registry](/docs/screenshots/pets.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Edit, Delete |
+> | Admin | View, Edit, Delete |
+> | Moderator | View, Edit |
+> | Viewer | View only |
+
 ---
 
 ## Tabla de Listado de Mascotas

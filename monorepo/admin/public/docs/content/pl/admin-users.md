@@ -4,6 +4,15 @@ Strona Administratorzy umożliwia zarządzanie kontami administratorów, które 
 
 ![Admin Users](/docs/screenshots/admin-users.png)
 
+> **Access:** Super Admin only
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Create, Edit, Delete, Manage Permissions |
+> | Admin | No access |
+> | Moderator | No access |
+> | Viewer | No access |
+
 ---
 
 ## Przegląd

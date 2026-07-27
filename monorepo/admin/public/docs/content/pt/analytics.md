@@ -4,6 +4,15 @@ A página de Analytics fornece informações visuais sobre a utilização da pla
 
 ![Analytics](/docs/screenshots/analytics.png)
 
+> **Access:** Super Admin, Admin, Viewer
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Export |
+> | Admin | View, Export |
+> | Moderator | No access |
+> | Viewer | View only |
+
 ---
 
 ## Visão Geral

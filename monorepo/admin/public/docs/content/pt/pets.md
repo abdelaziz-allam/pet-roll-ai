@@ -4,6 +4,15 @@ O Registo de Animais é o módulo central para visualizar e gerir todos os anima
 
 ![Pet Registry](/docs/screenshots/pets.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Edit, Delete |
+> | Admin | View, Edit, Delete |
+> | Moderator | View, Edit |
+> | Viewer | View only |
+
 ---
 
 ## Tabela de Listagem de Animais

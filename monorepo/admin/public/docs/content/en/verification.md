@@ -244,6 +244,33 @@ Each timeline entry shows:
 
 ---
 
+## Verification Workflow Diagram
+
+The following diagram shows the complete lifecycle of a breeder verification request:
+
+```mermaid
+flowchart TD
+    A[Breeder Submits Application] --> B[Status: Pending]
+    B --> C{Admin Reviews}
+    C -->|Documents Valid| D[Approve]
+    C -->|Issues Found| E[Reject with Reason]
+    D --> F[Status: Approved]
+    F --> G{Validity Period}
+    G -->|Still Valid| F
+    G -->|Expired| H[Status: Expired]
+    H --> I[Breeder Resubmits]
+    I --> B
+    E --> J[Status: Rejected]
+    J --> K[Breeder Fixes & Resubmits]
+    K --> B
+    F -->|Fraud Detected| L[Revoke]
+    L --> M[Status: Revoked]
+    M --> N[Breeder May Reapply]
+    N --> B
+```
+
+---
+
 ## Frequently Asked Questions
 
 **Q: Can I approve a submission with conditions?**

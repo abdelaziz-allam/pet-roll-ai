@@ -4,6 +4,15 @@ Modulen Husdjurskategorier låter administratörer definiera och hantera klassif
 
 ![Pet Categories](/docs/screenshots/categories.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | Full access |
+> | Admin | Full access |
+> | Moderator | View, Edit |
+> | Viewer | View only |
+
 ---
 
 ## Kategorilistning

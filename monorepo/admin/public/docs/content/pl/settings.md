@@ -4,6 +4,15 @@ Strona Ustawienia zapewnia opcje konfiguracji systemowej dla platformy Petfolioo
 
 ![Settings](/docs/screenshots/settings.png)
 
+> **Access:** Super Admin only
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Edit |
+> | Admin | No access |
+> | Moderator | No access |
+> | Viewer | No access |
+
 ---
 
 ## Przegląd

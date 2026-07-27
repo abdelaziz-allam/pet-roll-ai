@@ -4,6 +4,15 @@ De Blog CMS-module stelt beheerders in staat om blogberichten te maken, bewerken
 
 ![Blog CMS](/docs/screenshots/blog.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | Full access |
+> | Admin | Full access |
+> | Moderator | View, Edit |
+> | Viewer | View only |
+
 ---
 
 ## Blogberichtentabel

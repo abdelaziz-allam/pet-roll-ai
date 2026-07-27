@@ -4,6 +4,15 @@ Terveystodistukset-moduuli mahdollistaa ylläpitäjien hallita ja vahvistaa elä
 
 ![Health Records](/docs/screenshots/health-certifications.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | Full access |
+> | Admin | Full access |
+> | Moderator | View, Edit |
+> | Viewer | View only |
+
 ---
 
 ## Todistustaulukko

@@ -20,7 +20,8 @@
     "verification": "Vérification & Santé",
     "marketplace": "Marché",
     "content": "Contenu & Communication",
-    "administration": "Administration"
+    "administration": "Administration",
+    "reference": "Référence"
   },
   "articles": {
     "gettingStarted": "Démarrage",
@@ -37,6 +38,14 @@
     "blog": "Blog CMS",
     "notifications": "Notifications",
     "adminUsers": "Administrateurs",
-    "settings": "Paramètres"
-  }
+    "settings": "Paramètres",
+    "quickstartSuperAdmin": "Démarrage rapide : Super Admin",
+    "quickstartAdmin": "Démarrage rapide : Admin",
+    "quickstartModerator": "Démarrage rapide : Moderator",
+    "quickstartViewer": "Démarrage rapide : Viewer",
+    "glossary": "Glossaire",
+    "troubleshooting": "Dépannage",
+    "changelog": "Nouveautés"
+  },
+  "printArticle": "Imprimer / Enregistrer en PDF"
 }

@@ -4,6 +4,15 @@ Le tableau de bord est le premier ecran que vous voyez apres vous etre connecte 
 
 ![Dashboard](/docs/screenshots/dashboard.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View |
+> | Admin | View |
+> | Moderator | View |
+> | Viewer | View |
+
 ---
 
 ## Cartes KPI

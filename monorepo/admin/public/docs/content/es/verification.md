@@ -4,6 +4,15 @@ El modulo de Verificacion de Criadores permite a los administradores revisar, ap
 
 ![Verification](/docs/screenshots/verification.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Approve, Reject |
+> | Admin | View, Approve, Reject |
+> | Moderator | View, Approve, Reject |
+> | Viewer | View only |
+
 ---
 
 ## Tabla de Solicitudes de Verificacion

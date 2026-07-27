@@ -4,6 +4,15 @@ Il modulo Analytics Vaccinazioni fornisce agli amministratori informazioni sulle
 
 ![Vaccination Analytics](/docs/screenshots/vaccination-analytics.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Export |
+> | Admin | View, Export |
+> | Moderator | View |
+> | Viewer | View only |
+
 ---
 
 ## Panoramica della Dashboard

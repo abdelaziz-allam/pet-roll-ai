@@ -4,6 +4,15 @@ Modul Weryfikacji Hodowcow umozliwia administratorom przegladanie, zatwierdzanie
 
 ![Verification](/docs/screenshots/verification.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Approve, Reject |
+> | Admin | View, Approve, Reject |
+> | Moderator | View, Approve, Reject |
+> | Viewer | View only |
+
 ---
 
 ## Tabela wnioskow o weryfikacje

@@ -4,6 +4,15 @@ Palautehallinta-sivu mahdollistaa ylläpitäjien tarkastella, vastata ja järjes
 
 ![Feedback](/docs/screenshots/feedback.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | Full access |
+> | Admin | Full access |
+> | Moderator | View, Respond |
+> | Viewer | View only |
+
 ---
 
 ## Yleiskatsaus

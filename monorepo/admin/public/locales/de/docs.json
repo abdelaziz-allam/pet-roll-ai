@@ -20,7 +20,8 @@
     "verification": "Verifizierung & Gesundheit",
     "marketplace": "Marktplatz",
     "content": "Inhalte & Kommunikation",
-    "administration": "Administration"
+    "administration": "Administration",
+    "reference": "Referenz"
   },
   "articles": {
     "gettingStarted": "Erste Schritte",
@@ -37,6 +38,14 @@
     "blog": "Blog CMS",
     "notifications": "Benachrichtigungen",
     "adminUsers": "Admin-Benutzer",
-    "settings": "Einstellungen"
-  }
+    "settings": "Einstellungen",
+    "quickstartSuperAdmin": "Schnellstart: Super Admin",
+    "quickstartAdmin": "Schnellstart: Admin",
+    "quickstartModerator": "Schnellstart: Moderator",
+    "quickstartViewer": "Schnellstart: Viewer",
+    "glossary": "Glossar",
+    "troubleshooting": "Fehlerbehebung",
+    "changelog": "Neuigkeiten"
+  },
+  "printArticle": "Drucken / Als PDF speichern"
 }

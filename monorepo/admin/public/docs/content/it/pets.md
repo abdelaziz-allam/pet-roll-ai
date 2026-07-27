@@ -4,6 +4,15 @@ Il Registro Animali è il modulo centrale per visualizzare e gestire tutti gli a
 
 ![Pet Registry](/docs/screenshots/pets.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Edit, Delete |
+> | Admin | View, Edit, Delete |
+> | Moderator | View, Edit |
+> | Viewer | View only |
+
 ---
 
 ## Tabella Elenco Animali

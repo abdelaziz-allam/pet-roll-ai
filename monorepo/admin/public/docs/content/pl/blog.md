@@ -4,6 +4,15 @@ Moduł Blog CMS umożliwia administratorom tworzenie, edycję, publikowanie i za
 
 ![Blog CMS](/docs/screenshots/blog.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | Full access |
+> | Admin | Full access |
+> | Moderator | View, Edit |
+> | Viewer | View only |
+
 ---
 
 ## Tabela wpisów na blogu

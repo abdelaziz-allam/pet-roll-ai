@@ -4,6 +4,15 @@ Modulet Sundhedscertificeringer giver administratorer mulighed for at administre
 
 ![Health Records](/docs/screenshots/health-certifications.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | Full access |
+> | Admin | Full access |
+> | Moderator | View, Edit |
+> | Viewer | View only |
+
 ---
 
 ## Certificeringstabel

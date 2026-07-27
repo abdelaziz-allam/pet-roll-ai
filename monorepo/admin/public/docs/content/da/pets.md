@@ -4,6 +4,15 @@ Kæledyrsregistret er det centrale modul til visning og administration af alle k
 
 ![Pet Registry](/docs/screenshots/pets.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Edit, Delete |
+> | Admin | View, Edit, Delete |
+> | Moderator | View, Edit |
+> | Viewer | View only |
+
 ---
 
 ## Kæledyrsoversigtstabel

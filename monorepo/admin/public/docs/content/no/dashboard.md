@@ -4,6 +4,15 @@ Dashboardet er den forste skjermen du ser etter innlogging i Petfolioo-administr
 
 ![Dashboard](/docs/screenshots/dashboard.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View |
+> | Admin | View |
+> | Moderator | View |
+> | Viewer | View |
+
 ---
 
 ## KPI-kort

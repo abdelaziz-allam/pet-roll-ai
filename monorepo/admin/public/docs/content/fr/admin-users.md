@@ -4,6 +4,15 @@ La page Administrateurs vous permet de gerer les comptes administrateur qui ont 
 
 ![Admin Users](/docs/screenshots/admin-users.png)
 
+> **Access:** Super Admin only
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Create, Edit, Delete, Manage Permissions |
+> | Admin | No access |
+> | Moderator | No access |
+> | Viewer | No access |
+
 ---
 
 ## Vue d'ensemble

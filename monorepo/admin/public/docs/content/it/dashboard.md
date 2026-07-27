@@ -4,6 +4,15 @@ La Dashboard è la prima schermata visualizzata dopo l'accesso al Portale Admin 
 
 ![Dashboard](/docs/screenshots/dashboard.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View |
+> | Admin | View |
+> | Moderator | View |
+> | Viewer | View |
+
 ---
 
 ## Card KPI

@@ -20,7 +20,8 @@
     "verification": "Verificatie & Gezondheid",
     "marketplace": "Marktplaats",
     "content": "Content & Communicatie",
-    "administration": "Administratie"
+    "administration": "Administratie",
+    "reference": "Referentie"
   },
   "articles": {
     "gettingStarted": "Aan de slag",
@@ -37,6 +38,14 @@
     "blog": "Blog CMS",
     "notifications": "Meldingen",
     "adminUsers": "Beheerders",
-    "settings": "Instellingen"
-  }
+    "settings": "Instellingen",
+    "quickstartSuperAdmin": "Snelstart: Super Admin",
+    "quickstartAdmin": "Snelstart: Admin",
+    "quickstartModerator": "Snelstart: Moderator",
+    "quickstartViewer": "Snelstart: Viewer",
+    "glossary": "Woordenlijst",
+    "troubleshooting": "Probleemoplossing",
+    "changelog": "Nieuw"
+  },
+  "printArticle": "Afdrukken / Opslaan als PDF"
 }

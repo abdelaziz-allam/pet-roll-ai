@@ -4,6 +4,15 @@ A página de Utilizadores Admin permite-lhe gerir as contas de administrador que
 
 ![Admin Users](/docs/screenshots/admin-users.png)
 
+> **Access:** Super Admin only
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Create, Edit, Delete, Manage Permissions |
+> | Admin | No access |
+> | Moderator | No access |
+> | Viewer | No access |
+
 ---
 
 ## Visão Geral

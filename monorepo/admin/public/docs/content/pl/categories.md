@@ -4,6 +4,15 @@ Moduł Kategorie zwierząt umożliwia administratorom definiowanie i zarządzani
 
 ![Pet Categories](/docs/screenshots/categories.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | Full access |
+> | Admin | Full access |
+> | Moderator | View, Edit |
+> | Viewer | View only |
+
 ---
 
 ## Lista kategorii

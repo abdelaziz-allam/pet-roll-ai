@@ -4,6 +4,15 @@ Analyser-siden gir visuell innsikt i plattformbruk, brukervekst, kjaeledyrdemogr
 
 ![Analytics](/docs/screenshots/analytics.png)
 
+> **Access:** Super Admin, Admin, Viewer
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Export |
+> | Admin | View, Export |
+> | Moderator | No access |
+> | Viewer | View only |
+
 ---
 
 ## Oversikt

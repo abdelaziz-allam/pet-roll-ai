@@ -4,6 +4,15 @@ De module Huisdiercategorieën stelt beheerders in staat het classificatiesystee
 
 ![Pet Categories](/docs/screenshots/categories.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | Full access |
+> | Admin | Full access |
+> | Moderator | View, Edit |
+> | Viewer | View only |
+
 ---
 
 ## Categorieënlijst

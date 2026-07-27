@@ -4,6 +4,15 @@ Strona Analityka zapewnia wizualny wgląd w wykorzystanie platformy, wzrost uży
 
 ![Analytics](/docs/screenshots/analytics.png)
 
+> **Access:** Super Admin, Admin, Viewer
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Export |
+> | Admin | View, Export |
+> | Moderator | No access |
+> | Viewer | View only |
+
 ---
 
 ## Przegląd

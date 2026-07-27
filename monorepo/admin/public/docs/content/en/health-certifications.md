@@ -287,6 +287,36 @@ For efficient processing of multiple certifications:
 
 ---
 
+## Certification Lifecycle Diagram
+
+The following diagram illustrates the complete lifecycle of a health certification:
+
+```mermaid
+flowchart TD
+    A[Owner/Vet Submits Certificate] --> B[Status: Pending]
+    B --> C{Admin Reviews}
+    C -->|Valid Documents| D[Approve]
+    C -->|Issues Found| E[Reject with Reason]
+    D --> F[Status: Approved]
+    F --> G[Validity Timer Starts]
+    G --> H{Time Remaining?}
+    H -->|> 30 days| I[Green Progress Bar]
+    H -->|≤ 30 days| J[Yellow Warning + Notifications]
+    H -->|0 days| K[Status: Expired]
+    K --> L[Badge Removed from Pet]
+    L --> M[Owner Submits New Cert]
+    M --> B
+    E --> N[Status: Rejected]
+    N --> O[Owner Corrects & Resubmits]
+    O --> B
+    F -->|Fraud/Invalid| P[Revoke]
+    P --> Q[Status: Revoked]
+    Q --> R[Badge Immediately Removed]
+    R --> M
+```
+
+---
+
 ## Frequently Asked Questions
 
 **Q: Can I edit the expiry date of an approved certification?**

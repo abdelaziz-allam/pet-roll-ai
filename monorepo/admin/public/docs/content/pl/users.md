@@ -4,6 +4,15 @@ Moduł Użytkownicy aplikacji zapewnia pełne zarządzanie wszystkimi kontami u�
 
 ![App Users](/docs/screenshots/users.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Create, Edit, Ban, Delete, Export |
+> | Admin | View, Create, Edit, Ban |
+> | Moderator | View, Ban |
+> | Viewer | View only |
+
 ---
 
 ## Tabela listy użytkowników

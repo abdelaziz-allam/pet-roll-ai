@@ -4,6 +4,15 @@ Modulet App-brugere giver komplet administration af alle brugerkonti på Petfoli
 
 ![App Users](/docs/screenshots/users.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | View, Create, Edit, Ban, Delete, Export |
+> | Admin | View, Create, Edit, Ban |
+> | Moderator | View, Ban |
+> | Viewer | View only |
+
 ---
 
 ## Brugeroversigtstabel
