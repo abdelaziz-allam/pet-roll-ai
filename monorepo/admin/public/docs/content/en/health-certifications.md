@@ -4,6 +4,15 @@ The Health Certifications module allows administrators to manage and verify pet 
 
 ![Health Records](/docs/screenshots/health-certifications.png)
 
+> **Access:** All roles
+>
+> | Role | Permissions |
+> |------|-------------|
+> | Super Admin | Full access |
+> | Admin | Full access |
+> | Moderator | View, Edit |
+> | Viewer | View only |
+
 ---
 
 ## Certifications Table

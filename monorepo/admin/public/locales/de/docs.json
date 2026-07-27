@@ -24,6 +24,7 @@
   },
   "articles": {
     "gettingStarted": "Erste Schritte",
+    "rolesPermissions": "Rollen & Berechtigungen",
     "dashboard": "Dashboard",
     "pets": "Tierregister",
     "users": "App-Benutzer",

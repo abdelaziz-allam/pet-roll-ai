@@ -24,6 +24,7 @@
   },
   "articles": {
     "gettingStarted": "Rozpoczęcie",
+    "rolesPermissions": "Role i Uprawnienia",
     "dashboard": "Panel",
     "pets": "Rejestr zwierząt",
     "users": "Użytkownicy",

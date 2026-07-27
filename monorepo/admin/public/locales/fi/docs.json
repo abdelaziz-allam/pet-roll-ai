@@ -24,6 +24,7 @@
   },
   "articles": {
     "gettingStarted": "Aloitus",
+    "rolesPermissions": "Roolit ja Käyttöoikeudet",
     "dashboard": "Hallintapaneeli",
     "pets": "Eläinrekisteri",
     "users": "Sovelluskäyttäjät",

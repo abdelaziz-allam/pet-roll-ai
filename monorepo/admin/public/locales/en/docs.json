@@ -24,6 +24,7 @@
   },
   "articles": {
     "gettingStarted": "Getting Started",
+    "rolesPermissions": "Roles & Permissions",
     "dashboard": "Dashboard",
     "pets": "Pet Registry",
     "users": "App Users",

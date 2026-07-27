@@ -24,6 +24,7 @@
   },
   "articles": {
     "gettingStarted": "Démarrage",
+    "rolesPermissions": "Rôles & Permissions",
     "dashboard": "Tableau de bord",
     "pets": "Registre des animaux",
     "users": "Utilisateurs",

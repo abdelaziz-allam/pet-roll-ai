@@ -16,6 +16,7 @@ export const docsStructure: DocCategory[] = [
     label: 'Getting Started',
     articles: [
       { key: 'getting-started', title: 'Getting Started', description: 'Login, navigation, and first steps' },
+      { key: 'roles-permissions', title: 'Roles & Permissions', description: 'User roles, access control, and permission matrix' },
     ],
   },
   {

@@ -24,6 +24,7 @@
   },
   "articles": {
     "gettingStarted": "Primeros pasos",
+    "rolesPermissions": "Roles y Permisos",
     "dashboard": "Panel",
     "pets": "Registro de mascotas",
     "users": "Usuarios",

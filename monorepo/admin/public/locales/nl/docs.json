@@ -24,6 +24,7 @@
   },
   "articles": {
     "gettingStarted": "Aan de slag",
+    "rolesPermissions": "Rollen & Rechten",
     "dashboard": "Dashboard",
     "pets": "Dierenregister",
     "users": "App-gebruikers",

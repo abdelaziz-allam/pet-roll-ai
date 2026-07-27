@@ -24,6 +24,7 @@
   },
   "articles": {
     "gettingStarted": "Kom igång",
+    "rolesPermissions": "Roller & Behörigheter",
     "dashboard": "Instrumentpanel",
     "pets": "Djurregister",
     "users": "Appanvändare",
