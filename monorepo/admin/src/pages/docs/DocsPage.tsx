@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Layout, Input, Typography, Breadcrumb, Anchor, Empty, Spin, Button, Tooltip } from 'antd';
-import { SearchOutlined, BookOutlined, HomeOutlined, PrinterOutlined } from '@ant-design/icons';
+import { Layout, Input, Typography, Breadcrumb, Anchor, Empty, Spin, Button, Tooltip, Drawer, Grid } from 'antd';
+import { SearchOutlined, BookOutlined, HomeOutlined, PrinterOutlined, MenuOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import Fuse from 'fuse.js';
 import DocsSidebar from './components/DocsSidebar';
@@ -24,6 +24,10 @@ export default function DocsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [allContents, setAllContents] = useState<Map<string, string>>(new Map());
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const screens = Grid.useBreakpoint();
+  const isMobile = !screens.md;
 
   const activeArticle = searchParams.get('article') || 'getting-started';
 
@@ -91,58 +95,80 @@ export default function DocsPage() {
     setSearchParams({ article: key });
     setSearchQuery('');
     setSearchResults([]);
+    setDrawerOpen(false);
   }
+
+  const sidebarContent = (
+    <div style={{ padding: '24px 16px 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+        <BookOutlined style={{ fontSize: 20, color: '#F1379D' }} />
+        <Title level={4} style={{ margin: 0 }}>{t('title')}</Title>
+      </div>
+      <Input
+        prefix={<SearchOutlined />}
+        placeholder={t('searchPlaceholder')}
+        value={searchQuery}
+        onChange={e => handleSearch(e.target.value)}
+        allowClear
+        style={{ marginBottom: 16 }}
+      />
+      {searchQuery && searchResults.length > 0 ? (
+        <div style={{ marginBottom: 16 }}>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            {t('searchResults', { count: searchResults.length })}
+          </Text>
+          {searchResults.map(r => (
+            <div
+              key={r.item.key}
+              onClick={() => navigateToArticle(r.item.key)}
+              style={{ padding: '8px 12px', cursor: 'pointer', borderRadius: 6, marginTop: 4, background: '#fff', border: '1px solid #e8e8e8' }}
+            >
+              <Text strong style={{ fontSize: 13 }}>{r.item.title}</Text>
+              {r.item.description && <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>{r.item.description}</Text>}
+            </div>
+          ))}
+        </div>
+      ) : searchQuery ? (
+        <Text type="secondary" style={{ fontSize: 12 }}>{t('searchNoResults', { query: searchQuery })}</Text>
+      ) : null}
+      {!searchQuery && <DocsSidebar activeKey={activeArticle} onSelect={navigateToArticle} />}
+    </div>
+  );
 
   return (
     <Layout style={{ minHeight: '100%', background: '#fff' }}>
-      <Sider
-        width={280}
-        style={{ background: '#fafafa', borderRight: '1px solid #f0f0f0', overflow: 'auto', position: 'sticky', top: 0, height: '100vh' }}
-      >
-        <div style={{ padding: '24px 16px 16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <BookOutlined style={{ fontSize: 20, color: '#F1379D' }} />
-            <Title level={4} style={{ margin: 0 }}>{t('title')}</Title>
-          </div>
-          <Input
-            prefix={<SearchOutlined />}
-            placeholder={t('searchPlaceholder')}
-            value={searchQuery}
-            onChange={e => handleSearch(e.target.value)}
-            allowClear
-            style={{ marginBottom: 16 }}
-          />
-          {searchQuery && searchResults.length > 0 ? (
-            <div style={{ marginBottom: 16 }}>
-              <Text type="secondary" style={{ fontSize: 12 }}>
-                {t('searchResults', { count: searchResults.length })}
-              </Text>
-              {searchResults.map(r => (
-                <div
-                  key={r.item.key}
-                  onClick={() => navigateToArticle(r.item.key)}
-                  style={{ padding: '8px 12px', cursor: 'pointer', borderRadius: 6, marginTop: 4, background: '#fff', border: '1px solid #e8e8e8' }}
-                >
-                  <Text strong style={{ fontSize: 13 }}>{r.item.title}</Text>
-                  {r.item.description && <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>{r.item.description}</Text>}
-                </div>
-              ))}
-            </div>
-          ) : searchQuery ? (
-            <Text type="secondary" style={{ fontSize: 12 }}>{t('searchNoResults', { query: searchQuery })}</Text>
-          ) : null}
-        </div>
-        {!searchQuery && <DocsSidebar activeKey={activeArticle} onSelect={navigateToArticle} />}
-      </Sider>
-      <Content style={{ padding: '32px 48px', maxWidth: 900 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <Breadcrumb>
-            <Breadcrumb.Item><HomeOutlined /> Admin</Breadcrumb.Item>
-            <Breadcrumb.Item>{t('title')}</Breadcrumb.Item>
-            <Breadcrumb.Item>
-              {docsStructure.flatMap(c => c.articles).find(a => a.key === activeArticle)?.title || activeArticle}
-            </Breadcrumb.Item>
-          </Breadcrumb>
+      {!isMobile && (
+        <Sider
+          width={280}
+          style={{ background: '#fafafa', borderRight: '1px solid #f0f0f0', overflow: 'auto', position: 'sticky', top: 0, height: '100vh' }}
+        >
+          {sidebarContent}
+        </Sider>
+      )}
+      {isMobile && (
+        <Drawer
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          placement="left"
+          width={280}
+          styles={{ body: { padding: 0 } }}
+        >
+          {sidebarContent}
+        </Drawer>
+      )}
+      <Content style={{ padding: isMobile ? '16px 12px' : '32px 48px', maxWidth: 900 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? 16 : 24, gap: 8 }}>
+          {isMobile ? (
+            <Button icon={<MenuOutlined />} onClick={() => setDrawerOpen(true)} type="text" />
+          ) : (
+            <Breadcrumb>
+              <Breadcrumb.Item><HomeOutlined /> Admin</Breadcrumb.Item>
+              <Breadcrumb.Item>{t('title')}</Breadcrumb.Item>
+              <Breadcrumb.Item>
+                {docsStructure.flatMap(c => c.articles).find(a => a.key === activeArticle)?.title || activeArticle}
+              </Breadcrumb.Item>
+            </Breadcrumb>
+          )}
           <Tooltip title={t('printArticle')}>
             <Button
               icon={<PrinterOutlined />}

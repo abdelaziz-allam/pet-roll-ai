@@ -221,15 +221,15 @@ const BlogPage: React.FC = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
         <Title level={3} style={{ margin: 0 }}>Blog Posts</Title>
-        <Space>
+        <Space wrap>
           <Input
             prefix={<SearchOutlined />}
             placeholder="Search posts..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ width: 240 }}
+            style={{ width: 240, maxWidth: '100%' }}
             allowClear
           />
           <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
@@ -244,6 +244,7 @@ const BlogPage: React.FC = () => {
           dataSource={posts}
           rowKey="id"
           loading={loading}
+          scroll={{ x: 720 }}
           pagination={{ pageSize: 20 }}
         />
       </Card>
@@ -251,7 +252,7 @@ const BlogPage: React.FC = () => {
       <Drawer
         title={editingPost ? 'Edit Post' : 'New Post'}
         placement="right"
-        width={720}
+        width={Math.min(720, typeof window !== 'undefined' ? window.innerWidth - 20 : 720)}
         onClose={() => setDrawerOpen(false)}
         open={drawerOpen}
         extra={

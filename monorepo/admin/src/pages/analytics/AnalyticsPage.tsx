@@ -54,14 +54,14 @@ const AnalyticsPage: React.FC = () => {
       </div>
 
       <Row gutter={[16, 16]}>
-        <Col span={6}><Card><Statistic title="Avg. Pets per User" value={3.1} precision={1} /></Card></Col>
-        <Col span={6}><Card><Statistic title="Monthly Active Users" value={870} suffix={<ArrowUpOutlined style={{ color: '#52c41a', fontSize: 14 }} />} /></Card></Col>
-        <Col span={6}><Card><Statistic title="Health Records/Month" value={445} /></Card></Col>
-        <Col span={6}><Card><Statistic title="Mating Success Rate" value={68} suffix="%" valueStyle={{ color: '#52c41a' }} /></Card></Col>
+        <Col xs={12} sm={12} lg={6}><Card><Statistic title="Avg. Pets per User" value={3.1} precision={1} /></Card></Col>
+        <Col xs={12} sm={12} lg={6}><Card><Statistic title="Monthly Active Users" value={870} suffix={<ArrowUpOutlined style={{ color: '#52c41a', fontSize: 14 }} />} /></Card></Col>
+        <Col xs={12} sm={12} lg={6}><Card><Statistic title="Health Records/Month" value={445} /></Card></Col>
+        <Col xs={12} sm={12} lg={6}><Card><Statistic title="Mating Success Rate" value={68} suffix="%" valueStyle={{ color: '#52c41a' }} /></Card></Col>
       </Row>
 
       <Row gutter={[16, 16]}>
-        <Col span={16}>
+        <Col xs={24} lg={16}>
           <Card title="User Growth">
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={userGrowth}>
@@ -76,7 +76,7 @@ const AnalyticsPage: React.FC = () => {
             </ResponsiveContainer>
           </Card>
         </Col>
-        <Col span={8}>
+        <Col xs={24} lg={8}>
           <Card title="Species Distribution">
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -92,7 +92,7 @@ const AnalyticsPage: React.FC = () => {
       </Row>
 
       <Row gutter={[16, 16]}>
-        <Col span={12}>
+        <Col xs={24} md={12}>
           <Card title="Popular Breeds">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={breedPopularity} layout="vertical">
@@ -105,7 +105,7 @@ const AnalyticsPage: React.FC = () => {
             </ResponsiveContainer>
           </Card>
         </Col>
-        <Col span={12}>
+        <Col xs={24} md={12}>
           <Card title="Health Activity">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={healthActivity}>

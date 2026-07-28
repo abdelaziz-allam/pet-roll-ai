@@ -296,7 +296,7 @@ const PetsPage: React.FC = () => {
             placeholder="Search by name, breed, or owner..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ width: 280 }}
+            style={{ width: 280, maxWidth: '100%' }}
           />
           <Select placeholder="Species" allowClear value={speciesFilter} onChange={setSpeciesFilter} style={{ width: 150 }}>
             <Option value="dog">🐕 Dog</Option>
@@ -477,14 +477,14 @@ function PetDetailContent({
       {/* Quick Stats */}
       <div style={{ padding: '16px 20px' }}>
         <Row gutter={12}>
-          <Col span={6}>
+          <Col xs={12} sm={6}>
             <div style={{ textAlign: 'center', padding: '12px 8px', background: '#fff', borderRadius: 10, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
               <CameraOutlined style={{ fontSize: 18, color: '#1890ff' }} />
               <div style={{ fontSize: 18, fontWeight: 700, marginTop: 4 }}>{photos.length}</div>
               <div style={{ fontSize: 11, color: '#999' }}>Photos</div>
             </div>
           </Col>
-          <Col span={6}>
+          <Col xs={12} sm={6}>
             <div style={{ textAlign: 'center', padding: '12px 8px', background: '#fff', borderRadius: 10, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
               <SafetyCertificateOutlined style={{ fontSize: 18, color: pet.healthCertified ? '#52c41a' : '#d9d9d9' }} />
               <div style={{ fontSize: 13, fontWeight: 600, marginTop: 6, color: pet.healthCertified ? '#52c41a' : '#999' }}>
@@ -493,7 +493,7 @@ function PetDetailContent({
               <div style={{ fontSize: 11, color: '#999' }}>Health Cert</div>
             </div>
           </Col>
-          <Col span={6}>
+          <Col xs={12} sm={6}>
             <div style={{ textAlign: 'center', padding: '12px 8px', background: '#fff', borderRadius: 10, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
               <HeartOutlined style={{ fontSize: 18, color: pet.isAvailableForMating ? '#eb2f96' : '#d9d9d9' }} />
               <div style={{ fontSize: 13, fontWeight: 600, marginTop: 6, color: pet.isAvailableForMating ? '#eb2f96' : '#999' }}>
@@ -502,7 +502,7 @@ function PetDetailContent({
               <div style={{ fontSize: 11, color: '#999' }}>Mating</div>
             </div>
           </Col>
-          <Col span={6}>
+          <Col xs={12} sm={6}>
             <div style={{ textAlign: 'center', padding: '12px 8px', background: '#fff', borderRadius: 10, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
               <CalendarOutlined style={{ fontSize: 18, color: '#faad14' }} />
               <div style={{ fontSize: 13, fontWeight: 600, marginTop: 6 }}>{formatDate(pet.createdAt, 'MMM YY')}</div>
@@ -545,7 +545,7 @@ function PetDetailContent({
 
         {/* Basic Info + Health side by side */}
         <Row gutter={12}>
-          <Col span={12}>
+          <Col xs={24} sm={12}>
             <Card size="small" style={{ marginBottom: 12, borderRadius: 12, height: '100%' }}
               title={<Space style={{ fontSize: 13 }}><InfoCircleOutlined /> Details</Space>}
             >
@@ -563,7 +563,7 @@ function PetDetailContent({
               </div>
             </Card>
           </Col>
-          <Col span={12}>
+          <Col xs={24} sm={12}>
             <Card size="small" style={{ marginBottom: 12, borderRadius: 12, height: '100%' }}
               title={<Space style={{ fontSize: 13 }}><EnvironmentOutlined /> Location & Owner</Space>}
             >
@@ -601,12 +601,12 @@ function PetDetailContent({
           {healthCert ? (
             <Space direction="vertical" size={10} style={{ width: '100%' }}>
               <Row gutter={16}>
-                <Col span={12}>
+                <Col xs={24} sm={12}>
                   <Text type="secondary" style={{ fontSize: 11 }}>Veterinarian</Text>
                   <div style={{ fontWeight: 600, fontSize: 13 }}>{healthCert.vetName}</div>
                   <Text type="secondary" style={{ fontSize: 11 }}>{healthCert.vetClinic}</Text>
                 </Col>
-                <Col span={12}>
+                <Col xs={24} sm={12}>
                   <Text type="secondary" style={{ fontSize: 11 }}>Dates</Text>
                   <div style={{ fontWeight: 500, fontSize: 12 }}>Issued: {formatDate(healthCert.certDate)}</div>
                   {healthCert.expiryDate && (

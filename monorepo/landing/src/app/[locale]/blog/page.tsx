@@ -73,7 +73,7 @@ export default async function BlogPage({ params, searchParams }: { params: Promi
     <Navbar />
     <main style={{ minHeight: '100vh', background: '#fafafa' }}>
       <section style={{ padding: '120px 24px 48px', textAlign: 'center', background: 'linear-gradient(135deg, #F1379D 0%, #722ed1 100%)', color: '#fff' }}>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: 700, margin: 0, fontFamily: 'Poppins' }}>
+        <h1 style={{ fontSize: 'clamp(1.8rem, 5vw, 2.5rem)', fontWeight: 700, margin: 0, fontFamily: 'Poppins' }}>
           {t('title')}
         </h1>
         <p style={{ fontSize: '1.1rem', opacity: 0.9, marginTop: 12, maxWidth: 600, marginInline: 'auto' }}>
@@ -88,7 +88,7 @@ export default async function BlogPage({ params, searchParams }: { params: Promi
           </div>
         ) : (
           <>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 32 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px, 100%), 1fr))', gap: 32 }}>
               {posts.map((post) => (
                 <Link key={post.id} href={`/blog/${post.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                   <article style={{ background: '#fff', borderRadius: 12, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', transition: 'transform 0.2s, box-shadow 0.2s' }}>

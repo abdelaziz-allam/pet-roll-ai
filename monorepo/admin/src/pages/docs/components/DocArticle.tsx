@@ -25,7 +25,7 @@ function MermaidBlock({ chart }: { chart: string }) {
     });
   }, [chart]);
 
-  return <div ref={containerRef} style={{ margin: '24px 0', textAlign: 'center' }} />;
+  return <div ref={containerRef} style={{ margin: '24px 0', textAlign: 'center', overflowX: 'auto', maxWidth: '100%' }} />;
 }
 
 export default function DocArticle({ content }: Props) {

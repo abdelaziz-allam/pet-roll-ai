@@ -218,7 +218,7 @@ export default async function BlogPostPage({
           <h1
             itemProp="headline"
             style={{
-              fontSize: '2.2rem',
+              fontSize: 'clamp(1.6rem, 5vw, 2.2rem)',
               fontWeight: 700,
               marginTop: 16,
               marginBottom: 16,
@@ -283,7 +283,7 @@ export default async function BlogPostPage({
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))',
                 gap: 24,
               }}
             >
