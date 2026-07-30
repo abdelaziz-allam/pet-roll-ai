@@ -6,7 +6,7 @@
 
 | Email | Password | Role | Notes |
 |-------|----------|------|-------|
-| admin@petfolioo.com | P@tF0lioo@2612210106022312 | super_admin | Primary admin account |
+| admin@petfolioo.com | P@TF0lioo@2612210106022312789 | super_admin | Primary admin account |
 
 ### Admin Roles Available
 

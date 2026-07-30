@@ -367,7 +367,7 @@ export class AdminAuthService {
   }
 
   async seedSuperAdmin() {
-    const defaultPassword = 'P@tR0ll@2612210106022312';
+    const defaultPassword = 'P@TF0lioo@2612210106022312789';
     const existing = await this.adminUsersRef
       .where('role', '==', 'super_admin')
       .limit(1)
