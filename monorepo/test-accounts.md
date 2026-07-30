@@ -7,6 +7,9 @@
 | Email | Password | Role | Notes |
 |-------|----------|------|-------|
 | admin@petfolioo.com | P@TF0lioo@2612210106022312789 | super_admin | Primary admin account |
+| admin-user@petfolioo.com | P@TF0lioo@Admin2024! | admin | Full management (no admin_users page) |
+| moderator@petfolioo.com | P@TF0lioo@Mod2024! | moderator | Moderate content, approve/reject verifications |
+| viewer@petfolioo.com | P@TF0lioo@View2024! | viewer | Read-only access to all pages |
 
 ### Admin Roles Available
 
