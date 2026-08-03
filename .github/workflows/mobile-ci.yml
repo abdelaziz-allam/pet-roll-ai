@@ -52,6 +52,19 @@ jobs:
         working-directory: monorepo/app
         run: flutter pub get
 
+      - name: Decode keystore
+        if: env.KEYSTORE_BASE64 != ''
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > /tmp/upload-keystore.jks
+          cat > monorepo/app/android/key.properties << 'PROPS'
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          storeFile=/tmp/upload-keystore.jks
+          PROPS
+
       - name: Build release AAB
         working-directory: monorepo/app
         run: flutter build appbundle --release
