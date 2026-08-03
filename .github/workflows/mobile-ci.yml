@@ -84,12 +84,16 @@ jobs:
       - name: Install Fastlane
         run: gem install fastlane
 
-      - name: Write Play Store service account key
-        run: echo '${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}' > /tmp/play-publisher-key.json
-
       - name: Deploy to Play Store (internal track)
+        env:
+          SUPPLY_JSON_KEY_DATA: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
         working-directory: monorepo/app/android
-        run: fastlane deploy_internal
+        run: |
+          if [ -z "$SUPPLY_JSON_KEY_DATA" ]; then
+            echo "⚠️ PLAY_STORE_SERVICE_ACCOUNT_JSON secret not set, skipping deploy"
+            exit 0
+          fi
+          fastlane deploy_internal
 
   build-ios:
     needs: test
