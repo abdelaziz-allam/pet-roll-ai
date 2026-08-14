@@ -238,6 +238,21 @@ jobs:
         if: steps.ios_secrets.outputs.ready == 'true'
         run: gem install fastlane
 
+      # main.dart calls Firebase.initializeApp() with no options, so the iOS SDK reads
+      # GoogleService-Info.plist out of the app bundle at launch. The file was committed
+      # but never referenced in project.pbxproj, so it was not bundled — Firebase threw
+      # before runApp() and the app installed but would not open. Fail before burning a
+      # build and a TestFlight upload if that wiring goes missing again.
+      - name: Verify Firebase config is wired into the Xcode project
+        if: steps.ios_secrets.outputs.ready == 'true'
+        working-directory: monorepo/app/ios
+        run: |
+          test -f Runner/GoogleService-Info.plist \
+            || { echo "::error::Runner/GoogleService-Info.plist is missing"; exit 1; }
+          grep -q "GoogleService-Info.plist in Resources" Runner.xcodeproj/project.pbxproj \
+            || { echo "::error::GoogleService-Info.plist is not in the Runner target's Resources build phase — it will not be bundled and the app will crash at launch"; exit 1; }
+          echo "✅ Firebase config is referenced by the Runner target"
+
       - name: Build signed IPA and upload to TestFlight
         if: steps.ios_secrets.outputs.ready == 'true'
         working-directory: monorepo/app/ios
@@ -251,6 +266,20 @@ jobs:
           IOS_PROVISIONING_PROFILE_NAME: ${{ secrets.IOS_PROVISIONING_PROFILE_NAME }}
           FASTLANE_SKIP_UPDATE_CHECK: 'true'
         run: fastlane beta_ci
+
+      # Definitive check on the real artifact: the project wiring above can be right and
+      # the file still miss the bundle (wrong target, stale build). Inspect the IPA itself.
+      - name: Verify Firebase config landed in the IPA
+        if: steps.ios_secrets.outputs.ready == 'true'
+        working-directory: monorepo/app/ios
+        run: |
+          if unzip -l build/PetFolioo.ipa | grep -q "Payload/Runner.app/GoogleService-Info.plist"; then
+            echo "✅ GoogleService-Info.plist is present in the built IPA"
+          else
+            echo "::error::GoogleService-Info.plist is NOT in the IPA — Firebase.initializeApp() will crash at launch"
+            unzip -l build/PetFolioo.ipa | grep -i plist || true
+            exit 1
+          fi
 
       - name: Upload IPA artifact
         if: steps.ios_secrets.outputs.ready == 'true'
