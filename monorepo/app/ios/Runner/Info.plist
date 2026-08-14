@@ -24,6 +24,12 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<!-- Export compliance: the app uses only exempt encryption — HTTPS to
+	     api.petfolioo.com and SHA-256 hashing for the Sign In with Apple nonce.
+	     No proprietary or non-standard cryptography. Declaring this here stops
+	     every TestFlight build from stalling at "Missing Compliance". -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>
