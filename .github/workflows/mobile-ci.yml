@@ -23,14 +23,12 @@ jobs:
         working-directory: monorepo/app
         run: flutter pub get
 
-      # Deliberately non-gating, unlike the tests below. ~715 analyzer errors come
-      # from an orphaned riverpod/go_router tree (lib/**/screens, lib/**/providers,
-      # lib/core/router) that nothing reachable from lib/main.dart imports, so it
-      # never reaches a build. Gating today would block every deploy on dead code.
-      # Drop the "|| true" once that tree is deleted.
+      # Gating now that analysis_options.yaml excludes the orphaned tree those 715
+      # errors lived in. The code that actually ships analyzes clean, so a real
+      # regression in it fails the build instead of scrolling past.
       - name: Analyze
         working-directory: monorepo/app
-        run: flutter analyze --no-fatal-infos || true
+        run: flutter analyze --no-fatal-infos
 
       # No "|| true" here: this step previously swallowed every failure, so the job
       # reported success while 2 tests were failing and broken tests reached main.

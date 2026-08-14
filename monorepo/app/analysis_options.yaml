@@ -26,3 +26,79 @@ linter:
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
+
+analyzer:
+  # Excluded: an orphaned parallel implementation (riverpod providers, go_router,
+  # and a core/network + core/storage layer) that the "revert(mobile): restore
+  # mobile app to stable 80600d6 state" commit stranded. Nothing reachable from
+  # lib/main.dart or the tests imports any of it, and its dependencies are not in
+  # pubspec.yaml, so it never reaches a build — but it does produce 715 analyzer
+  # errors, which is why `flutter analyze` had to be run with "|| true".
+  #
+  # Excluding it lets analyze gate CI on the code that actually ships: the
+  # reachable set currently has ZERO analyzer errors. This is deliberately NOT a
+  # deletion — that tree still holds unshipped work (chat, reports, schedules,
+  # onboarding, notifications) with no equivalent in the shipped app.
+  #
+  # When that tree is either rewired or removed, delete the matching lines below.
+  exclude:
+    - lib/core/network/**
+    - lib/core/router/**
+    - lib/core/storage/**
+    - lib/core/utils/**
+    - lib/features/auth/providers/**
+    - lib/features/auth/screens/**
+    - lib/features/auth/services/**
+    - lib/features/chat/models/**
+    - lib/features/chat/providers/**
+    - lib/features/chat/screens/**
+    - lib/features/chat/services/**
+    - lib/features/health/providers/**
+    - lib/features/health/services/**
+    - lib/features/home/models/**
+    - lib/features/home/providers/**
+    - lib/features/home/screens/**
+    - lib/features/home/services/**
+    - lib/features/mating/models/**
+    - lib/features/mating/providers/**
+    - lib/features/mating/services/**
+    - lib/features/notifications/models/**
+    - lib/features/notifications/providers/**
+    - lib/features/notifications/screens/**
+    - lib/features/notifications/services/**
+    - lib/features/onboarding/screens/**
+    - lib/features/pets/providers/**
+    - lib/features/pets/services/**
+    - lib/features/pregnancy/providers/**
+    - lib/features/pregnancy/services/**
+    - lib/features/reports/providers/**
+    - lib/features/reports/screens/**
+    - lib/features/reports/services/**
+    - lib/features/schedules/models/**
+    - lib/features/schedules/providers/**
+    - lib/features/schedules/screens/**
+    - lib/features/schedules/services/**
+    - lib/features/vaccination/providers/**
+    - lib/features/vaccination/services/**
+    - lib/core/theme/app_colors.dart
+    - lib/core/theme/app_typography.dart
+    - lib/core/widgets/app_button.dart
+    - lib/core/widgets/app_text_field.dart
+    - lib/core/widgets/avatar_widget.dart
+    - lib/core/widgets/empty_state.dart
+    - lib/core/widgets/error_view.dart
+    - lib/core/widgets/loading_indicator.dart
+    - lib/core/widgets/shimmer_loading.dart
+    - lib/features/health/screens/add_health_record_screen.dart
+    - lib/features/mating/screens/breeder_rankings_screen.dart
+    - lib/features/mating/screens/create_listing_screen.dart
+    - lib/features/mating/screens/match_requests_screen.dart
+    - lib/features/mating/screens/mating_detail_screen.dart
+    - lib/features/pets/screens/edit_pet_screen.dart
+    - lib/features/pets/screens/pets_list_screen.dart
+    - lib/features/pregnancy/screens/pregnancy_tracker_screen.dart
+    - lib/features/pregnancy/screens/start_pregnancy_screen.dart
+    - lib/features/profile/screens/edit_profile_screen.dart
+    - lib/features/vaccination/screens/add_vaccination_screen.dart
+    - lib/features/vaccination/screens/vaccination_detail_screen.dart
+    - lib/features/vaccination/screens/vaccination_list_screen.dart
