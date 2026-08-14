@@ -18,7 +18,14 @@ platform :ios do
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
+      configuration: "Release",
       export_method: "app-store",
+      # Signing lives in the Release config of project.pbxproj (CODE_SIGN_STYLE=Manual,
+      # DEVELOPMENT_TEAM, PROVISIONING_PROFILE_SPECIFIER and an
+      # "CODE_SIGN_IDENTITY[sdk=iphoneos*]" override). The SDK-conditional identity in the
+      # project takes precedence over a plain CODE_SIGN_IDENTITY passed here, so do not try
+      # to set it via xcargs — it will be silently ignored and Xcode falls back to
+      # "iOS Development".
       xcargs: [
         "DEVELOPMENT_TEAM=#{team_id}",
         "CODE_SIGN_STYLE=Manual",
