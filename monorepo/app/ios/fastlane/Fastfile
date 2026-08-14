@@ -1,6 +1,46 @@
 default_platform(:ios)
 
+BUNDLE_ID = ENV["IOS_BUNDLE_ID"] || "com.petroll.app"
+
 platform :ios do
+  desc "Build signed IPA and upload to TestFlight (CI — App Store Connect API key, manual signing)"
+  lane :beta_ci do
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_content: ENV.fetch("ASC_KEY_P8_BASE64"),
+      is_key_content_base64: true
+    )
+
+    team_id = ENV.fetch("APPLE_TEAM_ID")
+    profile_name = ENV.fetch("IOS_PROVISIONING_PROFILE_NAME")
+
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      export_method: "app-store",
+      xcargs: [
+        "DEVELOPMENT_TEAM=#{team_id}",
+        "CODE_SIGN_STYLE=Manual",
+        "PROVISIONING_PROFILE_SPECIFIER=#{profile_name.inspect}"
+      ].join(" "),
+      export_options: {
+        signingStyle: "manual",
+        teamID: team_id,
+        provisioningProfiles: { BUNDLE_ID => profile_name },
+        uploadSymbols: true
+      },
+      output_directory: "build",
+      output_name: "PetFolioo.ipa"
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true,
+      distribute_external: false
+    )
+  end
+
   desc "Build and upload to TestFlight"
   lane :beta do
     build_app(

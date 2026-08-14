@@ -1,5 +1,8 @@
-app_identifier("com.petroll.app")
-apple_id("abd.ibrahim.allam@gmail.com")
+app_identifier(ENV["IOS_BUNDLE_ID"] || "com.petroll.app")
+apple_id(ENV["FASTLANE_APPLE_ID"] || "abd.ibrahim.allam@gmail.com")
 
-itc_team_id("")
-team_id("")
+# Populated from CI secrets once Apple Developer enrollment completes.
+# Locally these stay empty and the `beta`/`release` lanes fall back to
+# interactive Xcode signing.
+itc_team_id(ENV["ASC_TEAM_ID"] || "")
+team_id(ENV["APPLE_TEAM_ID"] || "")
