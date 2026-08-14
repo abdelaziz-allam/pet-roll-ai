@@ -305,7 +305,6 @@ class _MatingBrowseScreenState extends State<MatingBrowseScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Padding(

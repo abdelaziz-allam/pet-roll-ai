@@ -215,7 +215,6 @@ class _PetMatingProfileScreenState extends State<PetMatingProfileScreen> {
   }
 
   Widget _buildProfile() {
-    final l10n = AppLocalizations.of(context)!;
     final photos = (_profile!['photos'] as List?) ?? [];
     final owner = _profile!['owner'] as Map<String, dynamic>?;
     final healthRecords = (_profile!['healthRecords'] as List?) ?? [];

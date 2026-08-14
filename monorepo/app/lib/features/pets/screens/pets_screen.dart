@@ -209,7 +209,7 @@ class _PetsScreenState extends State<PetsScreen> {
     final status = pet['status'] ?? 'active';
     final photos = pet['photos'] as List?;
     final hasPhoto = photos != null && photos.isNotEmpty;
-    final photoUrl = hasPhoto ? (photos!.first is Map ? photos.first['url'] : photos.first) : null;
+    final photoUrl = hasPhoto ? (photos.first is Map ? photos.first['url'] : photos.first) : null;
 
     return GestureDetector(
       onTap: () async {

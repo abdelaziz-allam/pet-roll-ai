@@ -201,7 +201,6 @@ class _MatingMatchesScreenState extends State<MatingMatchesScreen> with SingleTi
     final listingPhotos = listing?['photos'] as List? ?? [];
 
     final myPetName = pet?['name'] ?? 'My Pet';
-    final myPetBreed = pet?['breed'] ?? '';
 
     final otherPersonName = isSent
         ? (receiver?['displayName'] ?? 'Pet Owner')
