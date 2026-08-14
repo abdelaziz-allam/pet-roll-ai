@@ -57,8 +57,8 @@ void main() {
       expect(AppConstants.maxPhotoSize, 10 * 1024 * 1024);
     });
 
-    test('max photos per pet is 10', () {
-      expect(AppConstants.maxPhotosPerPet, 10);
+    test('max photos per pet is 50', () {
+      expect(AppConstants.maxPhotosPerPet, 50);
     });
   });
 }

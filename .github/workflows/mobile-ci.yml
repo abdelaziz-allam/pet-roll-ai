@@ -23,13 +23,20 @@ jobs:
         working-directory: monorepo/app
         run: flutter pub get
 
+      # Deliberately non-gating, unlike the tests below. ~715 analyzer errors come
+      # from an orphaned riverpod/go_router tree (lib/**/screens, lib/**/providers,
+      # lib/core/router) that nothing reachable from lib/main.dart imports, so it
+      # never reaches a build. Gating today would block every deploy on dead code.
+      # Drop the "|| true" once that tree is deleted.
       - name: Analyze
         working-directory: monorepo/app
         run: flutter analyze --no-fatal-infos || true
 
+      # No "|| true" here: this step previously swallowed every failure, so the job
+      # reported success while 2 tests were failing and broken tests reached main.
       - name: Run tests
         working-directory: monorepo/app
-        run: flutter test || true
+        run: flutter test
 
   build-android:
     needs: test
@@ -47,6 +54,9 @@ jobs:
         with:
           flutter-version: '3.41.x'
           channel: 'stable'
+
+      - name: Stamp CI build number
+        run: "$GITHUB_WORKSPACE/.github/set-build-number.sh ${{ github.run_number }}"
 
       - name: Install dependencies
         working-directory: monorepo/app
@@ -149,6 +159,9 @@ jobs:
         with:
           flutter-version: '3.41.x'
           channel: 'stable'
+
+      - name: Stamp CI build number
+        run: "$GITHUB_WORKSPACE/.github/set-build-number.sh ${{ github.run_number }}"
 
       - name: Install dependencies
         working-directory: monorepo/app
