@@ -99,20 +99,31 @@ class _SplashLoaderState extends State<SplashLoader> {
   }
 
   Future<void> _init() async {
-    final notifService = NotificationService();
-    await notifService.init();
-    await notifService.requestPermissions();
-
     final api = ApiService();
-    await api.loadToken();
 
-    if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => api.isLoggedIn ? const HomeScreen() : const AppLoginScreen(),
-        ),
-      );
+    // Neither of these is worth blocking launch for. Previously any throw in here
+    // left the future rejected, so pushReplacement never ran and the app sat on the
+    // splash spinner forever with no error and no way forward.
+    try {
+      final notifService = NotificationService();
+      await notifService.init();
+      await notifService.requestPermissions();
+    } catch (e, stack) {
+      debugPrint('Notification setup failed, continuing without it: $e\n$stack');
     }
+
+    try {
+      await api.loadToken();
+    } catch (e, stack) {
+      debugPrint('Could not restore saved session, starting signed out: $e\n$stack');
+    }
+
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => api.isLoggedIn ? const HomeScreen() : const AppLoginScreen(),
+      ),
+    );
   }
 
   @override
