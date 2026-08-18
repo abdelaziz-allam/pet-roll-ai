@@ -253,6 +253,18 @@ jobs:
             || { echo "::error::GoogleService-Info.plist is not in the Runner target's Resources build phase — it will not be bundled and the app will crash at launch"; exit 1; }
           echo "✅ Firebase config is referenced by the Runner target"
 
+          # google_sign_in raises an NSException on iOS if the REVERSED_CLIENT_ID URL
+          # scheme is not registered — a native crash the Dart try/catch cannot catch.
+          # These two values must stay identical; regenerating GoogleService-Info.plist
+          # changes REVERSED_CLIENT_ID and would silently reintroduce the crash.
+          EXPECTED=$(plutil -extract REVERSED_CLIENT_ID raw -o - Runner/GoogleService-Info.plist)
+          ACTUAL=$(plutil -extract CFBundleURLTypes.0.CFBundleURLSchemes.0 raw -o - Runner/Info.plist 2>/dev/null || echo "")
+          if [ "$EXPECTED" != "$ACTUAL" ]; then
+            echo "::error::Google Sign-In URL scheme mismatch — Info.plist has '$ACTUAL', GoogleService-Info.plist expects '$EXPECTED'. Google sign-in will crash the app."
+            exit 1
+          fi
+          echo "✅ Google Sign-In URL scheme matches REVERSED_CLIENT_ID"
+
       - name: Build signed IPA and upload to TestFlight
         if: steps.ios_secrets.outputs.ready == 'true'
         working-directory: monorepo/app/ios

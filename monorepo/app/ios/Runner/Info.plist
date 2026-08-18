@@ -22,6 +22,25 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<!-- Google Sign-In OAuth callback. This must be the REVERSED_CLIENT_ID from
+	     GoogleService-Info.plist. google_sign_in raises an NSException on iOS when the
+	     scheme is missing, which is a native crash the Dart try/catch around signIn()
+	     cannot catch — the app died as soon as a signed-out user tapped "Sign in with
+	     Google", the first screen they see. Not a secret: it ships in every copy of
+	     the app and is already in the committed GoogleService-Info.plist. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>google-sign-in</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.834040996278-ufif9vc0k72ogrlqkmet34glafhvupkb</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<!-- Export compliance: the app uses only exempt encryption — HTTPS to
