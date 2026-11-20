@@ -206,8 +206,8 @@ const LoginPage: React.FC = () => {
                 fontSize: 13,
                 lineHeight: 1.8,
               }}>
-                <div><strong>Email:</strong> admin@petfolioo.com</div>
-                <div><strong>Password:</strong> admin123456</div>
+                <div><strong>Email:</strong> see test-accounts.md</div>
+                <div><strong>Password:</strong> in Secret Manager</div>
               </div>
             </>
           )}

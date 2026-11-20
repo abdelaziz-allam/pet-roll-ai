@@ -366,23 +366,25 @@ export class AdminAuthService {
     return { id: doc.id, ...safeUser };
   }
 
-  async seedSuperAdmin() {
-    const defaultPassword = 'P@TF0lioo@2612210106022312789';
+  /**
+   * Creates the first super admin with the given password. Never touches an
+   * existing super admin, so it cannot be used to take over the account.
+   */
+  async seedSuperAdmin(password: string) {
+    if (password.length < 12) {
+      throw new Error('Super admin password must be at least 12 characters');
+    }
     const existing = await this.adminUsersRef
       .where('role', '==', 'super_admin')
       .limit(1)
       .get();
 
     if (!existing.empty) {
-      const doc = existing.docs[0];
-      const salt = generateSalt();
-      const passwordHash = hashPassword(defaultPassword, salt);
-      await doc.ref.update({ passwordHash, salt, updatedAt: FieldValue.serverTimestamp() });
-      return { message: 'Super admin password reset', seeded: false };
+      return { message: 'Super admin already exists', seeded: false };
     }
 
     const salt = generateSalt();
-    const passwordHash = hashPassword(defaultPassword, salt);
+    const passwordHash = hashPassword(password, salt);
 
     const adminData = {
       email: 'admin@petroll.com',

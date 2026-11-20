@@ -100,10 +100,11 @@ describe('Admin Auth Routes', () => {
     });
   });
 
+  // Regression: an unauthenticated /seed reset the super admin password to a known value.
   describe('POST /seed', () => {
-    it('seeds super admin and returns 200', async () => {
+    it('is not exposed', async () => {
       const res = await fastify.inject({ method: 'POST', url: '/seed' });
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(404);
     });
   });
 

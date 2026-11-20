@@ -3,7 +3,10 @@ import { FieldValue } from 'firebase-admin/firestore';
 
 async function seedAdmin() {
   const email = process.env.ADMIN_EMAIL || 'admin@petfolioo.com';
-  const password = process.env.ADMIN_PASSWORD || 'P@TF0lioo@2612210106022312789';
+  const password = process.env.ADMIN_PASSWORD;
+  if (!password) {
+    throw new Error('Set ADMIN_PASSWORD to seed the admin user');
+  }
 
   let uid: string;
 
