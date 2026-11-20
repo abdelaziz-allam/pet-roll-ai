@@ -17,6 +17,16 @@ const envSchema = z.object({
   RATE_LIMIT_WINDOW: z.coerce.number().default(60000),
   GCS_BUCKET: z.string().default('petroll-production-storage'),
   USE_MEMORY_STORE: z.coerce.boolean().default(false),
+  STORAGE_PROVIDER: z.enum(['gcs', 'azure']).default('gcs'),
+  AZURE_STORAGE_ACCOUNT_URL: z.string().url().optional(),
+  AZURE_PUBLIC_CONTAINER: z.string().default('public'),
+  AZURE_PRIVATE_CONTAINER: z.string().default('private'),
+  // Bucket named in URLs that Firestore stored before the move to Azure.
+  LEGACY_GCS_BUCKET: z.string().default('petroll-production-storage'),
+  // Workload Identity Federation from an Azure managed identity to Google.
+  GCP_WIF_PROVIDER: z.string().optional(),
+  GCP_WIF_SERVICE_ACCOUNT: z.string().optional(),
+  GCP_WIF_TOKEN_RESOURCE: z.string().default('https://management.azure.com/'),
 });
 
 export type Env = z.infer<typeof envSchema>;

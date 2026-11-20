@@ -2,7 +2,8 @@ import { FastifyInstance } from 'fastify';
 import { pregnancyService } from './pregnancy.service';
 import { startPregnancySchema, updatePregnancySchema, addWeightSchema } from './pregnancy.schema';
 import { requireAuth } from '../../middleware/require-auth';
-import { storage, FieldValue, db } from '../../config/firebase';
+import { FieldValue, db } from '../../config/firebase';
+import { objectStore } from '../../storage/object-store';
 import { env } from '../../config/env';
 
 export async function pregnancyRoutes(fastify: FastifyInstance) {
@@ -124,18 +125,8 @@ export async function pregnancyRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      const bucket = storage.bucket(env.GCS_BUCKET);
-      const file = bucket.file(storagePath);
-      const stream = file.createWriteStream({ metadata: { contentType: resolvedMime }, resumable: false });
-
-      await new Promise<void>((resolve, reject) => {
-        data.file.pipe(stream);
-        stream.on('error', reject);
-        stream.on('finish', resolve);
-      });
-
-      const publicUrl = `https://storage.googleapis.com/${env.GCS_BUCKET}/${storagePath}`;
-      const updatedPhotos = [...currentPhotos, publicUrl];
+      const publicUrl = await objectStore().save(storagePath, data.file, resolvedMime);
+      const updatedPhotos = [...currentPhotos, objectStore().storedUrl(storagePath)];
       await db.collection('pregnancies').doc(pregId).update({
         'fatherInfo.photos': updatedPhotos,
         updatedAt: FieldValue.serverTimestamp(),
@@ -143,7 +134,7 @@ export async function pregnancyRoutes(fastify: FastifyInstance) {
 
       return reply.code(200).send({ url: publicUrl, path: storagePath, totalPhotos: updatedPhotos.length });
     } catch (err: any) {
-      request.log.error({ err, storagePath }, 'Failed to upload pregnancy photo to GCS');
+      request.log.error({ err, storagePath }, 'Failed to upload pregnancy photo ');
       return reply.code(500).send({ error: 'Upload failed', message: err.message || 'Storage error' });
     }
   });

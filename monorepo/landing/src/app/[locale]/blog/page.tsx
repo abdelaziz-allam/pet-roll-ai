@@ -4,6 +4,7 @@ import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { apiUrl as apiUrlFromEnv } from '@/lib/runtime-env';
 
 interface BlogPost {
   id: string;
@@ -26,7 +27,7 @@ interface BlogResponse {
 }
 
 async function getBlogPosts(page: number = 1): Promise<BlogResponse> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.petfolioo.com/api/v1';
+  const apiUrl = apiUrlFromEnv();
   try {
     const res = await fetch(`${apiUrl}/blog/posts?limit=24&page=${page}`, {
       next: { revalidate: 300 },

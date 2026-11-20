@@ -1,0 +1,103 @@
+name: Azure Deploy - Stage
+
+# Builds the three images, pushes them to the STAGE registry and rolls them out. Runs next to the
+# GCP workflows on the same push to main; neither knows about the other.
+# Prod never rebuilds: azure-promote-prod.yml copies the exact images running here.
+# Waits for the AZURE_DEPLOY_ENABLED repository variable, set once stage infrastructure exists.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "monorepo/backend/**"
+      - "monorepo/admin/**"
+      - "monorepo/landing/**"
+      - "monorepo/docker/**"
+      - ".github/workflows/azure-deploy-stage.yml"
+      - ".github/actions/azure-rollout/**"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: azure-deploy-stage
+  cancel-in-progress: false
+
+jobs:
+  test:
+    if: vars.AZURE_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: [backend, admin]
+    defaults:
+      run:
+        working-directory: monorepo/${{ matrix.project }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: monorepo/${{ matrix.project }}/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    # The stage deploy identity trusts this GitHub environment.
+    environment: azure-stage
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: api
+            dockerfile: docker/Dockerfile.backend
+            build_args: ""
+          - app: landing
+            dockerfile: docker/Dockerfile.landing
+            # Pages pre-rendered during the build must not call any real API: the address below
+            # cannot be reached, so they render empty and fill from API_URL (set per environment
+            # by Terraform) on their first refresh.
+            build_args: >-
+              --build-arg NEXT_PUBLIC_API_URL=http://127.0.0.1:9/api/v1
+              --build-arg NEXT_PUBLIC_GA_MEASUREMENT_ID=G-P1BLB43EGZ
+          - app: admin
+            dockerfile: docker/Dockerfile.admin
+            build_args: ""
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_STAGE_DEPLOY_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_STAGE_SUBSCRIPTION_ID }}
+
+      - name: Build and push
+        id: image
+        working-directory: monorepo
+        env:
+          ACR: ${{ vars.AZURE_STAGE_ACR_NAME }}
+          DOCKERFILE: ${{ matrix.dockerfile }}
+          BUILD_ARGS: ${{ matrix.build_args }}
+          APP: ${{ matrix.app }}
+        run: |
+          set -euo pipefail
+          az acr login -n "$ACR"
+          image="${ACR}.azurecr.io/${APP}:${GITHUB_SHA}"
+          # BUILD_ARGS is a fixed list from this file, split into words on purpose.
+          # shellcheck disable=SC2086
+          docker build -f "$DOCKERFILE" $BUILD_ARGS -t "$image" .
+          docker push "$image"
+          echo "ref=$image" >> "$GITHUB_OUTPUT"
+
+      - uses: ./.github/actions/azure-rollout
+        with:
+          environment: stage
+          app: ${{ matrix.app }}
+          image: ${{ steps.image.outputs.ref }}

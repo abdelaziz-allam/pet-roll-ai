@@ -1,4 +1,5 @@
-import { db, FieldValue, storage } from '../../config/firebase';
+import { db, FieldValue } from '../../config/firebase';
+import { objectStore } from '../../storage/object-store';
 import { CreateBlogPostInput, UpdateBlogPostInput } from './blog.schema';
 import { SeoService } from '../seo/seo.service';
 import { FastifyBaseLogger } from 'fastify';
@@ -225,15 +226,7 @@ export class BlogService {
   }
 
   async uploadCoverImage(file: Buffer, filename: string): Promise<string> {
-    const bucket = storage.bucket();
     const path = `blog/${Date.now()}-${filename}`;
-    const blob = bucket.file(path);
-
-    await blob.save(file, {
-      metadata: { contentType: 'image/jpeg' },
-      public: true,
-    });
-
-    return `https://storage.googleapis.com/${bucket.name}/${path}`;
+    return objectStore().save(path, file, 'image/jpeg');
   }
 }

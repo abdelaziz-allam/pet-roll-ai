@@ -1,4 +1,5 @@
-import { db, FieldValue, storage } from '../../config/firebase';
+import { db, FieldValue } from '../../config/firebase';
+import { objectStore } from '../../storage/object-store';
 import { CreatePetInput, UpdatePetInput } from './pets.schema';
 
 export class PetsService {
@@ -87,8 +88,7 @@ export class PetsService {
     await batch.commit();
 
     try {
-      const bucket = storage.bucket();
-      await bucket.deleteFiles({ prefix: `pets/${ownerId}/${petId}/` });
+      await objectStore().deletePrefix(`pets/${ownerId}/${petId}/`);
     } catch {}
   }
 
@@ -122,7 +122,7 @@ export class PetsService {
     });
 
     try {
-      await storage.bucket().file(path).delete();
+      await objectStore().delete(path);
     } catch {}
   }
 }
