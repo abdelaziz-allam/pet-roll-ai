@@ -19,6 +19,8 @@ services:
       - JWT_EXPIRY=1h
       - REFRESH_TOKEN_EXPIRY=7d
       - CORS_ORIGINS=http://localhost:5173,http://localhost:3001
+      - SEED_DEMO_DATA=true
+      - ADMIN_PASSWORD=local-dev-admin-only
     depends_on:
       firebase-emulator:
         condition: service_healthy

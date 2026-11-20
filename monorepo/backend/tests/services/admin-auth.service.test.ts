@@ -830,7 +830,7 @@ describe('AdminAuthService', () => {
       });
       mockAdminUsersCollection.add.mockResolvedValueOnce({ id: 'seeded-admin-id' });
 
-      const result = await service.seedSuperAdmin();
+      const result = await service.seedSuperAdmin('a-strong-test-password');
 
       expect(result.message).toBe('Super admin seeded: admin@petroll.com');
       expect(result.seeded).toBe(true);
@@ -845,32 +845,28 @@ describe('AdminAuthService', () => {
       );
     });
 
-    it('should reset password of existing super admin', async () => {
+    // Regression: seeding used to overwrite the existing super admin's password.
+    it('should leave an existing super admin untouched', async () => {
       const mockRef = { update: vi.fn().mockResolvedValue(undefined) };
       mockAdminUsersCollection.get.mockResolvedValueOnce({
         empty: false,
         size: 1,
         docs: [{
           id: 'existing-super-id',
-          data: () => ({
-            email: 'admin@petroll.com',
-            role: 'super_admin',
-          }),
+          data: () => ({ email: 'admin@petroll.com', role: 'super_admin' }),
           ref: mockRef,
         }],
       });
 
-      const result = await service.seedSuperAdmin();
+      const result = await service.seedSuperAdmin('a-strong-test-password');
 
-      expect(result.message).toBe('Super admin password reset');
       expect(result.seeded).toBe(false);
-      expect(mockRef.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          passwordHash: expect.any(String),
-          salt: expect.any(String),
-        })
-      );
+      expect(mockRef.update).not.toHaveBeenCalled();
       expect(mockAdminUsersCollection.add).not.toHaveBeenCalled();
+    });
+
+    it('should reject a short password', async () => {
+      await expect(service.seedSuperAdmin('short')).rejects.toThrow('at least 12 characters');
     });
   });
 

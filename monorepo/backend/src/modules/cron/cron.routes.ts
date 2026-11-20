@@ -1,7 +1,26 @@
-import { FastifyInstance } from 'fastify';
+import { timingSafeEqual } from 'crypto';
+import { FastifyInstance, FastifyRequest } from 'fastify';
 import { db } from '../../config/firebase';
 
+/** Compares the x-cron-secret header to CRON_SECRET; an unset secret matches nothing. */
+export function hasValidCronSecret(request: FastifyRequest): boolean {
+  const expected = process.env.CRON_SECRET;
+  const given = request.headers['x-cron-secret'];
+  if (!expected || typeof given !== 'string') return false;
+  const a = Buffer.from(given);
+  const b = Buffer.from(expected);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
 export async function cronRoutes(fastify: FastifyInstance) {
+  // These jobs write and delete data, so only the scheduler may call them.
+  fastify.addHook('onRequest', async (request, reply) => {
+    if (request.routeOptions.url?.endsWith('/ping')) return;
+    if (!hasValidCronSecret(request)) {
+      return reply.code(401).send({ error: 'Unauthorized' });
+    }
+  });
+
   fastify.get('/ping', async (request, reply) => {
     return reply.code(200).send({ status: 'ok', timestamp: new Date().toISOString() });
   });

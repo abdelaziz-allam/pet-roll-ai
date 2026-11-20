@@ -34,11 +34,6 @@ export async function adminAuthRoutes(fastify: FastifyInstance) {
     return reply.code(200).send(result);
   });
 
-  fastify.post('/seed', async (request, reply) => {
-    const result = await adminAuthService.seedSuperAdmin();
-    return reply.code(200).send(result);
-  });
-
   // Returns permission config for the frontend
   fastify.get('/permissions-config', async (_request, reply) => {
     return reply.code(200).send({ pages: ADMIN_PAGES, actions: PAGE_ACTIONS });

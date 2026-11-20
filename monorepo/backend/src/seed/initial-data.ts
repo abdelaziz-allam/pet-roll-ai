@@ -2,7 +2,16 @@ import { db, FieldValue } from '../config/firebase';
 import { adminAuthService } from '../modules/admin-auth/admin-auth.service';
 import { adminService } from '../modules/admin/admin.service';
 
+/**
+ * Fills an empty database with demo data. Opt-in through SEED_DEMO_DATA=true,
+ * because a fresh environment must never start with demo accounts or a
+ * guessable admin. The super admin is created only when ADMIN_PASSWORD is set.
+ */
 export async function seedInitialData() {
+  if (process.env.SEED_DEMO_DATA !== 'true') {
+    return;
+  }
+
   const usersCheck = await adminService.getUsers(1, 1);
   if (usersCheck.total > 0) {
     return;
@@ -10,7 +19,9 @@ export async function seedInitialData() {
 
   console.log('[SEED] Database empty — seeding initial data...');
 
-  await adminAuthService.seedSuperAdmin();
+  if (process.env.ADMIN_PASSWORD) {
+    await adminAuthService.seedSuperAdmin(process.env.ADMIN_PASSWORD);
+  }
   await seedUsers();
   await adminService.seedDefaultCategories();
   await adminService.seedLocations();

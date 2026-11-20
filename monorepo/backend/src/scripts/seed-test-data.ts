@@ -9,10 +9,15 @@ interface TestUser {
   pets?: Array<{ name: string; species: string; breed: string }>;
 }
 
+const TEST_USER_PASSWORD = process.env.TEST_USER_PASSWORD;
+if (!TEST_USER_PASSWORD) {
+  throw new Error('Set TEST_USER_PASSWORD to seed test users');
+}
+
 const TEST_USERS: TestUser[] = [
   {
     email: 'owner1@test.com',
-    password: 'Test1234!',
+    password: TEST_USER_PASSWORD,
     displayName: 'Test Owner 1',
     role: 'user',
     pets: [
@@ -23,7 +28,7 @@ const TEST_USERS: TestUser[] = [
   },
   {
     email: 'owner2@test.com',
-    password: 'Test1234!',
+    password: TEST_USER_PASSWORD,
     displayName: 'Test Owner 2',
     role: 'user',
     pets: [
@@ -32,7 +37,7 @@ const TEST_USERS: TestUser[] = [
   },
   {
     email: 'breeder@test.com',
-    password: 'Test1234!',
+    password: TEST_USER_PASSWORD,
     displayName: 'Test Breeder',
     role: 'breeder',
     pets: [
@@ -42,13 +47,13 @@ const TEST_USERS: TestUser[] = [
   },
   {
     email: 'mod@test.com',
-    password: 'Test1234!',
+    password: TEST_USER_PASSWORD,
     displayName: 'Test Moderator',
     role: 'moderator',
   },
   {
     email: 'viewer@test.com',
-    password: 'Test1234!',
+    password: TEST_USER_PASSWORD,
     displayName: 'Test Viewer',
     role: 'viewer',
   },

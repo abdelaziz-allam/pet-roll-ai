@@ -78,7 +78,11 @@ import { cronRoutes } from '../../src/modules/cron/cron.routes';
 describe('Cron Routes', () => {
   let fastify: FastifyInstance;
 
+  const secret = 'test-cron-secret-value';
+  const auth = { 'x-cron-secret': secret };
+
   beforeAll(async () => {
+    process.env.CRON_SECRET = secret;
     fastify = Fastify();
     fastify.decorateRequest('user', null);
     fastify.decorateRequest('adminUser', null);
@@ -86,7 +90,10 @@ describe('Cron Routes', () => {
     await fastify.ready();
   });
 
-  afterAll(() => fastify.close());
+  afterAll(async () => {
+    await fastify.close();
+    delete process.env.CRON_SECRET;
+  });
 
   describe('GET /ping', () => {
     it('returns ok status with 200', async () => {
@@ -100,7 +107,7 @@ describe('Cron Routes', () => {
 
   describe('POST /send-reminders', () => {
     it('sends reminders and returns 200', async () => {
-      const res = await fastify.inject({ method: 'POST', url: '/send-reminders' });
+      const res = await fastify.inject({ method: 'POST', url: '/send-reminders', headers: auth });
       expect(res.statusCode).toBe(200);
       const body = JSON.parse(res.payload);
       expect(body.sent).toBeDefined();
@@ -110,7 +117,7 @@ describe('Cron Routes', () => {
 
   describe('POST /cleanup', () => {
     it('cleans up old notifications and returns 200', async () => {
-      const res = await fastify.inject({ method: 'POST', url: '/cleanup' });
+      const res = await fastify.inject({ method: 'POST', url: '/cleanup', headers: auth });
       expect(res.statusCode).toBe(200);
       const body = JSON.parse(res.payload);
       expect(body.deleted).toBeDefined();
@@ -119,10 +126,30 @@ describe('Cron Routes', () => {
 
   describe('POST /compute-stats', () => {
     it('computes stats and returns 200', async () => {
-      const res = await fastify.inject({ method: 'POST', url: '/compute-stats' });
+      const res = await fastify.inject({ method: 'POST', url: '/compute-stats', headers: auth });
       expect(res.statusCode).toBe(200);
       const body = JSON.parse(res.payload);
       expect(body.computed).toBe(true);
+    });
+  });
+
+  // Regression: these jobs were callable by anyone on the internet.
+  describe('authorization', () => {
+    it.each(['/send-reminders', '/cleanup', '/compute-stats'])('rejects %s without the secret', async (url) => {
+      const res = await fastify.inject({ method: 'POST', url });
+      expect(res.statusCode).toBe(401);
+    });
+
+    it('rejects a wrong secret', async () => {
+      const res = await fastify.inject({ method: 'POST', url: '/cleanup', headers: { 'x-cron-secret': 'wrong' } });
+      expect(res.statusCode).toBe(401);
+    });
+
+    it('rejects every call when CRON_SECRET is unset', async () => {
+      delete process.env.CRON_SECRET;
+      const res = await fastify.inject({ method: 'POST', url: '/cleanup', headers: auth });
+      process.env.CRON_SECRET = secret;
+      expect(res.statusCode).toBe(401);
     });
   });
 });
