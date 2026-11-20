@@ -10,6 +10,9 @@ const nextConfig = {
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
+      // Blog covers uploaded through the admin portal (GCP today, Azure after the move).
+      { protocol: 'https', hostname: 'storage.googleapis.com' },
+      { protocol: 'https', hostname: '*.blob.core.windows.net' },
     ],
   },
   redirects: async () => [

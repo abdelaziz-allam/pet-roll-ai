@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify';
-import { db, FieldValue, storage } from '../../config/firebase';
+import { db, FieldValue } from '../../config/firebase';
+import { objectStore } from '../../storage/object-store';
 import { requireAuth } from '../../middleware/require-auth';
 
 export async function reportsRoutes(fastify: FastifyInstance) {
@@ -61,10 +62,7 @@ export async function reportsRoutes(fastify: FastifyInstance) {
     }
 
     const filePath = `reports/${request.user!.uid}/${reportId}.pdf`;
-    const [url] = await storage.bucket().file(filePath).getSignedUrl({
-      action: 'read',
-      expires: Date.now() + 15 * 60 * 1000,
-    });
+    const url = await objectStore().signedUrl(filePath, 15);
 
     return reply.code(200).send({ downloadUrl: url });
   });
