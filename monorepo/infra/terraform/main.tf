@@ -151,9 +151,11 @@ resource "google_storage_bucket" "uploads" {
   }
 }
 
+# legacyObjectReader grants storage.objects.get only: files open by direct
+# link, but nobody can list the bucket and enumerate private uploads.
 resource "google_storage_bucket_iam_member" "public_read" {
   bucket = google_storage_bucket.uploads.name
-  role   = "roles/storage.objectViewer"
+  role   = "roles/storage.legacyObjectReader"
   member = "allUsers"
 }
 
