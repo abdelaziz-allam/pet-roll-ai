@@ -1,8 +1,8 @@
 name: Azure Infra - Prod
 
 # Azure PROD only, and only by hand. Apply prod after stage has applied the same commit.
-# The job runs in the azure-prod GitHub environment, which requires a reviewer, and only from main;
-# the prod infra identity trusts that environment and nothing else.
+# The job runs in the azure-prod-infra GitHub environment, which requires a reviewer, and only from
+# main; the prod infra identity trusts that environment and nothing else.
 
 on:
   workflow_dispatch:
@@ -26,7 +26,7 @@ jobs:
   terraform:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    environment: azure-prod
+    environment: azure-prod-infra
     defaults:
       run:
         working-directory: azure/envs/prod

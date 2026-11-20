@@ -78,3 +78,12 @@ resource "azurerm_role_assignment" "deploy_environment" {
   principal_id         = azurerm_user_assigned_identity.deploy.principal_id
   principal_type       = "ServicePrincipal"
 }
+
+# Updating an app that carries the apps identity can require permission to assign that identity.
+# Managed Identity Operator grants exactly that, on this one identity.
+resource "azurerm_role_assignment" "deploy_assign_apps_identity" {
+  scope                = azurerm_user_assigned_identity.apps.id
+  role_definition_name = "Managed Identity Operator"
+  principal_id         = azurerm_user_assigned_identity.deploy.principal_id
+  principal_type       = "ServicePrincipal"
+}

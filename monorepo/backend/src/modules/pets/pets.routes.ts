@@ -64,7 +64,14 @@ export async function petsRoutes(fastify: FastifyInstance) {
   fastify.post('/:petId/photos', async (request, reply) => {
     const { petId } = request.params as { petId: string };
     const { url, path } = request.body as { url: string; path: string };
-    const pet = await petsService.addPetPhoto(petId, request.user!.uid, url, path);
+    const ownerId = request.user!.uid;
+    // The path must be one this owner's upload produced, and the stored URL is derived from it,
+    // so nobody can attach (and later be handed a signed link to) another user's file.
+    if (typeof path !== 'string' || !path.startsWith(`pets/${ownerId}/${petId}/`) || path.split('/').includes('..')) {
+      return reply.code(400).send({ error: 'Invalid photo path' });
+    }
+    const storedUrl = env.USE_MEMORY_STORE ? url : objectStore().storedUrl(path);
+    const pet = await petsService.addPetPhoto(petId, ownerId, storedUrl, path);
     return reply.code(200).send(pet);
   });
 

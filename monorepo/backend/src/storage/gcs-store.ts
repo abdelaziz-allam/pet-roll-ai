@@ -23,6 +23,10 @@ export class GcsObjectStore implements ObjectStore {
     return `https://storage.googleapis.com/${env.GCS_BUCKET}/${path}`;
   }
 
+  storedUrl(path: string): string {
+    return `https://storage.googleapis.com/${env.GCS_BUCKET}/${path}`;
+  }
+
   async delete(path: string): Promise<void> {
     try {
       await this.bucket().file(path).delete();

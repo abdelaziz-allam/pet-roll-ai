@@ -126,7 +126,7 @@ export async function pregnancyRoutes(fastify: FastifyInstance) {
 
     try {
       const publicUrl = await objectStore().save(storagePath, data.file, resolvedMime);
-      const updatedPhotos = [...currentPhotos, publicUrl];
+      const updatedPhotos = [...currentPhotos, objectStore().storedUrl(storagePath)];
       await db.collection('pregnancies').doc(pregId).update({
         'fatherInfo.photos': updatedPhotos,
         updatedAt: FieldValue.serverTimestamp(),

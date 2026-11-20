@@ -91,14 +91,15 @@ for env in "${ENVIRONMENTS[@]}"; do
   # Plain variables, not an associative array: macOS still ships bash 3.2.
   printf -v "CLIENT_ID_${env}" '%s' "$(az identity show --subscription "$PROD_SUBSCRIPTION_ID" -n "$id_name" -g "$STATE_RG" --query clientId -o tsv)"
 
-  # Only workflow jobs running in the matching GitHub environment may use it. The repo is public,
-  # so azure-prod can require a reviewer before any prod job starts.
-  fc_name="github-azure-${env}"
+  # Only Terraform jobs in the azure-<env>-infra GitHub environment may use it - not the deploy
+  # jobs, which run in azure-<env> with their own, much narrower identity. The repo is public, so
+  # azure-prod-infra can require a reviewer.
+  fc_name="github-azure-${env}-infra"
   if ! az identity federated-credential show --subscription "$PROD_SUBSCRIPTION_ID" -g "$STATE_RG" --identity-name "$id_name" -n "$fc_name" -o none 2>/dev/null; then
     az identity federated-credential create --subscription "$PROD_SUBSCRIPTION_ID" -g "$STATE_RG" --identity-name "$id_name" \
       -n "$fc_name" \
       --issuer "https://token.actions.githubusercontent.com" \
-      --subject "repo:${GITHUB_REPO}:environment:azure-${env}" \
+      --subject "repo:${GITHUB_REPO}:environment:azure-${env}-infra" \
       --audiences "api://AzureADTokenExchange" -o none
   fi
 
@@ -127,5 +128,7 @@ cat <<SUMMARY
     AZURE_STAGE_INFRA_CLIENT_ID  = ${CLIENT_ID_stage}
     AZURE_PROD_INFRA_CLIENT_ID   = ${CLIENT_ID_prod}
 
-    GitHub environments: azure-stage (no rules), azure-prod (required reviewer).
+    GitHub environments:
+      azure-stage-infra, azure-stage   no rules
+      azure-prod-infra, azure-prod     required reviewer, main branch only
 SUMMARY

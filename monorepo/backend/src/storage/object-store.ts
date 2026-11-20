@@ -14,6 +14,8 @@ export interface ObjectStore {
   delete(path: string): Promise<void>;
   deletePrefix(prefix: string): Promise<void>;
   signedUrl(path: string, minutes: number): Promise<string>;
+  /** The URL to keep in Firestore for a stored file; never carries a signature. */
+  storedUrl(path: string): string;
 }
 
 /** Only these prefixes are readable without a signed link on Azure. */

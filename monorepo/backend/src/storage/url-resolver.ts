@@ -11,15 +11,36 @@ export interface LinkSigner {
   ensureSigningKey(): Promise<void>;
   signedUrlSync(path: string, minutes: number): string;
   publicUrl(path: string): string;
+  unsignedUrl(path: string): string;
+}
+
+/** Who the response is for. Anonymous callers never receive a signed link. */
+export interface Viewer {
+  uid?: string;
+  isAdmin: boolean;
 }
 
 /**
- * Turns a stored file URL into one the client can open now: a fresh SAS link
- * for private files, the public container URL for public ones. Firestore keeps
- * the URLs written before the move (storage.googleapis.com) and links whose SAS
- * has expired, so both forms are recognised. Anything else is returned as is.
+ * Files only their owner (the second path segment) or an admin may open. Other private files - pet
+ * and pregnancy photos, health records - are shown to any signed-in user wherever the API already
+ * returns them (mating listings show other owners' pets).
  */
-export function resolveStoredUrl(value: string, signer: LinkSigner, legacyBucket: string): string {
+export const OWNER_ONLY_PREFIXES = ['verifications/', 'reports/'];
+
+export function maySign(path: string, viewer: Viewer): boolean {
+  if (viewer.isAdmin) return true;
+  if (!viewer.uid) return false;
+  if (!OWNER_ONLY_PREFIXES.some((prefix) => path.startsWith(prefix))) return true;
+  return path.split('/')[1] === viewer.uid;
+}
+
+/**
+ * Turns a stored file URL into one the client can open now: a SAS link for private files the
+ * viewer may open, the public container URL for public ones, and the unsigned (403) link otherwise.
+ * Firestore keeps the URLs written before the move (storage.googleapis.com) and links whose SAS has
+ * expired, so both forms are recognised. Anything else is returned as is.
+ */
+export function resolveStoredUrl(value: string, signer: LinkSigner, legacyBucket: string, viewer: Viewer): string {
   const legacyPrefix = `https://storage.googleapis.com/${legacyBucket}/`;
   let path: string | undefined;
 
@@ -37,7 +58,8 @@ export function resolveStoredUrl(value: string, signer: LinkSigner, legacyBucket
   }
 
   if (!path) return value;
-  return isPublicPath(path) ? signer.publicUrl(path) : signer.signedUrlSync(path, READ_LINK_MINUTES);
+  if (isPublicPath(path)) return signer.publicUrl(path);
+  return maySign(path, viewer) ? signer.signedUrlSync(path, READ_LINK_MINUTES) : signer.unsignedUrl(path);
 }
 
 function decodePath(path: string): string | undefined {
@@ -68,8 +90,8 @@ function eachString(payload: unknown, fn: (value: string) => string | void): voi
 }
 
 /** Rewrites every file URL inside a response payload, in place. */
-export function resolveUrlsInPayload(payload: unknown, signer: LinkSigner, legacyBucket: string): void {
-  eachString(payload, (value) => (value.startsWith('https://') ? resolveStoredUrl(value, signer, legacyBucket) : undefined));
+export function resolveUrlsInPayload(payload: unknown, signer: LinkSigner, legacyBucket: string, viewer: Viewer): void {
+  eachString(payload, (value) => (value.startsWith('https://') ? resolveStoredUrl(value, signer, legacyBucket, viewer) : undefined));
 }
 
 export function hasStoredUrl(payload: unknown, signer: LinkSigner, legacyBucket: string): boolean {
@@ -87,10 +109,20 @@ export function hasStoredUrl(payload: unknown, signer: LinkSigner, legacyBucket:
  */
 export function registerUrlResolver(app: FastifyInstance, signer: LinkSigner): void {
   const legacyBucket = env.LEGACY_GCS_BUCKET;
-  app.addHook('preSerialization', async (_request, _reply, payload) => {
+  app.addHook('preSerialization', async (request, _reply, payload) => {
     if (!payload || typeof payload !== 'object' || !hasStoredUrl(payload, signer, legacyBucket)) return payload;
-    await signer.ensureSigningKey();
-    resolveUrlsInPayload(payload, signer, legacyBucket);
+    try {
+      await signer.ensureSigningKey();
+    } catch (err) {
+      // Better a response whose images fail to load than a failed request.
+      request.log.warn({ err }, 'could not obtain a blob signing key; file links left unsigned');
+      return payload;
+    }
+    const viewer: Viewer = {
+      uid: (request as any).user?.uid,
+      isAdmin: Boolean((request as any).adminUser),
+    };
+    resolveUrlsInPayload(payload, signer, legacyBucket, viewer);
     return payload;
   });
 }

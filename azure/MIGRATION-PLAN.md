@@ -15,7 +15,7 @@ migration (`sportex-code/infra/azure`); differences are called out where they ma
 | Sign-in | **Keep Firebase Auth** | Moving it forces every user to register again. Google and Apple sign-in are configured there. |
 | Push (FCM) | Keep; nothing to move | The shipped app does not use FCM; only tokens are stored. |
 | API, landing, admin | Azure Container Apps (Consumption), one per app | Same images in stage and prod; the API address is read at runtime, so prod runs the stage image unchanged. |
-| Files | Azure Blob: `public` (blog/) and `private` (everything else) | On GCS the whole bucket was world-readable, health records included. Private files are served as 60-minute SAS links in API responses. |
+| Files | Azure Blob: `public` (blog/) and `private` (everything else) | On GCS the whole bucket was world-readable, health records included. Private files are served as SAS links (valid 1-2 hours, stable within each hour so the app's image cache works). Each link is issued only to someone allowed to open the file. |
 | Stage data | Prod reference data (blog, locations, categories, tips, settings) + synthetic users and pets | Real customer data never leaves prod. |
 | Region | Sweden Central | Same as iSportEx; every service needed is available there. |
 
@@ -53,7 +53,19 @@ service accounts can use it.
   - Infra identities are Owner of their own resource group and their own state container only.
   - Deploy identities have AcrPush plus Contributor on their own apps.
   - App identities have AcrPull, Secrets User and Blob Data Contributor in their own environment.
-- **GitHub OIDC:** stage identities trust `environment:azure-stage`, and prod identities trust `environment:azure-prod`. The repository is public, so `azure-prod` can require a reviewer.
+- **GitHub OIDC:** each identity trusts one GitHub environment.
+  - Infra (Owner) identities trust `azure-stage-infra` and `azure-prod-infra`.
+  - Deploy identities trust `azure-stage` and `azure-prod`.
+  - A deploy job can therefore never act as Owner. The repository is public, so both prod environments can require a reviewer.
+
+### Who receives a link to a private file
+The API decides this when it sends each response (`backend/src/storage/url-resolver.ts`):
+- **`verifications/` and `reports/`:** the owner (the user id in the path) and admins only.
+- **Other private files** (pet and pregnancy photos, health records): any signed-in user, because mating listings show other owners' pets.
+- **Anonymous callers:** never get a signed link.
+- **Anyone not allowed:** gets the unsigned link, which storage answers with 403.
+
+Pet photo URLs are derived on the server from a path that must lie under the caller's own pet.
 
 ### Secrets (Key Vault, RBAC mode, read by the apps identity)
 
@@ -102,7 +114,9 @@ az account alias create --name petfolioo-prod  --display-name "PetFolioo Prod"  
   - `AZURE_INFRA_ENABLED=true`;
   - after each environment's apply: `AZURE_<ENV>_DEPLOY_CLIENT_ID` and `AZURE_<ENV>_ACR_NAME`;
   - after stage exists: `AZURE_DEPLOY_ENABLED=true`.
-- Environments: `azure-stage` with no rules, and `azure-prod` with a required reviewer.
+- Environments:
+  - `azure-stage-infra` and `azure-stage`: no rules.
+  - `azure-prod-infra` and `azure-prod`: a required reviewer, main branch only.
 
 **4. Stage Google project.** `petfolioo-stage` (number 599180157887) exists, with Firestore eur3 and Firebase added.
 - Open the Firebase console, go to Authentication and press **Get started**, then enable Email/Password. The API can't do this without billing on the project.
@@ -184,4 +198,9 @@ Stage hostnames are `staging-api`, `staging` and `staging-admin` under petfolioo
 - **Google Analytics:** stage landing pages report to the prod GA property (`G-P1BLB43EGZ`). Filter by hostname.
 - **Health-records files:** `health-records/` objects in GCS come from an older app version with no current upload route. They are copied to `private` and served through the same link re-signing.
 - **`image-upload.ts`:** this backend helper still writes to GCS directly. It is not imported anywhere; route it through `objectStore()` before using it.
+- **Federation audience:**
+  - Today the Container App asks Entra for a token with audience `https://management.azure.com/` and hands it to Google STS.
+  - That token is also a valid Azure Resource Manager token for the apps identity until it expires.
+  - Better: an Entra app registration with its own App ID URI (no Azure API accepts it). Then set `GCP_WIF_TOKEN_RESOURCE` (Terraform `api_settings`) and `--allowed-audiences` in `gcp-wif.sh` to it.
+  - Check in Phase 2 whether the guest Owner account may create app registrations.
 - **Integration tests:** `npm run test:integration` fails 19 tests on main, independent of this migration. CI runs only the unit suite.

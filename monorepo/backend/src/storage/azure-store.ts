@@ -26,6 +26,7 @@ export class AzureObjectStore implements ObjectStore {
   private readonly privateContainer: ContainerClient;
   private key?: UserDelegationKey;
   private keyExpiresAt = 0;
+  private keyRequest?: Promise<void>;
 
   constructor(service?: BlobServiceClient) {
     if (!service && !env.AZURE_STORAGE_ACCOUNT_URL) {
@@ -82,23 +83,37 @@ export class AzureObjectStore implements ObjectStore {
   /** Fetches or renews the delegation key; call before signedUrlSync. */
   async ensureSigningKey(): Promise<void> {
     if (this.key && Date.now() < this.keyExpiresAt - KEY_RENEW_MARGIN_MS) return;
-    const startsOn = new Date(Date.now() - 5 * 60 * 1000);
-    const expiresOn = new Date(Date.now() + KEY_LIFETIME_MS);
-    this.key = await this.service.getUserDelegationKey(startsOn, expiresOn);
-    this.keyExpiresAt = expiresOn.getTime();
+    // Concurrent cold requests share one fetch instead of each asking Entra for a key.
+    this.keyRequest ??= (async () => {
+      try {
+        const startsOn = new Date(Date.now() - 5 * 60 * 1000);
+        const expiresOn = new Date(Date.now() + KEY_LIFETIME_MS);
+        this.key = await this.service.getUserDelegationKey(startsOn, expiresOn);
+        this.keyExpiresAt = expiresOn.getTime();
+      } finally {
+        this.keyRequest = undefined;
+      }
+    })();
+    return this.keyRequest;
   }
 
-  /** Signs a read link for a private blob with the cached delegation key. */
+  /**
+   * Signs a read link for a private blob with the cached delegation key. Start and expiry are
+   * aligned to windows of `minutes`, so the same file gets the same link for a whole window and the
+   * app's image cache keeps working; every link stays valid for between 1x and 2x `minutes`.
+   */
   signedUrlSync(path: string, minutes: number): string {
     if (!this.key) throw new Error('ensureSigningKey() must run first');
     const blob = this.privateContainer.getBlobClient(path);
-    const expiresOn = new Date(Math.min(Date.now() + minutes * 60 * 1000, this.keyExpiresAt));
+    const windowMs = minutes * 60 * 1000;
+    const windowStart = Math.floor(Date.now() / windowMs) * windowMs;
+    const expiresOn = new Date(Math.min(windowStart + 2 * windowMs, this.keyExpiresAt));
     const sas = generateBlobSASQueryParameters(
       {
         containerName: this.privateContainer.containerName,
         blobName: path,
         permissions: BlobSASPermissions.parse('r'),
-        startsOn: new Date(Date.now() - 5 * 60 * 1000),
+        startsOn: new Date(windowStart - 5 * 60 * 1000),
         expiresOn,
         protocol: SASProtocol.Https,
       },
@@ -110,5 +125,14 @@ export class AzureObjectStore implements ObjectStore {
 
   publicUrl(path: string): string {
     return this.publicContainer.getBlobClient(path).url;
+  }
+
+  /** The link without a signature: what a caller who may not read the file gets (it answers 403). */
+  unsignedUrl(path: string): string {
+    return this.privateContainer.getBlobClient(path).url;
+  }
+
+  storedUrl(path: string): string {
+    return isPublicPath(path) ? this.publicUrl(path) : this.unsignedUrl(path);
   }
 }

@@ -53,8 +53,8 @@ jobs:
     needs: validate
     if: vars.AZURE_INFRA_ENABLED == 'true'
     runs-on: ubuntu-latest
-    # The stage infra identity trusts this GitHub environment.
-    environment: azure-stage
+    # The stage infra identity trusts this GitHub environment, and only it.
+    environment: azure-stage-infra
     defaults:
       run:
         working-directory: azure/envs/stage
