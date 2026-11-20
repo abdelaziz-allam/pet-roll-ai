@@ -1,0 +1,115 @@
+name: Azure Promote - Prod
+
+# Copies the exact images running in STAGE to the PROD registry and rolls them out. Nothing is
+# rebuilt, so prod runs byte-for-byte what was tested in stage.
+#   export-from-stage  signs in as the stage deploy identity (read stage, pull)
+#   release-to-prod    signs in as the prod deploy identity (push, roll); azure-prod requires a reviewer
+# Neither identity can touch the other environment, so the images travel as a workflow artifact.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: azure-promote-prod
+  cancel-in-progress: false
+
+jobs:
+  export-from-stage:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: azure-stage
+    outputs:
+      images: ${{ steps.export.outputs.images }}
+    steps:
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_STAGE_DEPLOY_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_STAGE_SUBSCRIPTION_ID }}
+
+      - name: Export the images running in stage
+        id: export
+        env:
+          ACR: ${{ vars.AZURE_STAGE_ACR_NAME }}
+        run: |
+          set -euo pipefail
+          az acr login -n "$ACR"
+          refs=""
+          for app in api landing admin; do
+            image=$(az containerapp show -n "ca-petfolioo-stage-swc-${app}" -g rg-petfolioo-stage-swc \
+              --query "properties.template.containers[0].image" -o tsv)
+            case "$image" in
+              "${ACR}.azurecr.io/${app}:"*) ;;
+              *) echo "::error::stage ${app} runs ${image}, not an image from ${ACR}"; exit 1 ;;
+            esac
+            tag="${image##*:}"
+            docker pull "$image"
+            docker tag "$image" "promote/${app}:${tag}"
+            refs="${refs}${app}=${tag} "
+            echo "- ${app}: \`${image}\`" >> "$GITHUB_STEP_SUMMARY"
+          done
+          # shellcheck disable=SC2046
+          docker save $(docker images --format '{{.Repository}}:{{.Tag}}' 'promote/*') | gzip -1 > images.tar.gz
+          echo "images=${refs% }" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: promote-images
+          path: images.tar.gz
+          retention-days: 1
+
+  release-to-prod:
+    needs: export-from-stage
+    runs-on: ubuntu-latest
+    environment: azure-prod
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: promote-images
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_PROD_DEPLOY_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_PROD_SUBSCRIPTION_ID }}
+
+      - name: Push to the prod registry
+        id: push
+        env:
+          ACR: ${{ vars.AZURE_PROD_ACR_NAME }}
+          IMAGES: ${{ needs.export-from-stage.outputs.images }}
+        run: |
+          set -euo pipefail
+          az acr login -n "$ACR"
+          gunzip -c images.tar.gz | docker load
+          for pair in $IMAGES; do
+            app="${pair%%=*}"; tag="${pair#*=}"
+            target="${ACR}.azurecr.io/${app}:${tag}"
+            docker tag "promote/${app}:${tag}" "$target"
+            docker push "$target"
+            echo "${app}=${target}" >> "$GITHUB_OUTPUT"
+          done
+
+      - uses: ./.github/actions/azure-rollout
+        with:
+          environment: prod
+          app: api
+          image: ${{ steps.push.outputs.api }}
+
+      - uses: ./.github/actions/azure-rollout
+        with:
+          environment: prod
+          app: landing
+          image: ${{ steps.push.outputs.landing }}
+
+      - uses: ./.github/actions/azure-rollout
+        with:
+          environment: prod
+          app: admin
+          image: ${{ steps.push.outputs.admin }}
