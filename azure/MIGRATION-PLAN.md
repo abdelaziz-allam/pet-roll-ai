@@ -35,9 +35,9 @@ service accounts can use it.
   rg-petfolioo-stage-neu              rg-petfolioo-prod-swc     rg-petfolioo-tfstate-swc
   VNet 10.70.0.0/16                   VNet 10.60.0.0/16         (state account, infra ids)
    cae-petfolioo-stage-neu             cae-petfolioo-prod-swc
-     ca-...-api      staging-api.        ca-...-api      api.petfolioo.com
-     ca-...-landing  staging.            ca-...-landing  petfolioo.com, www
-     ca-...-admin    staging-admin.      ca-...-admin    admin.petfolioo.com
+     ca-...-api      stage-api.          ca-...-api      api.petfolioo.com
+     ca-...-landing  stage.              ca-...-landing  petfolioo.com, www
+     ca-...-admin    stage-admin.        ca-...-admin    admin.petfolioo.com
    cr..., kv..., st..., log-...         cr..., kv..., st..., log-...
           |  WIF (no keys)                     |  WIF (no keys)
           v                                    v
@@ -135,7 +135,7 @@ New subscriptions can be throttled (`TooManyRequests`) for a while after the las
 5. **Files.** Run `azure/scripts/migrate-files.sh <env>`. Stage receives `blog/` only. The script prints GCS and Azure object counts, which must match.
 6. **Domains.** Run `azure/scripts/bind-domain.sh <env> <app> <host>`. It prints the GoDaddy records, waits for them to resolve, then binds a free managed certificate.
 
-Stage hostnames are `staging-api`, `staging` and `staging-admin` under petfolioo.com. For every new hostname:
+Stage hostnames are `stage-api`, `stage` and `stage-admin` under petfolioo.com. For every new hostname:
 - add it to Firebase Auth authorized domains in that environment's project;
 - confirm `cors_origins` in the env file includes it.
 
@@ -148,7 +148,7 @@ Stage hostnames are `staging-api`, `staging` and `staging-admin` under petfolioo
 - **Landing:** the blog list and a blog post render from the stage API.
 - **Mobile:**
   - Register an Android app in `petfolioo-stage` with the package and SHA-1 of the release keystore.
-  - Build with that project's `google-services.json` and `--dart-define=API_BASE_URL=https://staging-api.petfolioo.com/api/v1`.
+  - Build with that project's `google-services.json` and `--dart-define=API_BASE_URL=https://stage-api.petfolioo.com/api/v1`.
   - Then test sign-in, adding a pet with a photo, a health record, and a verification upload.
 - **Cron:** `POST /api/v1/cron/compute-stats` returns 401 without the `x-cron-secret` header and 200 with it.
 

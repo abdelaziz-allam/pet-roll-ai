@@ -59,11 +59,11 @@ module "environment" {
     admin   = { cpu = 0.25, memory = "0.5Gi", min_replicas = 0, max_replicas = 1 }
   }
 
-  api_url = "https://staging-api.petfolioo.com/api/v1"
+  api_url = "https://stage-api.petfolioo.com/api/v1"
 
   cors_origins = [
-    "https://staging-admin.petfolioo.com",
-    "https://staging.petfolioo.com",
+    "https://stage-admin.petfolioo.com",
+    "https://stage.petfolioo.com",
   ]
 
   gcp = {
@@ -73,7 +73,7 @@ module "environment" {
   }
 
   api_settings = {
-    SITE_URL = "https://staging.petfolioo.com"
+    SITE_URL = "https://stage.petfolioo.com"
     # Stage starts empty: fill it with demo pets and synthetic users, never real customer data.
     SEED_DEMO_DATA = "true"
   }
