@@ -1,28 +1,30 @@
 #!/usr/bin/env bash
 # Shared by the azure/scripts/*.sh helpers. Source it; do not run it.
 #
-# Maps stage|prod to its subscription by display name, so no script hardcodes an id and none can
-# reach the iSportEx subscriptions that share this tenant.
+# Pins every script to PetFolioo's subscription by id. Display names are not unique across the
+# tenants this account can reach, and pinning the id means no script can touch another
+# subscription in this tenant.
+
+PETFOLIOO_SUBSCRIPTION_ID="563d2a19-5605-431f-97b4-546b2eb6ed3c"
 
 petfolioo_env() {
   case "${1:-}" in
-    stage|prod) ;;
+    stage) REGION_SHORT=neu ;;
+    prod) REGION_SHORT=swc ;;
     *) echo "environment must be stage or prod" >&2; exit 2 ;;
   esac
   ENV="$1"
-  local display
-  if [ "$ENV" = stage ]; then display="PetFolioo Stage"; else display="PetFolioo Prod"; fi
-  SUB=$(command az account list --query "[?name=='${display}'].id | [0]" -o tsv)
-  if [ -z "$SUB" ]; then
-    echo "subscription '${display}' not found; az login --tenant 48df7ad5-0c45-4bc0-8aa3-ee878024270e" >&2
+  SUB="$PETFOLIOO_SUBSCRIPTION_ID"
+  if ! command az account show --subscription "$SUB" -o none 2>/dev/null; then
+    echo "subscription $SUB not visible; az login --tenant 48df7ad5-0c45-4bc0-8aa3-ee878024270e" >&2
     exit 1
   fi
   # Read by the scripts that source this file.
   # shellcheck disable=SC2034
-  RG="rg-petfolioo-${ENV}-swc"
+  RG="rg-petfolioo-${ENV}-${REGION_SHORT}"
   # shellcheck disable=SC2034
-  PREFIX="petfolioo-${ENV}-swc"
+  PREFIX="petfolioo-${ENV}-${REGION_SHORT}"
 }
 
-# Every az call in a script that sourced this file goes to the selected environment's subscription.
+# Every az call in a script that sourced this file goes to PetFolioo's subscription.
 az() { command az "$@" --subscription "$SUB"; }

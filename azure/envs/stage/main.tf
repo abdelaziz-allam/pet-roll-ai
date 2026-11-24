@@ -20,8 +20,9 @@ terraform {
 }
 
 # The subscription comes from ARM_SUBSCRIPTION_ID (the AZURE_STAGE_SUBSCRIPTION_ID repository
-# variable). Each environment has its own subscription: the strongest isolation boundary, and
-# required because a subscription allows only one Container Apps environment.
+# variable). Stage and prod share PetFolioo's subscription but never a resource group, identity,
+# network or vault. Stage runs in North Europe because a subscription gets one Container Apps
+# environment per region, and prod holds the Sweden Central one.
 provider "azurerm" {
   features {
     key_vault {
@@ -37,7 +38,9 @@ module "environment" {
   source = "../../modules/environment"
 
   environment         = "stage"
-  resource_group_name = "rg-petfolioo-stage-swc"
+  location            = "northeurope"
+  location_short      = "neu"
+  resource_group_name = "rg-petfolioo-stage-neu"
   vnet_cidr           = "10.70.0.0/16"
 
   # The other environment's VNet. Its ingress IP is appended once it exists

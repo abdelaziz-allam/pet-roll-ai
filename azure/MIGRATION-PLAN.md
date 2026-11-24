@@ -30,10 +30,11 @@ service accounts can use it.
                       |
      +----------------+------------------+
      |                                   |
-  STAGE  sub "PetFolioo Stage"        PROD  sub "PetFolioo Prod"
-  rg-petfolioo-stage-swc              rg-petfolioo-prod-swc     rg-petfolioo-tfstate-swc
+          one subscription: "Azure subscription 2" (563d2a19-...)
+  STAGE  North Europe                 PROD  Sweden Central
+  rg-petfolioo-stage-neu              rg-petfolioo-prod-swc     rg-petfolioo-tfstate-swc
   VNet 10.70.0.0/16                   VNet 10.60.0.0/16         (state account, infra ids)
-   cae-petfolioo-stage-swc             cae-petfolioo-prod-swc
+   cae-petfolioo-stage-neu             cae-petfolioo-prod-swc
      ca-...-api      staging-api.        ca-...-api      api.petfolioo.com
      ca-...-landing  staging.            ca-...-landing  petfolioo.com, www
      ca-...-admin    staging-admin.      ca-...-admin    admin.petfolioo.com
@@ -45,7 +46,8 @@ service accounts can use it.
 ```
 
 ### Isolation between stage and prod
-- **Subscriptions:** separate. This is also required, because a subscription allows one Container Apps environment.
+- **Subscription:** one, used only by PetFolioo. Its name does not mention the product. Stage and prod never share a resource group, identity, network, registry or vault.
+- **Regions:** a subscription gets one Container Apps environment per region. Prod takes Sweden Central and stage takes North Europe, so both fit without a quota increase.
 - **Networks:** separate VNets with no peering. CIDRs `10.70/16` and `10.60/16` don't overlap each other or iSportEx (`10.40/16`, `10.50/16`).
 - **NSG:** each apps subnet denies the other environment's VNet. Once both environments exist, add the other environment's ingress IP to `deny_egress_cidrs`.
 - **Per-environment resources:** registry, Key Vault, storage account, Log Analytics, budget, identities, and Google project or service account.
@@ -96,21 +98,19 @@ Credit check on 2026-11-20:
 
 ## 4. One-time setup
 
-**1. Subscriptions.** Created by the billing account owner. Each one is approved in chat first.
+**1. Subscription.** Created 2026-11-24 by the billing account owner, after approval in chat:
 ```
-az account alias create --name petfolioo-stage --display-name "PetFolioo Stage" --workload Production --billing-scope <invoice-section-id>
-az account alias create --name petfolioo-prod  --display-name "PetFolioo Prod"  --workload Production --billing-scope <invoice-section-id>
+az account alias create --name sub-02 --display-name "Azure subscription 2" --workload Production --billing-scope <invoice-section-id>
 ```
-`PurchaseNeedsReview` means Microsoft is reviewing the billing account. Only the account holder can clear it, at https://aka.ms/AccountReview.
+New subscriptions can be throttled (`TooManyRequests`) for a while after the last one was created; retry later.
 
-**2. Bootstrap.** Run `azure/bootstrap/bootstrap.sh <prod-sub-id> <stage-sub-id>`. It:
-- refuses the iSportEx subscriptions;
+**2. Bootstrap.** Run `azure/bootstrap/bootstrap.sh`. It is pinned to PetFolioo's subscription id, and it:
 - registers the resource providers;
 - creates the three resource groups, the state account (Entra auth only, versioning on) and the infra identities.
 
 **3. GitHub.**
 - Repository variables:
-  - from bootstrap: `AZURE_TENANT_ID`, `AZURE_PROD_SUBSCRIPTION_ID`, `AZURE_STAGE_SUBSCRIPTION_ID`, `TFSTATE_STORAGE_ACCOUNT`, `AZURE_STAGE_INFRA_CLIENT_ID`, `AZURE_PROD_INFRA_CLIENT_ID`;
+  - from bootstrap: `AZURE_TENANT_ID`, `AZURE_PROD_SUBSCRIPTION_ID` and `AZURE_STAGE_SUBSCRIPTION_ID` (both PetFolioo's subscription), `TFSTATE_STORAGE_ACCOUNT`, `AZURE_STAGE_INFRA_CLIENT_ID`, `AZURE_PROD_INFRA_CLIENT_ID`;
   - `AZURE_INFRA_ENABLED=true`;
   - after each environment's apply: `AZURE_<ENV>_DEPLOY_CLIENT_ID` and `AZURE_<ENV>_ACR_NAME`;
   - after stage exists: `AZURE_DEPLOY_ENABLED=true`.
@@ -187,8 +187,8 @@ Stage hostnames are `staging-api`, `staging` and `staging-admin` under petfolioo
 |---|---|
 | 0 Discovery | Done 2026-11-20 |
 | Security fixes on GCP | Done 2026-11-20: unauthenticated admin seed endpoint removed (PR #1), cron needs a secret, admin passwords rotated into Secret Manager, public listing of the bucket stopped (PR #2) |
-| 1 Plan, Terraform, workflows | This PR. Plan output is pending: needs the subscriptions |
-| 2 Stage up | Blocked: subscription creation returns `PurchaseNeedsReview` |
+| 1 Plan, Terraform, workflows | This PR. Plan output pending: needs bootstrap and the GitHub variables |
+| 2 Stage up | Unblocked 2026-11-24: subscription created |
 | 3-7 | Not started |
 
 ## 9. Risks and notes

@@ -40,7 +40,7 @@ jobs:
           az acr login -n "$ACR"
           refs=""
           for app in api landing admin; do
-            image=$(az containerapp show -n "ca-petfolioo-stage-swc-${app}" -g rg-petfolioo-stage-swc \
+            image=$(az containerapp show -n "ca-petfolioo-stage-neu-${app}" -g rg-petfolioo-stage-neu \
               --query "properties.template.containers[0].image" -o tsv)
             case "$image" in
               "${ACR}.azurecr.io/${app}:"*) ;;

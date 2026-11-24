@@ -20,8 +20,9 @@ runs:
     - name: Roll out ${{ inputs.app }}
       shell: bash
       env:
-        RG: rg-petfolioo-${{ inputs.environment }}-swc
-        APP: ca-petfolioo-${{ inputs.environment }}-swc-${{ inputs.app }}
+        # Stage runs in North Europe (neu), prod in Sweden Central (swc); see azure/envs/*/main.tf.
+        RG: rg-petfolioo-${{ inputs.environment }}-${{ inputs.environment == 'stage' && 'neu' || 'swc' }}
+        APP: ca-petfolioo-${{ inputs.environment }}-${{ inputs.environment == 'stage' && 'neu' || 'swc' }}-${{ inputs.app }}
         IMAGE: ${{ inputs.image }}
         APP_KEY: ${{ inputs.app }}
       run: |

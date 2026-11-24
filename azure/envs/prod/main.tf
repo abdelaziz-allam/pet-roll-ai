@@ -20,8 +20,8 @@ terraform {
 }
 
 # The subscription comes from ARM_SUBSCRIPTION_ID (the AZURE_PROD_SUBSCRIPTION_ID repository
-# variable). Each environment has its own subscription: the strongest isolation boundary, and
-# required because a subscription allows only one Container Apps environment.
+# variable). Stage and prod share PetFolioo's subscription but never a resource group, identity,
+# network or vault; prod holds the subscription's Sweden Central Container Apps environment.
 provider "azurerm" {
   features {
     key_vault {

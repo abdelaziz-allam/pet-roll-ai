@@ -4,7 +4,7 @@ name: Azure Infra - Stage
 #   pull request touching azure/**  -> validate, plan
 #   push to main touching azure/**  -> validate, apply
 #   manual                          -> plan or apply
-# Signs in (GitHub OIDC) as the stage infra identity, which is Owner of rg-petfolioo-stage-swc only.
+# Signs in (GitHub OIDC) as the stage infra identity, which is Owner of rg-petfolioo-stage-neu only.
 # The terraform job waits for the AZURE_INFRA_ENABLED repository variable, set once bootstrap has run.
 
 on:
