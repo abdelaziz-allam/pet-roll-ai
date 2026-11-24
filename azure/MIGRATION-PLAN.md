@@ -144,7 +144,7 @@ Stage hostnames are `stage-api`, `stage` and `stage-admin` under petfolioo.com. 
 - **API:** `/health` returns 200, and `/docs` loads.
 - **Seeding:** the first start seeds synthetic users and pets, and a super admin whose password is the stage Key Vault secret `admin-seed-password`.
 - **Admin portal:** log in, open users, pets and verifications; upload a blog cover and confirm it is in the `public` container.
-- **Files:** upload a pet photo and a verification document. Both must land in `private` and come back as links containing `sig=`. The same link with the query string removed must return 403.
+- **Files:** upload a pet photo and a verification document. Both must land in `private` and come back as links containing `sig=`. The same link with the query string removed must not return the file (Azure answers 404 for anonymous reads of a private container).
 - **Landing:** the blog list and a blog post render from the stage API.
 - **Mobile:**
   - Register an Android app in `petfolioo-stage` with the package and SHA-1 of the release keystore.
@@ -187,9 +187,11 @@ Stage hostnames are `stage-api`, `stage` and `stage-admin` under petfolioo.com. 
 |---|---|
 | 0 Discovery | Done 2026-11-20 |
 | Security fixes on GCP | Done 2026-11-20: unauthenticated admin seed endpoint removed (PR #1), cron needs a secret, admin passwords rotated into Secret Manager, public listing of the bucket stopped (PR #2) |
-| 1 Plan, Terraform, workflows | This PR. Plan output pending: needs bootstrap and the GitHub variables |
-| 2 Stage up | Unblocked 2026-11-24: subscription created |
-| 3-7 | Not started |
+| 1 Plan, Terraform, workflows | Done 2026-11-24 (PR #3) |
+| 2 Stage up | Done 2026-11-24: infrastructure applied, Google federation set, apps deployed; prod has no `blog/` files, so stage storage starts empty. Bound to stage.petfolioo.com, stage-admin.petfolioo.com and stage-api.petfolioo.com with managed certificates |
+| 3 Stage tests | API health, docs, admin login, public blog upload, private document upload with signed links, and cron secret pass. Firebase Auth on `petfolioo-stage` mirrors prod (email/password, Google, Apple), and a Firebase sign-up registers and logs in through the stage API. Stage Firestore carries prod's composite indexes plus `notifications (userId, createdAt desc)`, which prod is missing |
+| 4 Prod up | Blocked: the subscription allows one Container Apps environment and stage holds it. Quota request filed; the prod infra apply reruns once it is granted |
+| 5-7 | Not started |
 
 ## 9. Risks and notes
 
