@@ -50,7 +50,13 @@ runs:
         # The API must answer its health check; the websites must serve their home page.
         fqdn=$(az containerapp show -n "$APP" -g "$RG" --query properties.configuration.ingress.fqdn -o tsv)
         if [ "$APP_KEY" = api ]; then path=/health; else path=/; fi
-        code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 120 --retry 5 --retry-delay 10 --retry-all-errors "https://$fqdn$path" || echo 000)
+        # A new revision can answer 404 until its server listens, and the API's first start in an
+        # empty database seeds it before listening. curl does not retry on an HTTP status, so poll.
+        for _ in $(seq 1 30); do
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://$fqdn$path" || echo 000)
+          case "$code" in 2*|3*) break ;; esac
+          sleep 10
+        done
         echo "### $APP_KEY (${{ inputs.environment }}): https://$fqdn$path -> $code" >> "$GITHUB_STEP_SUMMARY"
         echo "https://$fqdn$path -> $code"
         case "$code" in 2*|3*) ;; *) echo "::error::$APP_KEY answered $code"; exit 1 ;; esac
