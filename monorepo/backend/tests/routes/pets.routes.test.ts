@@ -643,10 +643,25 @@ describe('Pets Routes', () => {
       const res = await fastify.inject({
         method: 'POST',
         url: '/nonexistent/photos',
-        payload: { url: 'https://example.com/photo.jpg', path: 'pets/user-1/x/photo.jpg' },
+        payload: { url: 'https://example.com/photo.jpg', path: 'pets/user-1/nonexistent/photo.jpg' },
       });
 
       expect(res.statusCode).toBe(404);
+    });
+
+    // Regression: a client could attach any URL, including another user's private file.
+    it.each([
+      'verifications/user-2/id.pdf',
+      'pets/user-2/pet-1/photo.jpg',
+      'pets/user-1/other-pet/photo.jpg',
+      'pets/user-1/pet-1/../../verifications/user-2/id.pdf',
+    ])('rejects a photo path outside this pet (%s)', async (path) => {
+      const res = await fastify.inject({
+        method: 'POST',
+        url: '/pet-1/photos',
+        payload: { url: 'https://example.com/photo.jpg', path },
+      });
+      expect(res.statusCode).toBe(400);
     });
 
     it('returns 400 when max photos (50) reached', async () => {

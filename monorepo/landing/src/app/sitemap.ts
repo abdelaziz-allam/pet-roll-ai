@@ -1,8 +1,9 @@
 import type { MetadataRoute } from 'next';
 import { locales, defaultLocale } from '@/i18n/locales';
+import { apiUrl as apiUrlFromEnv } from '@/lib/runtime-env';
 
 async function getBlogSlugs(): Promise<{ slug: string; updatedAt?: { _seconds: number } }[]> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.petfolioo.com/api/v1';
+  const apiUrl = apiUrlFromEnv();
   const allPosts: { slug: string; updatedAt?: { _seconds: number } }[] = [];
   let page = 1;
   const limit = 100;

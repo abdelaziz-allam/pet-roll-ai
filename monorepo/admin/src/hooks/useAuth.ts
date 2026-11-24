@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { API_BASE } from '../config';
 
 export interface AdminUser {
   id: string;
@@ -33,7 +34,7 @@ export function useAuth(): AuthState {
     const token = localStorage.getItem(TOKEN_KEY);
     if (token && !user) {
       setLoading(true);
-      fetch(`${import.meta.env.VITE_API_URL || '/api/v1'}/admin-auth/me`, {
+      fetch(`${API_BASE}/admin-auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => {
@@ -57,7 +58,7 @@ export function useAuth(): AuthState {
   const login = useCallback(async (email: string, password: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || '/api/v1'}/admin-auth/login`, {
+      const res = await fetch(`${API_BASE}/admin-auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

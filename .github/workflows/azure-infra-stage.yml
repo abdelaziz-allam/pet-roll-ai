@@ -1,0 +1,110 @@
+name: Azure Infra - Stage
+
+# Azure STAGE only. The GCP workflows filter on monorepo/** paths, so azure/** never triggers them.
+#   pull request touching azure/**  -> validate, plan
+#   push to main touching azure/**  -> validate, apply
+#   manual                          -> plan or apply
+# Signs in (GitHub OIDC) as the stage infra identity, which is Owner of rg-petfolioo-stage-neu only.
+# The terraform job waits for the AZURE_INFRA_ENABLED repository variable, set once bootstrap has run.
+
+on:
+  pull_request:
+    branches: [main]
+    paths: ["azure/**", ".github/workflows/azure-infra-*.yml"]
+  push:
+    branches: [main]
+    paths: ["azure/**", ".github/workflows/azure-infra-*.yml"]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Action
+        required: true
+        default: plan
+        type: choice
+        options: [plan, apply]
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: azure-infra-stage
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.17.2"
+      - name: Format
+        run: terraform fmt -check -recursive azure
+      - name: Validate
+        run: |
+          for env in stage prod; do
+            (cd "azure/envs/$env" && terraform init -backend=false -input=false >/dev/null && terraform validate)
+          done
+      - name: Shell scripts
+        run: shellcheck -S warning -x --source-path=SCRIPTDIR azure/bootstrap/*.sh azure/scripts/*.sh monorepo/docker/admin-write-config.sh
+
+  terraform:
+    needs: validate
+    if: vars.AZURE_INFRA_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    # The stage infra identity trusts this GitHub environment, and only it.
+    environment: azure-stage-infra
+    defaults:
+      run:
+        working-directory: azure/envs/stage
+    env:
+      ARM_USE_OIDC: "true"
+      ARM_CLIENT_ID: ${{ vars.AZURE_STAGE_INFRA_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_STAGE_SUBSCRIPTION_ID }}
+      TF_IN_AUTOMATION: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.17.2"
+          terraform_wrapper: false
+
+      # The state account lives in the prod subscription; stage resources do not.
+      - name: Init
+        run: >-
+          terraform init -input=false
+          -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE_ACCOUNT }}"
+          -backend-config="subscription_id=${{ vars.AZURE_PROD_SUBSCRIPTION_ID }}"
+
+      - name: Plan
+        id: plan
+        run: |
+          set -o pipefail
+          code=0
+          terraform plan -input=false -lock-timeout=5m -out=tfplan -detailed-exitcode | tee plan.txt || code=$?
+          # 0 = no changes, 2 = changes, anything else is a failure.
+          case "$code" in 0|2) ;; *) exit "$code" ;; esac
+          echo "changes=$([ "$code" = 2 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Terraform plan - stage"
+            echo '```'
+            grep -E '^(Plan:|No changes|  # )' plan.txt || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Apply
+        if: (github.event_name == 'push' || inputs.action == 'apply') && steps.plan.outputs.changes == 'true'
+        run: terraform apply -input=false -lock-timeout=5m tfplan
+
+      - name: Outputs
+        if: github.event_name == 'push' || inputs.action == 'apply'
+        run: |
+          {
+            echo "### Outputs - stage"
+            echo '```json'
+            terraform output -json environment
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

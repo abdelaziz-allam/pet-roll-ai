@@ -1,4 +1,5 @@
 import { env } from './env';
+import { federatedFirebaseCredential, prepareWifCredentialFile } from './gcp-wif';
 
 const store: Record<string, Record<string, any>> = {};
 
@@ -194,7 +195,13 @@ function initFirebase() {
       storageBucket: env.GCS_BUCKET,
     };
 
-    if (env.GOOGLE_APPLICATION_CREDENTIALS) {
+    const wifCredentialFile = prepareWifCredentialFile();
+    if (wifCredentialFile) {
+      // Order matters: the credential must be built before Firestore's own lookup is pointed at
+      // the federation file (see federatedFirebaseCredential).
+      options.credential = federatedFirebaseCredential(() => admin.credential.applicationDefault(), wifCredentialFile);
+      process.env.GOOGLE_APPLICATION_CREDENTIALS = wifCredentialFile;
+    } else if (env.GOOGLE_APPLICATION_CREDENTIALS) {
       const serviceAccount = require(env.GOOGLE_APPLICATION_CREDENTIALS);
       options.credential = admin.credential.cert(serviceAccount);
     } else {

@@ -26,11 +26,18 @@ import { feedbackRoutes } from './modules/feedback/feedback.routes';
 import { seoRoutes } from './modules/seo/seo.routes';
 import { blogRoutes } from './modules/blog/blog.routes';
 import { seedInitialData } from './seed/initial-data';
+import { objectStore } from './storage/object-store';
+import type { AzureObjectStore } from './storage/azure-store';
+import { registerUrlResolver } from './storage/url-resolver';
 
 export async function buildApp() {
   const app = Fastify({
     logger: env.NODE_ENV !== 'test',
   });
+
+  if (env.STORAGE_PROVIDER === 'azure') {
+    registerUrlResolver(app, objectStore() as AzureObjectStore);
+  }
 
   await app.register(swagger, {
     openapi: {

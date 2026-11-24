@@ -2,7 +2,8 @@ import { FastifyInstance } from 'fastify';
 import { petsService } from './pets.service';
 import { createPetSchema, updatePetSchema } from './pets.schema';
 import { requireAuth } from '../../middleware/require-auth';
-import { db, storage } from '../../config/firebase';
+import { db } from '../../config/firebase';
+import { objectStore } from '../../storage/object-store';
 import { env } from '../../config/env';
 import { adminService } from '../admin/admin.service';
 import { healthCertificationService } from './health-certification.service';
@@ -63,7 +64,14 @@ export async function petsRoutes(fastify: FastifyInstance) {
   fastify.post('/:petId/photos', async (request, reply) => {
     const { petId } = request.params as { petId: string };
     const { url, path } = request.body as { url: string; path: string };
-    const pet = await petsService.addPetPhoto(petId, request.user!.uid, url, path);
+    const ownerId = request.user!.uid;
+    // The path must be one this owner's upload produced, and the stored URL is derived from it,
+    // so nobody can attach (and later be handed a signed link to) another user's file.
+    if (typeof path !== 'string' || !path.startsWith(`pets/${ownerId}/${petId}/`) || path.split('/').includes('..')) {
+      return reply.code(400).send({ error: 'Invalid photo path' });
+    }
+    const storedUrl = env.USE_MEMORY_STORE ? url : objectStore().storedUrl(path);
+    const pet = await petsService.addPetPhoto(petId, ownerId, storedUrl, path);
     return reply.code(200).send(pet);
   });
 
@@ -95,24 +103,10 @@ export async function petsRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      const bucket = storage.bucket(env.GCS_BUCKET);
-      const file = bucket.file(storagePath);
-
-      const stream = file.createWriteStream({
-        metadata: { contentType: resolvedMime },
-        resumable: false,
-      });
-
-      await new Promise<void>((resolve, reject) => {
-        data.file.pipe(stream);
-        stream.on('error', reject);
-        stream.on('finish', resolve);
-      });
-
-      const publicUrl = `https://storage.googleapis.com/${env.GCS_BUCKET}/${storagePath}`;
+      const publicUrl = await objectStore().save(storagePath, data.file, resolvedMime);
       return reply.code(200).send({ url: publicUrl, path: storagePath });
     } catch (err: any) {
-      request.log.error({ err, storagePath }, 'Failed to upload pet photo to GCS');
+      request.log.error({ err, storagePath }, 'Failed to upload pet photo ');
       return reply.code(500).send({ error: 'Upload failed', message: err.message || 'Storage error' });
     }
   });

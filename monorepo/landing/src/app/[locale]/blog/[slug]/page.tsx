@@ -5,6 +5,7 @@ import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { apiUrl } from '@/lib/runtime-env';
 
 interface BlogPost {
   id: string;
@@ -23,11 +24,11 @@ interface BlogPost {
   createdAt: { _seconds: number };
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.petfolioo.com/api/v1';
+
 
 async function getPost(slug: string): Promise<BlogPost | null> {
   try {
-    const res = await fetch(`${API_URL}/blog/posts/${slug}`, {
+    const res = await fetch(`${apiUrl()}/blog/posts/${slug}`, {
       next: { revalidate: 300 },
     });
     if (!res.ok) return null;
@@ -41,7 +42,7 @@ async function getRelatedPosts(tags: string, currentSlug: string): Promise<BlogP
   try {
     const primaryTag = tags.split(',')[0]?.trim();
     if (!primaryTag) return [];
-    const res = await fetch(`${API_URL}/blog/posts?limit=50&page=1`, {
+    const res = await fetch(`${apiUrl()}/blog/posts?limit=50&page=1`, {
       next: { revalidate: 3600 },
     });
     if (!res.ok) return [];

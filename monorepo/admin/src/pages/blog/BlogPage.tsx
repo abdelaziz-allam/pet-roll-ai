@@ -10,6 +10,7 @@ import {
 import { api } from '@/services/api';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { API_BASE } from '../../config';
 
 dayjs.extend(relativeTime);
 
@@ -41,7 +42,7 @@ function formatDate(ts: { _seconds: number } | null): string {
   return dayjs.unix(ts._seconds).format('MMM D, YYYY');
 }
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api/v1';
+
 
 const BlogPage: React.FC = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);

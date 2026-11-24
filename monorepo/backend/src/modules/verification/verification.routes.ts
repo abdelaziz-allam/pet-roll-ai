@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { verificationService } from './verification.service';
-import { storage } from '../../config/firebase';
+import { objectStore } from '../../storage/object-store';
 import { env } from '../../config/env';
 
 export async function verificationRoutes(fastify: FastifyInstance) {
@@ -51,24 +51,10 @@ export async function verificationRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      const bucket = storage.bucket(env.GCS_BUCKET);
-      const file = bucket.file(storagePath);
-
-      const stream = file.createWriteStream({
-        metadata: { contentType: resolvedMime },
-        resumable: false,
-      });
-
-      await new Promise<void>((resolve, reject) => {
-        data.file.pipe(stream);
-        stream.on('error', reject);
-        stream.on('finish', resolve);
-      });
-
-      const publicUrl = `https://storage.googleapis.com/${env.GCS_BUCKET}/${storagePath}`;
+      const publicUrl = await objectStore().save(storagePath, data.file, resolvedMime);
       return reply.code(200).send({ url: publicUrl, path: storagePath, name: data.filename, type: resolvedMime });
     } catch (err: any) {
-      request.log.error({ err, storagePath }, 'Failed to upload verification document to GCS');
+      request.log.error({ err, storagePath }, 'Failed to upload verification document ');
       return reply.code(500).send({ error: 'Upload failed', message: err.message || 'Storage error' });
     }
   });

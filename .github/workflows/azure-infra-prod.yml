@@ -1,0 +1,80 @@
+name: Azure Infra - Prod
+
+# Azure PROD only, and only by hand. Apply prod after stage has applied the same commit.
+# The job runs in the azure-prod-infra GitHub environment, which requires a reviewer, and only from
+# main; the prod infra identity trusts that environment and nothing else.
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Action
+        required: true
+        default: plan
+        type: choice
+        options: [plan, apply]
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: azure-infra-prod
+  cancel-in-progress: false
+
+jobs:
+  terraform:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: azure-prod-infra
+    defaults:
+      run:
+        working-directory: azure/envs/prod
+    env:
+      ARM_USE_OIDC: "true"
+      ARM_CLIENT_ID: ${{ vars.AZURE_PROD_INFRA_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_PROD_SUBSCRIPTION_ID }}
+      TF_IN_AUTOMATION: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.17.2"
+          terraform_wrapper: false
+
+      - name: Init
+        run: >-
+          terraform init -input=false
+          -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE_ACCOUNT }}"
+          -backend-config="subscription_id=${{ vars.AZURE_PROD_SUBSCRIPTION_ID }}"
+
+      - name: Plan
+        id: plan
+        run: |
+          set -o pipefail
+          code=0
+          terraform plan -input=false -lock-timeout=5m -out=tfplan -detailed-exitcode | tee plan.txt || code=$?
+          case "$code" in 0|2) ;; *) exit "$code" ;; esac
+          echo "changes=$([ "$code" = 2 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Terraform plan - prod"
+            echo '```'
+            grep -E '^(Plan:|No changes|  # )' plan.txt || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Apply
+        if: inputs.action == 'apply' && steps.plan.outputs.changes == 'true'
+        run: terraform apply -input=false -lock-timeout=5m tfplan
+
+      - name: Outputs
+        if: inputs.action == 'apply'
+        run: |
+          {
+            echo "### Outputs - prod"
+            echo '```json'
+            terraform output -json environment
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
