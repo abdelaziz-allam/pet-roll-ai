@@ -85,7 +85,7 @@ variable "api_copied_secrets" {
 }
 
 variable "api_url" {
-  description = "Public API base URL the landing site and admin portal call, e.g. https://staging-api.petfolioo.com/api/v1."
+  description = "Public API base URL the landing site and admin portal call, e.g. https://stage-api.petfolioo.com/api/v1."
   type        = string
 }
 
