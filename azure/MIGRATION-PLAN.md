@@ -188,9 +188,10 @@ Stage hostnames are `stage-api`, `stage` and `stage-admin` under petfolioo.com. 
 | 0 Discovery | Done 2026-11-20 |
 | Security fixes on GCP | Done 2026-11-20: unauthenticated admin seed endpoint removed (PR #1), cron needs a secret, admin passwords rotated into Secret Manager, public listing of the bucket stopped (PR #2) |
 | 1 Plan, Terraform, workflows | Done 2026-11-24 (PR #3) |
-| 2 Stage up | Done 2026-11-24: infrastructure applied, Google federation set, apps deployed; prod has no `blog/` files, so stage storage starts empty. Stage domains not bound yet |
-| 3 Stage tests | API health, docs, admin login, public blog upload, private document upload with signed links, and cron secret pass on the `azurecontainerapps.io` hostnames. Mobile tests wait for Firebase Auth on `petfolioo-stage` |
-| 4-7 | Not started |
+| 2 Stage up | Done 2026-11-24: infrastructure applied, Google federation set, apps deployed; prod has no `blog/` files, so stage storage starts empty. Bound to stage.petfolioo.com, stage-admin.petfolioo.com and stage-api.petfolioo.com with managed certificates |
+| 3 Stage tests | API health, docs, admin login, public blog upload, private document upload with signed links, and cron secret pass. Firebase Auth on `petfolioo-stage` mirrors prod (email/password, Google, Apple), and a Firebase sign-up registers and logs in through the stage API. Stage Firestore carries prod's composite indexes plus `notifications (userId, createdAt desc)`, which prod is missing |
+| 4 Prod up | Blocked: the subscription allows one Container Apps environment and stage holds it. Quota request filed; the prod infra apply reruns once it is granted |
+| 5-7 | Not started |
 
 ## 9. Risks and notes
 
