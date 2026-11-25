@@ -44,11 +44,12 @@ jobs:
           terraform_version: "1.17.2"
           terraform_wrapper: false
 
+      # The state account lives in the stage subscription; prod resources do not.
       - name: Init
         run: >-
           terraform init -input=false
           -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE_ACCOUNT }}"
-          -backend-config="subscription_id=${{ vars.AZURE_PROD_SUBSCRIPTION_ID }}"
+          -backend-config="subscription_id=${{ vars.TFSTATE_SUBSCRIPTION_ID }}"
 
       - name: Plan
         id: plan

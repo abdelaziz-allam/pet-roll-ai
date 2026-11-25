@@ -8,7 +8,7 @@ terraform {
     }
   }
 
-  # storage_account_name and subscription_id (the prod subscription, which holds the state account)
+  # storage_account_name and subscription_id (the stage subscription, which holds the state account)
   # are passed at init time with -backend-config. The stage infra identity can read and write only
   # the stage container, so this state cannot be pointed at the other environment.
   backend "azurerm" {
@@ -20,9 +20,8 @@ terraform {
 }
 
 # The subscription comes from ARM_SUBSCRIPTION_ID (the AZURE_STAGE_SUBSCRIPTION_ID repository
-# variable). Stage and prod share PetFolioo's subscription but never a resource group, identity,
-# network or vault. Stage runs in North Europe because a subscription gets one Container Apps
-# environment per region, and prod holds the Sweden Central one.
+# variable). Prod runs in a subscription of its own, so the two never share a resource group,
+# identity, network or vault.
 provider "azurerm" {
   features {
     key_vault {

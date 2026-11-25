@@ -1,23 +1,28 @@
 #!/usr/bin/env bash
 # One-time setup of everything Terraform needs before it can run, for both environments.
-# Run by an Owner of PetFolioo's subscription from a workstation:
+# Run by an Owner of both PetFolioo subscriptions from a workstation:
 #
 #   az login --tenant 48df7ad5-0c45-4bc0-8aa3-ee878024270e
 #   ./bootstrap.sh
 #
 # Idempotent: every step checks before it creates, so it is safe to re-run.
 #
-# Creates, all in PetFolioo's subscription:
-#   rg-petfolioo-tfstate-swc   state storage + the two infra identities
-#   rg-petfolioo-prod-swc      empty; Terraform fills it (Sweden Central)
-#   rg-petfolioo-stage-neu     empty; Terraform fills it (North Europe: a subscription gets one
-#                              Container Apps environment per region, and prod holds Sweden Central)
+# Creates:
+#   rg-petfolioo-tfstate-swc   state storage + the two infra identities (stage subscription)
+#   rg-petfolioo-stage-neu     empty; Terraform fills it (stage subscription, North Europe)
+#   rg-petfolioo-prod-swc      empty; Terraform fills it (prod subscription, Sweden Central)
+#
+# Prod has a subscription of its own because a new subscription allows only one Container Apps
+# environment in total, and stage holds the stage subscription's.
 #
 # Each infra identity is Owner of its own environment's resource group and can write only its own
-# state container. Neither has any right on the other environment or on the subscription itself.
+# state container. Neither has any right on the other environment or on either subscription.
 set -euo pipefail
 
-SUBSCRIPTION_ID="563d2a19-5605-431f-97b4-546b2eb6ed3c"
+STAGE_SUBSCRIPTION_ID="563d2a19-5605-431f-97b4-546b2eb6ed3c"
+PROD_SUBSCRIPTION_ID="d9aee4d6-484e-4a06-b58e-6de407a5d117"
+# The state account and both infra identities live in the stage subscription.
+SUBSCRIPTION_ID="$STAGE_SUBSCRIPTION_ID"
 STATE_LOCATION="swedencentral"
 GITHUB_REPO="abdelaziz-allam/pet-roll-ai"
 STATE_RG="rg-petfolioo-tfstate-swc"
@@ -27,6 +32,7 @@ PROVIDERS=(Microsoft.App Microsoft.OperationalInsights Microsoft.ContainerRegist
            Microsoft.CostManagement)
 
 env_location() { if [ "$1" = stage ]; then echo northeurope; else echo swedencentral; fi; }
+env_subscription() { if [ "$1" = stage ]; then echo "$STAGE_SUBSCRIPTION_ID"; else echo "$PROD_SUBSCRIPTION_ID"; fi; }
 env_rg() { if [ "$1" = stage ]; then echo rg-petfolioo-stage-neu; else echo rg-petfolioo-prod-swc; fi; }
 
 TENANT_ID=$(az account show --subscription "$SUBSCRIPTION_ID" --query tenantId -o tsv)
@@ -36,8 +42,10 @@ SUFFIX=$(printf '%s' "$SUBSCRIPTION_ID" | shasum | cut -c1-6)
 STATE_SA="stpetfoliootf${SUFFIX}"
 
 echo "==> Registering resource providers (subscription-wide; the infra identities cannot)"
-for rp in "${PROVIDERS[@]}"; do
-  az provider register --subscription "$SUBSCRIPTION_ID" --namespace "$rp" --wait >/dev/null
+for sub in "$STAGE_SUBSCRIPTION_ID" "$PROD_SUBSCRIPTION_ID"; do
+  for rp in "${PROVIDERS[@]}"; do
+    az provider register --subscription "$sub" --namespace "$rp" --wait >/dev/null
+  done
 done
 echo "    ${#PROVIDERS[@]} providers registered"
 
@@ -45,7 +53,7 @@ echo "==> Resource groups"
 az group create --subscription "$SUBSCRIPTION_ID" -n "$STATE_RG" -l "$STATE_LOCATION" \
   --tags project=petfolioo environment=shared purpose=terraform-state -o none
 for env in "${ENVIRONMENTS[@]}"; do
-  az group create --subscription "$SUBSCRIPTION_ID" -n "$(env_rg "$env")" -l "$(env_location "$env")" \
+  az group create --subscription "$(env_subscription "$env")" -n "$(env_rg "$env")" -l "$(env_location "$env")" \
     --tags project=petfolioo environment="$env" -o none
 done
 
@@ -90,7 +98,7 @@ for env in "${ENVIRONMENTS[@]}"; do
     az role assignment create --assignee-object-id "$principal_id" --assignee-principal-type ServicePrincipal \
       --role "$1" --scope "$2" -o none 2>/dev/null || true
   }
-  assign "Owner" "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/$(env_rg "$env")"
+  assign "Owner" "/subscriptions/$(env_subscription "$env")/resourceGroups/$(env_rg "$env")"
   assign "Storage Blob Data Contributor" "${STATE_SA_ID}/blobServices/default/containers/${env}"
   # Lets terraform init find the account; grants no data access.
   assign "Reader" "$STATE_SA_ID"
@@ -105,8 +113,9 @@ cat <<SUMMARY
     password or key anywhere):
 
     AZURE_TENANT_ID              = ${TENANT_ID}
-    AZURE_PROD_SUBSCRIPTION_ID   = ${SUBSCRIPTION_ID}
-    AZURE_STAGE_SUBSCRIPTION_ID  = ${SUBSCRIPTION_ID}
+    AZURE_PROD_SUBSCRIPTION_ID   = ${PROD_SUBSCRIPTION_ID}
+    AZURE_STAGE_SUBSCRIPTION_ID  = ${STAGE_SUBSCRIPTION_ID}
+    TFSTATE_SUBSCRIPTION_ID      = ${SUBSCRIPTION_ID}
     TFSTATE_STORAGE_ACCOUNT      = ${STATE_SA}
     AZURE_STAGE_INFRA_CLIENT_ID  = ${CLIENT_ID_stage}
     AZURE_PROD_INFRA_CLIENT_ID   = ${CLIENT_ID_prod}

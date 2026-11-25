@@ -30,7 +30,7 @@ service accounts can use it.
                       |
      +----------------+------------------+
      |                                   |
-          one subscription: "Azure subscription 2" (563d2a19-...)
+  sub 2 (563d2a19-...)                sub 4 (d9aee4d6-...)      sub 2
   STAGE  North Europe                 PROD  Sweden Central
   rg-petfolioo-stage-neu              rg-petfolioo-prod-swc     rg-petfolioo-tfstate-swc
   VNet 10.70.0.0/16                   VNet 10.60.0.0/16         (state account, infra ids)
@@ -104,13 +104,13 @@ az account alias create --name sub-02 --display-name "Azure subscription 2" --wo
 ```
 New subscriptions can be throttled (`TooManyRequests`) for a while after the last one was created; retry later.
 
-**2. Bootstrap.** Run `azure/bootstrap/bootstrap.sh`. It is pinned to PetFolioo's subscription id, and it:
+**2. Bootstrap.** Run `azure/bootstrap/bootstrap.sh`. It is pinned to PetFolioo's two subscription ids (stage, and prod's own, because a new subscription allows only one Container Apps environment in total), and it:
 - registers the resource providers;
 - creates the three resource groups, the state account (Entra auth only, versioning on) and the infra identities.
 
 **3. GitHub.**
 - Repository variables:
-  - from bootstrap: `AZURE_TENANT_ID`, `AZURE_PROD_SUBSCRIPTION_ID` and `AZURE_STAGE_SUBSCRIPTION_ID` (both PetFolioo's subscription), `TFSTATE_STORAGE_ACCOUNT`, `AZURE_STAGE_INFRA_CLIENT_ID`, `AZURE_PROD_INFRA_CLIENT_ID`;
+  - from bootstrap: `AZURE_TENANT_ID`, `AZURE_PROD_SUBSCRIPTION_ID`, `AZURE_STAGE_SUBSCRIPTION_ID`, `TFSTATE_SUBSCRIPTION_ID` (the stage subscription, which holds the state account), `TFSTATE_STORAGE_ACCOUNT`, `AZURE_STAGE_INFRA_CLIENT_ID`, `AZURE_PROD_INFRA_CLIENT_ID`;
   - `AZURE_INFRA_ENABLED=true`;
   - after each environment's apply: `AZURE_<ENV>_DEPLOY_CLIENT_ID` and `AZURE_<ENV>_ACR_NAME`;
   - after stage exists: `AZURE_DEPLOY_ENABLED=true`.
@@ -190,7 +190,7 @@ Stage hostnames are `stage-api`, `stage` and `stage-admin` under petfolioo.com. 
 | 1 Plan, Terraform, workflows | Done 2026-11-24 (PR #3) |
 | 2 Stage up | Done 2026-11-24: infrastructure applied, Google federation set, apps deployed; prod has no `blog/` files, so stage storage starts empty. Bound to stage.petfolioo.com, stage-admin.petfolioo.com and stage-api.petfolioo.com with managed certificates |
 | 3 Stage tests | API health, docs, admin login, public blog upload, private document upload with signed links, and cron secret pass. Firebase Auth on `petfolioo-stage` mirrors prod (email/password, Google, Apple), and a Firebase sign-up registers and logs in through the stage API. Stage Firestore carries prod's composite indexes plus `notifications (userId, createdAt desc)`, which prod is missing |
-| 4 Prod up | Blocked: the subscription allows one Container Apps environment and stage holds it. Quota request filed; the prod infra apply reruns once it is granted |
+| 4 Prod up | Moved to its own subscription (subscription 4), because a new subscription allows only one Container Apps environment in total and stage holds subscription 2's |
 | 5-7 | Not started |
 
 ## 9. Risks and notes
