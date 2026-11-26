@@ -42,9 +42,8 @@ module "environment" {
   resource_group_name = "rg-petfolioo-stage-neu"
   vnet_cidr           = "10.70.0.0/16"
 
-  # The other environment's VNet. Its ingress IP is appended once it exists
-  # (output container_app_environment_static_ip).
-  deny_egress_cidrs = ["10.60.0.0/16"]
+  # The other environment's VNet and its ingress IP (output container_app_environment_static_ip).
+  deny_egress_cidrs = ["10.60.0.0/16", "172.135.116.76/32"]
 
   alert_emails       = ["abdelaziz.allam.sportex@gmail.com"]
   monthly_budget_usd = 15
