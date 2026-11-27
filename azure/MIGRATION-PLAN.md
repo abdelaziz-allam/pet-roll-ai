@@ -164,7 +164,8 @@ Stage hostnames are `stage-api`, `stage` and `stage-admin` under petfolioo.com. 
 1. A day before, lower the TTL to 600 s on `api`, `admin` and `www`; the apex is already at 600 s.
 2. Stop file writes on GCP: scale `petroll-api` to 0 or serve a maintenance page. Firestore needs no copy, because both clouds use the same database.
 3. Run `migrate-files.sh prod` for the delta and compare counts.
-4. Run `bind-domain.sh prod` in this order: `api`, `admin`, `www`, then the apex `petfolioo.com` last. The apex certificate needs its A record to point at Azure first.
+4. Issue the certificates before moving traffic: add each host to its app, create its managed certificate with `--validation-method TXT`, publish the returned token as `_dnsauth.<host>`, and bind once it succeeds. Only then switch the records.
+   - Keep the `asuid.*` and `_dnsauth.*` TXT records: Azure renews the certificates against them.
 5. Verify app sign-in, viewing an existing pet photo (a legacy GCS URL re-signed from Azure), a new upload, admin login, and the landing blog.
 6. Keep GCP Cloud Run deployed with max instances 0 as the rollback.
 
@@ -189,9 +190,11 @@ Stage hostnames are `stage-api`, `stage` and `stage-admin` under petfolioo.com. 
 | Security fixes on GCP | Done 2026-11-20: unauthenticated admin seed endpoint removed (PR #1), cron needs a secret, admin passwords rotated into Secret Manager, public listing of the bucket stopped (PR #2) |
 | 1 Plan, Terraform, workflows | Done 2026-11-24 (PR #3) |
 | 2 Stage up | Done 2026-11-24: infrastructure applied, Google federation set, apps deployed; prod has no `blog/` files, so stage storage starts empty. Bound to stage.petfolioo.com, stage-admin.petfolioo.com and stage-api.petfolioo.com with managed certificates |
-| 3 Stage tests | API health, docs, admin login, public blog upload, private document upload with signed links, and cron secret pass. Firebase Auth on `petfolioo-stage` mirrors prod (email/password, Google, Apple), and a Firebase sign-up registers and logs in through the stage API. Stage Firestore carries prod's composite indexes plus `notifications (userId, createdAt desc)`, which prod is missing |
-| 4 Prod up | Moved to its own subscription (subscription 4), because a new subscription allows only one Container Apps environment in total and stage holds subscription 2's |
-| 5-7 | Not started |
+| 3 Stage tests | API health, docs, admin login, public blog upload, private document upload with signed links, and cron secret pass. Firebase Auth on `petfolioo-stage` mirrors prod (email/password, Google, Apple), and a Firebase sign-up registers and logs in through the stage API. Stage and prod Firestore both carry `notifications (userId, createdAt desc)` |
+| 4 Prod up | Moved to its own subscription (subscription 4), because a new subscription allows only one Container Apps environment in total and stage holds subscription 2's. Released by promote run 45604051600; live Firestore reads match GCP and the JWT secret matches |
+| 5 Rehearsal | Done 2026-11-26 on the `*.azurecontainerapps.io` hostnames: health, websites, blog reads and token checks pass; 16 of 16 files copied to the private container |
+| 6 Cutover | Done 2026-11-27. Certificates were issued before the switch through `_dnsauth` TXT records, so HTTPS never broke. GoDaddy now points the apex at 172.135.116.76 and `api`/`admin` at their Azure apps; `www` still CNAMEs to the apex. GCP was left running untouched as the rollback |
+| 7 Decommission | Not started; needs the owner's explicit OK after two weeks of monitoring |
 
 ## 9. Risks and notes
 
