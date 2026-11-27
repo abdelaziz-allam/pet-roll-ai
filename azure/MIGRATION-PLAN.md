@@ -174,7 +174,7 @@ Stage hostnames are `stage-api`, `stage` and `stage-admin` under petfolioo.com. 
   - `api` and `admin`: CNAME `ghs.googlehosted.com`;
   - apex: the four Google A records (216.239.32/34/36/38.21);
   - `www`: CNAME to the apex.
-- Scale GCP back up.
+- Reopen GCP: `gcloud run services update <petroll-api|petroll-landing|petroll-admin> --region=europe-north1 --ingress=all`. Set the `GCP_DEPLOY_ENABLED` repository variable to `true` if GCP should take deploys again.
 - Firestore is shared, so no records are lost. Records created on Azure after the cutover point at Azure blob links, which the GCP API does not re-sign:
   - copy those files back to GCS with azcopy;
   - rewrite their URLs to the GCS form;
@@ -194,7 +194,7 @@ Stage hostnames are `stage-api`, `stage` and `stage-admin` under petfolioo.com. 
 | 4 Prod up | Moved to its own subscription (subscription 4), because a new subscription allows only one Container Apps environment in total and stage holds subscription 2's. Released by promote run 45604051600; live Firestore reads match GCP and the JWT secret matches |
 | 5 Rehearsal | Done 2026-11-26 on the `*.azurecontainerapps.io` hostnames: health, websites, blog reads and token checks pass; 16 of 16 files copied to the private container |
 | 6 Cutover | Done 2026-11-27. Certificates were issued before the switch through `_dnsauth` TXT records, so HTTPS never broke. GoDaddy now points the apex at 172.135.116.76 and `api`/`admin` at their Azure apps; `www` still CNAMEs to the apex. GCP was left running untouched as the rollback |
-| 7 Decommission | Not started; needs the owner's explicit OK after two weeks of monitoring |
+| 7 Decommission | 2026-11-27: the three Cloud Run services set to internal ingress (closed to the public, nothing billed) and the GCP build and deploy jobs gated on `GCP_DEPLOY_ENABLED`. Deleting the services, the uploads bucket and the images waits for the owner's explicit OK. The project stays: Firestore, Firebase Auth and FCM still serve the app |
 
 ## 9. Risks and notes
 

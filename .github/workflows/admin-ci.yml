@@ -46,7 +46,8 @@ jobs:
         run: npm run build
 
   build-and-push:
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    # Prod runs on Azure; GCP Cloud Run is kept closed as a rollback. Set GCP_DEPLOY_ENABLED=true to deploy there again.
+    if: vars.GCP_DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     needs: test
     permissions:
@@ -84,7 +85,8 @@ jobs:
           docker push $IMAGE_LATEST
 
   deploy:
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    # Prod runs on Azure; GCP Cloud Run is kept closed as a rollback. Set GCP_DEPLOY_ENABLED=true to deploy there again.
+    if: vars.GCP_DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     needs: build-and-push
     permissions:
