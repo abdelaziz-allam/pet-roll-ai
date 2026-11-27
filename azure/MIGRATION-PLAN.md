@@ -26,7 +26,7 @@ service accounts can use it.
 ## 2. Architecture
 
 ```
-                GoDaddy DNS (petfolioo.com)
+          Azure DNS (petfolioo.com, registered at GoDaddy)
                       |
      +----------------+------------------+
      |                                   |
@@ -133,9 +133,10 @@ New subscriptions can be throttled (`TooManyRequests`) for a while after the las
    - Stage: `azure-deploy-stage` runs on every push to main that touches the apps.
    - Prod: run `azure-promote-prod`.
 5. **Files.** Run `azure/scripts/migrate-files.sh <env>`. Stage receives `blog/` only. The script prints GCS and Azure object counts, which must match.
-6. **Domains.** Run `azure/scripts/bind-domain.sh <env> <app> <host>`. It prints the GoDaddy records, waits for them to resolve, then binds a free managed certificate.
+6. **Domains.** Run `azure/scripts/bind-domain.sh <env> <app> <host>`. It prints the DNS records, waits for them to resolve, then binds a free managed certificate.
 
 Stage hostnames are `stage-api`, `stage` and `stage-admin` under petfolioo.com. For every new hostname:
+- add its records to `azure/envs/prod/dns.tf` and apply through `azure-infra-prod`, because the zone is hosted in Azure DNS;
 - add it to Firebase Auth authorized domains in that environment's project;
 - confirm `cors_origins` in the env file includes it.
 
@@ -170,7 +171,7 @@ Stage hostnames are `stage-api`, `stage` and `stage-admin` under petfolioo.com. 
 6. Keep GCP Cloud Run deployed with max instances 0 as the rollback.
 
 **Rollback:**
-- Point the DNS back:
+- Point the DNS back in `azure/envs/prod/dns.tf`:
   - `api` and `admin`: CNAME `ghs.googlehosted.com`;
   - apex: the four Google A records (216.239.32/34/36/38.21);
   - `www`: CNAME to the apex.
@@ -194,6 +195,7 @@ Stage hostnames are `stage-api`, `stage` and `stage-admin` under petfolioo.com. 
 | 4 Prod up | Moved to its own subscription (subscription 4), because a new subscription allows only one Container Apps environment in total and stage holds subscription 2's. Released by promote run 45604051600; live Firestore reads match GCP and the JWT secret matches |
 | 5 Rehearsal | Done 2026-11-26 on the `*.azurecontainerapps.io` hostnames: health, websites, blog reads and token checks pass; 16 of 16 files copied to the private container |
 | 6 Cutover | Done 2026-11-27. Certificates were issued before the switch through `_dnsauth` TXT records, so HTTPS never broke. GoDaddy now points the apex at 172.135.116.76 and `api`/`admin` at their Azure apps; `www` still CNAMEs to the apex. GCP was left running untouched as the rollback |
+| DNS hosting | Done 2026-11-27: the petfolioo.com zone moved to Azure DNS (`azure/envs/prod/dns.tf`), with all 20 records checked against GoDaddy before the switch. The domain stays registered at GoDaddy, whose nameservers now point to `ns1-05.azure-dns.com`, `ns2-05.azure-dns.net`, `ns3-05.azure-dns.org` and `ns4-05.azure-dns.info`. GoDaddy keeps its copy of the records, so resolvers still holding the old nameservers get the same answers |
 | 7 Decommission | 2026-11-27: the three Cloud Run services set to internal ingress (closed to the public, nothing billed) and the GCP build and deploy jobs gated on `GCP_DEPLOY_ENABLED`. Deleting the services, the uploads bucket and the images waits for the owner's explicit OK. The project stays: Firestore, Firebase Auth and FCM still serve the app |
 
 ## 9. Risks and notes
