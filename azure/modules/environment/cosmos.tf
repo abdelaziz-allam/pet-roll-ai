@@ -5,9 +5,14 @@
 #
 # Reachable only through the private endpoint in this environment's VNet, and only with Entra ID:
 # there are no account keys to leak and no public address to reach.
+locals {
+  cosmos_location       = coalesce(var.cosmos_location, var.location)
+  cosmos_location_short = coalesce(var.cosmos_location_short, var.location_short)
+}
+
 resource "azurerm_cosmosdb_account" "data" {
-  name                = "cosmos-${local.name}"
-  location            = var.location
+  name                = "cosmos-petfolioo-${var.environment}-${local.cosmos_location_short}"
+  location            = local.cosmos_location
   resource_group_name = local.rg
   offer_type          = "Standard"
   kind                = "GlobalDocumentDB"
@@ -25,7 +30,7 @@ resource "azurerm_cosmosdb_account" "data" {
   }
 
   geo_location {
-    location          = var.location
+    location          = local.cosmos_location
     failover_priority = 0
     zone_redundant    = false
   }

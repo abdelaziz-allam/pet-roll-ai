@@ -103,6 +103,18 @@ variable "gcp" {
   })
 }
 
+variable "cosmos_location" {
+  description = "Region of the Cosmos DB account when it cannot be the environment's own (new subscriptions are refused in regions short of capacity). The private endpoint stays in this environment's VNet either way. Null means var.location."
+  type        = string
+  default     = null
+}
+
+variable "cosmos_location_short" {
+  description = "Abbreviation of cosmos_location for the account name. Null means var.location_short."
+  type        = string
+  default     = null
+}
+
 variable "data_store" {
   description = "Where the API keeps app data: firestore (Google, through federation) or cosmos (this environment's Cosmos DB). Switch only after the data-migration job has copied and verified the data."
   type        = string

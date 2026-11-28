@@ -42,6 +42,11 @@ module "environment" {
   resource_group_name = "rg-petfolioo-stage-neu"
   vnet_cidr           = "10.70.0.0/16"
 
+  # North Europe refuses new Cosmos DB accounts for this subscription (capacity), so the account
+  # sits in Sweden Central and stage reaches it through its own private endpoint.
+  cosmos_location       = "swedencentral"
+  cosmos_location_short = "swc"
+
   # The other environment's VNet and its ingress IP (output container_app_environment_static_ip).
   deny_egress_cidrs = ["10.60.0.0/16", "172.135.116.76/32"]
 
