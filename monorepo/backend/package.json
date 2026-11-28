@@ -20,6 +20,7 @@
     "seed:test-data": "tsx src/scripts/seed-test-data.ts"
   },
   "dependencies": {
+    "@azure/cosmos": "^4.10.2",
     "@azure/identity": "^4.14.1",
     "@azure/storage-blob": "^12.34.0",
     "@fastify/cors": "^9.0.0",

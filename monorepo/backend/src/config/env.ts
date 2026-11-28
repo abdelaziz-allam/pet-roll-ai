@@ -17,6 +17,11 @@ const envSchema = z.object({
   RATE_LIMIT_WINDOW: z.coerce.number().default(60000),
   GCS_BUCKET: z.string().default('petroll-production-storage'),
   USE_MEMORY_STORE: z.coerce.boolean().default(false),
+  // Where app data lives. Firebase Auth and FCM stay on Google either way.
+  DATA_STORE: z.enum(['firestore', 'cosmos']).default('firestore'),
+  COSMOS_ENDPOINT: z.string().url().optional(),
+  COSMOS_DATABASE: z.string().default('petfolioo'),
+  COSMOS_CONTAINER: z.string().default('documents'),
   STORAGE_PROVIDER: z.enum(['gcs', 'azure']).default('gcs'),
   AZURE_STORAGE_ACCOUNT_URL: z.string().url().optional(),
   AZURE_PUBLIC_CONTAINER: z.string().default('public'),

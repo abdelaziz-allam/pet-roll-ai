@@ -48,6 +48,10 @@ locals {
         AZURE_CLIENT_ID           = azurerm_user_assigned_identity.apps.client_id
         LEGACY_GCS_BUCKET         = var.legacy_gcs_bucket
         CORS_ORIGINS              = join(",", var.cors_origins)
+        DATA_STORE                = var.data_store
+        COSMOS_ENDPOINT           = azurerm_cosmosdb_account.data.endpoint
+        COSMOS_DATABASE           = azurerm_cosmosdb_sql_database.data.name
+        COSMOS_CONTAINER          = azurerm_cosmosdb_sql_container.documents.name
       },
       var.api_settings,
     )

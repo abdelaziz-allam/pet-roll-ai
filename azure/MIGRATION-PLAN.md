@@ -1,18 +1,19 @@
 # PetFolioo: GCP to Azure migration plan
 
-Hosting, files and secrets move from GCP (europe-north1) to Azure (Sweden Central). Firestore and
-Firebase Auth stay on Google. The mobile app needs no release: it already calls
-`https://api.petfolioo.com/api/v1`, and the cutover changes DNS only.
+Hosting, files and secrets moved from GCP (europe-north1) to Azure (Sweden Central) in phases 0-7.
+Phase 8 (section 8) then moves the app data from Firestore to Cosmos DB and sign-in from Firebase
+Auth to the API, so everything runs on one cloud with one bill and one set of access controls. Only
+FCM stays on Google: Android devices receive push through it whatever the sender.
 
-Status lives in the table in section 8. Everything in this folder is modelled on the iSportEx
+Status lives in the table in section 9. Everything in this folder is modelled on the iSportEx
 migration (`sportex-code/infra/azure`); differences are called out where they matter.
 
 ## 1. Decisions
 
 | Topic | Decision | Why |
 |---|---|---|
-| Database | **Keep Firestore** (`petroll-production`, eur3) | It holds all data (22 collections, ~1.6k docs) and costs nothing on the free tier. Moving it means rewriting the data layer. Azure reaches it through Workload Identity Federation with no stored Google key. |
-| Sign-in | **Keep Firebase Auth** | Moving it forces every user to register again. Google and Apple sign-in are configured there. |
+| Database | Phases 0-7: keep Firestore. **Phase 8: Cosmos DB for NoSQL** (free tier, private endpoint) | One cloud and one bill. The services keep their Firestore-style calls; `src/data-store` implements them on Cosmos, so no service is rewritten. |
+| Sign-in | Phases 0-7: keep Firebase Auth. **Phase 8: the API signs users in itself** | The API already issues its own session tokens. Google and Apple tokens are verified directly, and Firebase's exported password hashes are checked on first login, so nobody re-registers or resets a password. |
 | Push (FCM) | Keep; nothing to move | The shipped app does not use FCM; only tokens are stored. |
 | API, landing, admin | Azure Container Apps (Consumption), one per app | Same images in stage and prod; the API address is read at runtime, so prod runs the stage image unchanged. |
 | Files | Azure Blob: `public` (blog/) and `private` (everything else) | On GCS the whole bucket was world-readable, health records included. Private files are served as SAS links (valid 1-2 hours, stable within each hour so the app's image cache works). Each link is issued only to someone allowed to open the file. |
@@ -87,10 +88,11 @@ A placeholder value fails the API's validation (JWT_SECRET must be at least 16 c
 | Landing, admin | ~0 | 0-3 |
 | Registry (Basic) | 5 | 5 |
 | Storage, Key Vault, logs (daily cap) | ~2 | 3-4 |
-| **Total** | **~7-9** | **~18-27** |
-| Budget alert | 15 | 35 |
+| Cosmos DB (free tier) + its private endpoint (phase 8) | ~8 | ~8 |
+| **Total** | **~15-17** | **~26-35** |
+| Budget alert | 20 | 45 |
 
-The billing account is shared with iSportEx (budgets of 150 for its prod and 40 for its stage). Together that's $240/month of budget against the credit.
+The billing account is shared with iSportEx (budgets of 150 for its prod and 40 for its stage). Together that is $255/month of budget against the credit.
 
 Credit check on 2026-11-20:
 - The only lot visible on the billing profile is the $200 sign-up credit, which expires 2026-12-17.
@@ -183,7 +185,45 @@ Stage hostnames are `stage-api`, `stage` and `stage-admin` under petfolioo.com. 
 
 **Decommission (Phase 7, only with the owner's explicit OK):** after two weeks of monitoring, delete the GCP Cloud Run services and the uploads bucket. Keep the project, Firestore and Firebase.
 
-## 8. Status
+## 8. Phase 8: Firestore and Firebase Auth to Azure
+
+### 8a. Data: Firestore to Cosmos DB (backend only, no app release)
+
+- **Account:** one Cosmos DB for NoSQL account per environment (`cosmos-petfolioo-<env>-<region>`) on the free tier (1000 RU/s, 25 GB, one per subscription). Public network access off, key authentication off, reachable only through a private endpoint in the environment's VNet. 7-day continuous backup (no storage charge).
+- **Layout:** database `petfolioo`, one container `documents`, partition key `/c` (the collection path, e.g. `pets` or `chat_rooms/<id>/messages`). Each item holds the document twice: `d` as clients see it (timestamps as `{_seconds, _nanoseconds}`, which the app and admin parse) and `o` with timestamps as epoch milliseconds for filters and ordering. Only `o` is indexed.
+- **Code:** `src/data-store` implements the Firestore calls the services make (collection/doc, where, orderBy, offset, limit, count, add/set/update/delete/create, merge, FieldValue, batches). `DATA_STORE=firestore|cosmos` picks the store; the Terraform variable `data_store` sets it per environment. Two differences from Firestore: batches apply write by write instead of atomically (every batch here is a retry-safe bulk update or delete), and there are no realtime listeners (the backend uses none).
+- **Migration job:** `caj-petfolioo-<env>-<region>-data` runs `src/scripts/migrate-firestore-to-cosmos.ts` from the API image inside the VNet, as the apps identity. Started by the `azure-data-migrate` workflow: `selftest`, `copy`, `verify` or `delta --since=<copy start>`. It logs counts and document ids, never contents, and never writes to Firestore.
+
+Steps per environment (stage first, then prod):
+
+1. Apply infra (creates Cosmos, the private endpoint and the job; the API stays on Firestore).
+2. Release an API image that contains the data layer (deploy-stage, then promote for prod).
+3. `selftest`, then `copy`, then `verify` until it reports `ok: true`. Note when the copy started.
+4. Switch: set `data_store = "cosmos"` in `azure/envs/<env>/main.tf` and apply. New writes go to Cosmos.
+5. `delta --since=<copy start>` picks up whatever Firestore changed between the copy and the switch; items the API has already written are left alone. Then `verify` once more (differences now can only be writes made after the switch).
+6. Smoke test: sign-in, pets, health records with private file links, mating, notifications, admin, blog.
+
+**Rollback:** set `data_store = "firestore"` and apply. Firestore still holds everything up to the switch; writes made in Cosmos after it would need copying back (a reverse of the job, written only if ever needed).
+
+### 8b. Sign-in: Firebase Auth to the API (backend, then an app release)
+
+1. Export users once with `firebase auth:export` (uids, emails, providers, scrypt password hashes and the project's hash parameters). Store them in Cosmos (`auth_identities`), keyed by the existing uid, so every user keeps the same id and all their data stays linked.
+2. New API endpoints: email/password register, login and reset (reset mail through the existing mailer), and Google and Apple sign-in, which verify the provider's ID token against Google's and Apple's published keys. A Firebase-hashed password is checked once with Firebase's scrypt parameters, then re-stored with the API's own hash.
+3. During the overlap the API also keeps accepting Firebase ID tokens (`x-firebase-token`), so installed apps keep working.
+4. App release: replace `firebase_auth` with `google_sign_in` and `sign_in_with_apple` (already dependencies) plus the API endpoints; require the new version.
+5. Remove the `test-login` and `test-register` routes, which only need `JWT_SECRET`.
+6. After old versions are gone, stop accepting Firebase tokens and disable the Firebase Auth providers (deletion only with the owner's OK).
+
+### 8c. Chat and push
+
+- The app reads and writes `chat_rooms/<id>/messages` straight in Firestore (0 messages in prod). The release in 8b moves this to API endpoints for listing and sending messages, refreshed by polling; Azure Web PubSub (free tier) can add live delivery later.
+- FCM stays: it is the only way to reach Android devices, and it costs nothing. The Firebase project then holds only messaging.
+
+### 8d. After phase 8
+
+The `petroll-production` and `petfolioo-stage` projects hold only FCM. Firestore data, Auth users, Cloud Run, the bucket and the images are deleted only with the owner's explicit OK, after two weeks without needing a rollback.
+
+## 9. Status
 
 | Phase | State |
 |---|---|
@@ -197,8 +237,11 @@ Stage hostnames are `stage-api`, `stage` and `stage-admin` under petfolioo.com. 
 | 6 Cutover | Done 2026-11-27. Certificates were issued before the switch through `_dnsauth` TXT records, so HTTPS never broke. GoDaddy now points the apex at 172.135.116.76 and `api`/`admin` at their Azure apps; `www` still CNAMEs to the apex. GCP was left running untouched as the rollback |
 | DNS hosting | Done 2026-11-27: the petfolioo.com zone moved to Azure DNS (`azure/envs/prod/dns.tf`), with all 20 records checked against GoDaddy before the switch. The domain stays registered at GoDaddy, whose nameservers now point to `ns1-05.azure-dns.com`, `ns2-05.azure-dns.net`, `ns3-05.azure-dns.org` and `ns4-05.azure-dns.info`. GoDaddy keeps its copy of the records, so resolvers still holding the old nameservers get the same answers |
 | 7 Decommission | 2026-11-27: the three Cloud Run services set to internal ingress (closed to the public, nothing billed) and the GCP build and deploy jobs gated on `GCP_DEPLOY_ENABLED`. Deleting the services, the uploads bucket and the images waits for the owner's explicit OK. The project stays: Firestore, Firebase Auth and FCM still serve the app |
+| 8a Data to Cosmos DB | 2026-11-28: plan, Terraform (Cosmos, private endpoint, migration job), data layer and migration script in review. Prod Firestore holds 1,582 documents in 22 collections; the app's direct chat path holds none |
+| 8b Sign-in to the API | Planned: backend endpoints, then an app release |
+| 8c Chat through the API | Planned with the 8b app release |
 
-## 9. Risks and notes
+## 10. Risks and notes
 
 - **Credit:** see section 3. Budgets alert but never stop resources.
 - **First visit after a landing deploy:** the pre-rendered blog list is empty until its first 5-minute refresh. The build never calls a real API, so it stays isolated.

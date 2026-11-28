@@ -1,5 +1,8 @@
 import { env } from './env';
 import { federatedFirebaseCredential, prepareWifCredentialFile } from './gcp-wif';
+import { openContainer } from '../data-store/cosmos-client';
+import { CosmosFirestore } from '../data-store/cosmos-firestore';
+import { FieldValue as CosmosFieldValue, Timestamp as CosmosTimestamp } from '../data-store/values';
 
 const store: Record<string, Record<string, any>> = {};
 
@@ -224,11 +227,22 @@ function initFirebase() {
   };
 }
 
-const firebase = env.USE_MEMORY_STORE ? initMemoryStore() : initFirebase();
+function initCosmos() {
+  if (!env.COSMOS_ENDPOINT) throw new Error('DATA_STORE=cosmos needs COSMOS_ENDPOINT');
+  const container = openContainer({
+    endpoint: env.COSMOS_ENDPOINT,
+    database: env.COSMOS_DATABASE,
+    container: env.COSMOS_CONTAINER,
+  });
+  return { db: new CosmosFirestore(container), FieldValue: CosmosFieldValue, Timestamp: CosmosTimestamp };
+}
 
-export const db = firebase.db;
+const firebase = env.USE_MEMORY_STORE ? initMemoryStore() : initFirebase();
+const cosmos = !env.USE_MEMORY_STORE && env.DATA_STORE === 'cosmos' ? initCosmos() : undefined;
+
+export const db: any = cosmos ? cosmos.db : firebase.db;
 export const auth = firebase.auth;
 export const storage = firebase.storage;
 export const messaging = firebase.messaging;
-export const FieldValue = firebase.FieldValue;
-export const Timestamp = firebase.Timestamp;
+export const FieldValue: any = cosmos ? cosmos.FieldValue : firebase.FieldValue;
+export const Timestamp: any = cosmos ? cosmos.Timestamp : firebase.Timestamp;

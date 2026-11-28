@@ -46,7 +46,7 @@ module "environment" {
   deny_egress_cidrs = ["10.60.0.0/16", "172.135.116.76/32"]
 
   alert_emails       = ["abdelaziz.allam.sportex@gmail.com"]
-  monthly_budget_usd = 15
+  monthly_budget_usd = 20
   log_daily_quota_gb = 0.5
 
   deploy_oidc_subject = "environment:azure-stage"

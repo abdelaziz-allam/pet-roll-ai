@@ -1,0 +1,82 @@
+name: Azure Data Migration
+
+# Runs the Firestore -> Cosmos DB migration job in one environment, with the API image that
+# environment is running now. The job reads Firestore and writes only to that environment's Cosmos DB.
+#   selftest  exercise the data layer against the real Cosmos container (scratch collection)
+#   copy      copy every Firestore document
+#   verify    compare every document; fails the run on any difference
+#   delta     after switching the API to Cosmos: copy what Firestore changed since `since`
+# Prod runs need the azure-prod reviewer, like every other prod change.
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        options: [stage, prod]
+        required: true
+      mode:
+        type: choice
+        options: [selftest, copy, verify, delta]
+        required: true
+      since:
+        description: "delta only: when the copy started (ISO 8601, e.g. 2026-12-01T10:00:00Z)"
+        required: false
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: azure-data-migrate-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  run:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: azure-${{ inputs.environment }}
+    steps:
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ inputs.environment == 'prod' && vars.AZURE_PROD_DEPLOY_CLIENT_ID || vars.AZURE_STAGE_DEPLOY_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ inputs.environment == 'prod' && vars.AZURE_PROD_SUBSCRIPTION_ID || vars.AZURE_STAGE_SUBSCRIPTION_ID }}
+
+      - name: Run the migration job
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
+          MODE: ${{ inputs.mode }}
+          SINCE: ${{ inputs.since }}
+        run: |
+          set -euo pipefail
+          if [ "$ENVIRONMENT" = prod ]; then name=petfolioo-prod-swc; else name=petfolioo-stage-neu; fi
+          rg="rg-${name}"
+          job="caj-${name}-data"
+
+          args="$MODE"
+          if [ "$MODE" = delta ]; then
+            if ! [[ "$SINCE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(:[0-9]{2}(\.[0-9]+)?)?Z$ ]]; then
+              echo "::error::delta needs since as a UTC ISO time, e.g. 2026-12-01T10:00:00Z"; exit 1
+            fi
+            args="delta --since=${SINCE}"
+          fi
+
+          image=$(az containerapp show -n "ca-${name}-api" -g "$rg" --query "properties.template.containers[0].image" -o tsv)
+          echo "Job image: \`${image}\`, mode: \`${args}\`" >> "$GITHUB_STEP_SUMMARY"
+          # shellcheck disable=SC2086
+          az containerapp job update -n "$job" -g "$rg" --image "$image" --args $args -o none
+          execution=$(az containerapp job start -n "$job" -g "$rg" --query name -o tsv)
+          echo "Execution: \`${execution}\`" >> "$GITHUB_STEP_SUMMARY"
+
+          for _ in $(seq 1 120); do
+            status=$(az containerapp job execution show -n "$job" -g "$rg" --job-execution-name "$execution" --query properties.status -o tsv)
+            case "$status" in
+              Succeeded) echo "Result: succeeded" >> "$GITHUB_STEP_SUMMARY"; exit 0 ;;
+              Failed|Stopped|Degraded)
+                echo "Result: ${status}. Logs: ContainerAppConsoleLogs_CL where ContainerJobName_s == '${job}'" >> "$GITHUB_STEP_SUMMARY"
+                echo "::error::migration ${MODE} ${status}"; exit 1 ;;
+            esac
+            sleep 15
+          done
+          echo "::error::migration ${MODE} still running after 30 minutes"; exit 1
