@@ -137,14 +137,12 @@ class ApiService {
     }
   }
 
-  Future<dynamic> postWithFirebaseToken(String path, String firebaseToken, [Map<String, dynamic>? body]) async {
+  /// For sign-in endpoints, which take no session.
+  Future<dynamic> postPublic(String path, Map<String, dynamic> body) async {
     final response = await http.post(
       Uri.parse('$baseUrl$path'),
-      headers: {
-        'Content-Type': 'application/json',
-        'x-firebase-token': firebaseToken,
-      },
-      body: jsonEncode(body ?? {}),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
     );
     if (response.statusCode == 200 || response.statusCode == 201) {
       return jsonDecode(response.body);
