@@ -18,8 +18,10 @@ permissions:
   id-token: write
   contents: read
 
+# Shared with the promote workflow: an apply that updates a container app sends the image
+# recorded at plan time, so a release finishing in between would be rolled back. One at a time.
 concurrency:
-  group: azure-infra-prod
+  group: azure-prod-release
   cancel-in-progress: false
 
 jobs:
