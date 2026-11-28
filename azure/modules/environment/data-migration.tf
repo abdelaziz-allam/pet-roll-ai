@@ -29,11 +29,12 @@ resource "azurerm_container_app_job" "data_migration" {
 
   template {
     container {
-      name    = "migrate"
-      image   = local.placeholder_image
-      cpu     = 0.5
-      memory  = "1Gi"
-      command = ["node", "dist/scripts/migrate-firestore-to-cosmos.js"]
+      name   = "migrate"
+      image  = local.placeholder_image
+      cpu    = 0.5
+      memory = "1Gi"
+      # The API image runs TypeScript from src with tsx (docker/Dockerfile.backend); there is no dist.
+      command = ["npx", "tsx", "src/scripts/migrate-firestore-to-cosmos.ts"]
       args    = ["verify"]
 
       dynamic "env" {
