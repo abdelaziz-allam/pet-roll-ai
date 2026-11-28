@@ -6,6 +6,7 @@ name: Azure Data Migration
 #   copy      copy every Firestore document
 #   verify    compare every document; fails the run on any difference
 #   delta     after switching the API to Cosmos: copy what Firestore changed since `since`
+#   auth-import  copy Firebase Auth accounts into auth_identities (never overwrites)
 # Prod runs need the azure-prod reviewer, like every other prod change.
 
 on:
@@ -17,7 +18,7 @@ on:
         required: true
       mode:
         type: choice
-        options: [selftest, copy, verify, delta]
+        options: [selftest, copy, verify, delta, auth-import]
         required: true
       since:
         description: "delta only: when the copy started (ISO 8601, e.g. 2026-12-01T10:00:00Z)"
