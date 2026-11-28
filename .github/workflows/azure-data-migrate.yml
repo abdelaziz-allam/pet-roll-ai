@@ -59,7 +59,7 @@ jobs:
             if ! [[ "$SINCE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(:[0-9]{2}(\.[0-9]+)?)?Z$ ]]; then
               echo "::error::delta needs since as a UTC ISO time, e.g. 2026-12-01T10:00:00Z"; exit 1
             fi
-            args="delta --since=${SINCE}"
+            args="delta ${SINCE}"
           fi
 
           image=$(az containerapp show -n "ca-${name}-api" -g "$rg" --query "properties.template.containers[0].image" -o tsv)

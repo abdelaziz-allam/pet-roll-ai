@@ -5,7 +5,7 @@
  * through Entra ID. It never writes to Firestore, and it logs counts and document ids, never contents.
  *
  *   copy                  write every Firestore document, subcollections included
- *   delta --since=<ISO>   after the API has switched to Cosmos: copy documents Firestore changed
+ *   delta <ISO>           after the API has switched to Cosmos: copy documents Firestore changed
  *                         since <ISO>, and drop copies whose source was deleted. Items the API has
  *                         written since the copy are left alone (an API write drops the copy marker).
  *   verify                compare every document; exits 1 on any difference
@@ -217,8 +217,9 @@ async function main(): Promise<void> {
     case 'copy':
       return copy(openFirestore(), container);
     case 'delta': {
-      const since = Date.parse(args.find((a) => a.startsWith('--since='))?.slice('--since='.length) ?? '');
-      if (Number.isNaN(since)) throw new Error('delta needs --since=<ISO time the copy started>');
+      // A plain argument: the job runner (az containerapp job update --args) reads --flags as its own.
+      const since = Date.parse(args[0] ?? '');
+      if (Number.isNaN(since)) throw new Error('delta needs the ISO time the copy started');
       return delta(openFirestore(), container, since);
     }
     case 'verify':
