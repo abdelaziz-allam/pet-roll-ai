@@ -4,7 +4,6 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,6 +20,9 @@ class AppLoginScreen extends StatefulWidget {
   @override
   State<AppLoginScreen> createState() => _AppLoginScreenState();
 }
+
+// OAuth web client of the petroll-production Google project (google-services.json, client_type 3).
+const _googleServerClientId = '834040996278-0lmec5vdgu349d8fktcog17qmd2ae3tt.apps.googleusercontent.com';
 
 class _AppLoginScreenState extends State<AppLoginScreen> {
   final _formKey = GlobalKey<FormState>();
@@ -45,33 +47,30 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
 
     setState(() { _loading = true; _error = null; });
 
+    final email = _emailController.text.trim();
     try {
-      final auth = FirebaseAuth.instance;
-      UserCredential credential;
-
-      if (_isSignUp) {
-        credential = await auth.createUserWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-        );
-      } else {
-        credential = await auth.signInWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-        );
-      }
-
-      await _authenticateWithBackend(credential.user!, isNewUser: _isSignUp);
-    } on FirebaseAuthException catch (e) {
+      final api = ApiService();
+      final result = _isSignUp
+          ? await api.postPublic('/auth/password/register', {
+              'email': email,
+              'password': _passwordController.text,
+              'displayName': _nameController.text.trim().isNotEmpty
+                  ? _nameController.text.trim()
+                  : email.split('@').first,
+            })
+          : await api.postPublic('/auth/password/login', {
+              'email': email,
+              'password': _passwordController.text,
+            });
+      await _completeSignIn(result);
+    } on ApiException catch (e) {
       setState(() {
-        _error = _mapFirebaseError(e.code);
+        _error = _messageFor(e.statusCode);
         _loading = false;
       });
     } catch (e) {
       setState(() {
-        _error = e.toString().contains('409')
-            ? 'Account already exists. Please sign in instead.'
-            : 'Something went wrong. Please try again.';
+        _error = 'Network error. Check your connection.';
         _loading = false;
       });
     }
@@ -83,6 +82,8 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
     try {
       final googleSignIn = GoogleSignIn(
         scopes: ['email', 'profile'],
+        // The web client: Google issues the ID token for it, and the API accepts that audience.
+        serverClientId: _googleServerClientId,
       );
 
       await googleSignIn.signOut();
@@ -92,19 +93,17 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
         return;
       }
 
-      final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+      final idToken = (await googleUser.authentication).idToken;
+      if (idToken == null) throw Exception('Google returned no ID token');
 
-      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-      final isNew = userCredential.additionalUserInfo?.isNewUser ?? false;
-
-      await _authenticateWithBackend(userCredential.user!, isNewUser: isNew);
-    } on FirebaseAuthException catch (e) {
+      final result = await ApiService().postPublic('/auth/google', {
+        'idToken': idToken,
+        if ((googleUser.displayName ?? '').trim().length >= 2) 'displayName': _fitName(googleUser.displayName!.trim()),
+      });
+      await _completeSignIn(result);
+    } on ApiException catch (e) {
       setState(() {
-        _error = _mapFirebaseError(e.code);
+        _error = _messageFor(e.statusCode);
         _loading = false;
       });
     } catch (e) {
@@ -142,26 +141,21 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
         nonce: nonce,
       );
 
-      final oauthCredential = OAuthProvider('apple.com').credential(
-        idToken: appleCredential.identityToken,
-        rawNonce: rawNonce,
-      );
+      final identityToken = appleCredential.identityToken;
+      if (identityToken == null) throw Exception('Apple returned no identity token');
 
-      final userCredential = await FirebaseAuth.instance.signInWithCredential(oauthCredential);
-      final isNew = userCredential.additionalUserInfo?.isNewUser ?? false;
+      // Apple shares the name only on the first sign-in; the API uses it if this creates the account.
+      final fullName = [
+        appleCredential.givenName,
+        appleCredential.familyName,
+      ].where((n) => n != null && n.isNotEmpty).join(' ');
 
-      if (isNew && userCredential.user != null) {
-        final fullName = [
-          appleCredential.givenName,
-          appleCredential.familyName,
-        ].where((n) => n != null && n.isNotEmpty).join(' ');
-
-        if (fullName.isNotEmpty) {
-          await userCredential.user!.updateDisplayName(fullName);
-        }
-      }
-
-      await _authenticateWithBackend(userCredential.user!, isNewUser: isNew);
+      final result = await ApiService().postPublic('/auth/apple', {
+        'identityToken': identityToken,
+        'rawNonce': rawNonce,
+        if (fullName.length >= 2) 'displayName': _fitName(fullName),
+      });
+      await _completeSignIn(result);
     } on SignInWithAppleAuthorizationException catch (e) {
       if (e.code == AuthorizationErrorCode.canceled) {
         setState(() { _loading = false; });
@@ -171,9 +165,9 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
         _error = 'Apple sign-in failed. Please try again.';
         _loading = false;
       });
-    } on FirebaseAuthException catch (e) {
+    } on ApiException catch (e) {
       setState(() {
-        _error = _mapFirebaseError(e.code);
+        _error = _messageFor(e.statusCode);
         _loading = false;
       });
     } catch (e) {
@@ -184,41 +178,11 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
     }
   }
 
-  Future<void> _authenticateWithBackend(User user, {required bool isNewUser}) async {
-    final idToken = await user.getIdToken();
-    if (idToken == null) throw Exception('Failed to get Firebase token');
+  // The API accepts display names of up to 50 characters.
+  String _fitName(String name) => name.length > 50 ? name.substring(0, 50) : name;
 
-    final api = ApiService();
-
-    try {
-      if (isNewUser) {
-        final displayName = _nameController.text.trim().isNotEmpty
-            ? _nameController.text.trim()
-            : user.displayName ?? user.email?.split('@').first ?? 'User';
-
-        final result = await api.postWithFirebaseToken('/auth/register', idToken, {
-          'displayName': displayName,
-        });
-        await api.setTokens(result['accessToken'], result['refreshToken']);
-      } else {
-        final result = await api.postWithFirebaseToken('/auth/login', idToken);
-        await api.setTokens(result['accessToken'], result['refreshToken']);
-      }
-    } on ApiException catch (e) {
-      if (e.statusCode == 409) {
-        final result = await api.postWithFirebaseToken('/auth/login', idToken);
-        await api.setTokens(result['accessToken'], result['refreshToken']);
-      } else if (e.statusCode == 404 && !isNewUser) {
-        final displayName = user.displayName ?? user.email?.split('@').first ?? 'User';
-        final result = await api.postWithFirebaseToken('/auth/register', idToken, {
-          'displayName': displayName,
-        });
-        await api.setTokens(result['accessToken'], result['refreshToken']);
-      } else {
-        rethrow;
-      }
-    }
-
+  Future<void> _completeSignIn(dynamic result) async {
+    await ApiService().setTokens(result['accessToken'], result['refreshToken']);
     if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -226,23 +190,22 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
     }
   }
 
-  String _mapFirebaseError(String code) {
-    switch (code) {
-      case 'user-not-found':
-        return 'No account found with this email. Sign up instead?';
-      case 'wrong-password':
-      case 'invalid-credential':
+  String _messageFor(int statusCode) {
+    switch (statusCode) {
+      case 400:
+        return _isSignUp
+            ? 'Please enter a valid email and a password of at least 8 characters.'
+            : 'Please enter a valid email address.';
+      case 401:
         return 'Invalid email or password.';
-      case 'email-already-in-use':
+      case 403:
+        return 'This account has been suspended.';
+      case 409:
         return 'This email is already registered. Sign in instead?';
-      case 'weak-password':
-        return 'Password must be at least 6 characters.';
-      case 'invalid-email':
-        return 'Please enter a valid email address.';
-      case 'too-many-requests':
+      case 410:
+        return 'This account has been deleted.';
+      case 429:
         return 'Too many attempts. Please try again later.';
-      case 'network-request-failed':
-        return 'Network error. Check your connection.';
       default:
         return 'Authentication failed. Please try again.';
     }
@@ -423,7 +386,7 @@ class _AppLoginScreenState extends State<AppLoginScreen> {
                   ),
                   validator: (v) {
                     if (v == null || v.isEmpty) return l10n.password;
-                    if (_isSignUp && v.length < 6) return l10n.password;
+                    if (_isSignUp && v.length < 8) return l10n.password;
                     return null;
                   },
                 ),
