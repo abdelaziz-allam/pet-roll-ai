@@ -17,7 +17,7 @@ resource "azurerm_cosmosdb_account" "data" {
   free_tier_enabled = true
 
   public_network_access_enabled = false
-  local_authentication_disabled = true
+  local_authentication_enabled  = false
   minimal_tls_version           = "Tls12"
 
   consistency_policy {
@@ -99,12 +99,11 @@ resource "azurerm_private_dns_zone" "cosmos" {
 
 # Linked to this VNet only, so the other environment cannot resolve this account privately.
 resource "azurerm_private_dns_zone_virtual_network_link" "cosmos" {
-  name                  = "link-${local.name}"
-  resource_group_name   = local.rg
-  private_dns_zone_name = azurerm_private_dns_zone.cosmos.name
-  virtual_network_id    = azurerm_virtual_network.env.id
-  registration_enabled  = false
-  tags                  = local.tags
+  name                 = "link-${local.name}"
+  private_dns_zone_id  = azurerm_private_dns_zone.cosmos.id
+  virtual_network_id   = azurerm_virtual_network.env.id
+  registration_enabled = false
+  tags                 = local.tags
 }
 
 resource "azurerm_private_endpoint" "cosmos" {
