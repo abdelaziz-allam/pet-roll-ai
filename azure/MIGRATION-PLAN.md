@@ -192,7 +192,7 @@ Stage hostnames are `stage-api`, `stage` and `stage-admin` under petfolioo.com. 
 - **Account:** one Cosmos DB for NoSQL account per environment (`cosmos-petfolioo-<env>-<region>`) on the free tier (1000 RU/s, 25 GB, one per subscription). Public network access off, key authentication off, reachable only through a private endpoint in the environment's VNet. 7-day continuous backup (no storage charge). Stage's account is in Sweden Central, because North Europe refuses new Cosmos DB accounts for its subscription; its private endpoint is still in the stage VNet.
 - **Layout:** database `petfolioo`, one container `documents`, partition key `/c` (the collection path, e.g. `pets` or `chat_rooms/<id>/messages`). Each item holds the document twice: `d` as clients see it (timestamps as `{_seconds, _nanoseconds}`, which the app and admin parse) and `o` with timestamps as epoch milliseconds for filters and ordering. Only `o` is indexed.
 - **Code:** `src/data-store` implements the Firestore calls the services make (collection/doc, where, orderBy, offset, limit, count, add/set/update/delete/create, merge, FieldValue, batches). `DATA_STORE=firestore|cosmos` picks the store; the Terraform variable `data_store` sets it per environment. Two differences from Firestore: batches apply write by write instead of atomically (every batch here is a retry-safe bulk update or delete), and there are no realtime listeners (the backend uses none).
-- **Migration job:** `caj-petfolioo-<env>-<region>-data` runs `src/scripts/migrate-firestore-to-cosmos.ts` from the API image inside the VNet, as the apps identity. Started by the `azure-data-migrate` workflow: `selftest`, `copy`, `verify` or `delta --since=<copy start>`. It logs counts and document ids, never contents, and never writes to Firestore.
+- **Migration job:** `caj-petfolioo-<env>-<region>-data` runs `src/scripts/migrate-firestore-to-cosmos.ts` from the API image inside the VNet, as the apps identity. Started by the `azure-data-migrate` workflow: `selftest`, `copy`, `verify` or `delta <copy start>`. It logs counts and document ids, never contents, and never writes to Firestore.
 
 Steps per environment (stage first, then prod):
 
@@ -200,7 +200,7 @@ Steps per environment (stage first, then prod):
 2. Release an API image that contains the data layer (deploy-stage, then promote for prod).
 3. `selftest`, then `copy`, then `verify` until it reports `ok: true`. Note when the copy started.
 4. Switch: set `data_store = "cosmos"` in `azure/envs/<env>/main.tf` and apply. New writes go to Cosmos.
-5. `delta --since=<copy start>` picks up whatever Firestore changed between the copy and the switch; items the API has already written are left alone. Then `verify` once more (differences now can only be writes made after the switch).
+5. `delta <copy start>` (the workflow's `since` input) picks up whatever Firestore changed between the copy and the switch; items the API has already written are left alone. Then `verify` once more (differences now can only be writes made after the switch).
 6. Smoke test: sign-in, pets, health records with private file links, mating, notifications, admin, blog.
 
 **Rollback:** set `data_store = "firestore"` and apply. Firestore still holds everything up to the switch; writes made in Cosmos after it would need copying back (a reverse of the job, written only if ever needed).
