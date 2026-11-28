@@ -1,5 +1,11 @@
 import { z } from 'zod';
 
+const splitList = (value: string) =>
+  value
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.coerce.number().default(3000),
@@ -22,6 +28,11 @@ const envSchema = z.object({
   COSMOS_ENDPOINT: z.string().url().optional(),
   COSMOS_DATABASE: z.string().default('petfolioo'),
   COSMOS_CONTAINER: z.string().default('documents'),
+  // Sign-in owned by the API (src/modules/auth/identity). Comma-separated OAuth audiences.
+  GOOGLE_CLIENT_IDS: z.string().default('').transform(splitList),
+  APPLE_CLIENT_IDS: z.string().default('').transform(splitList),
+  // Firebase Auth's scrypt hash config as JSON, to check passwords imported from Firebase.
+  FIREBASE_SCRYPT_PARAMS: z.string().optional(),
   STORAGE_PROVIDER: z.enum(['gcs', 'azure']).default('gcs'),
   AZURE_STORAGE_ACCOUNT_URL: z.string().url().optional(),
   AZURE_PUBLIC_CONTAINER: z.string().default('public'),
