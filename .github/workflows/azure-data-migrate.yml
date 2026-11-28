@@ -7,6 +7,7 @@ name: Azure Data Migration
 #   verify    compare every document; fails the run on any difference
 #   delta     after switching the API to Cosmos: copy what Firestore changed since `since`
 #   auth-import  copy Firebase Auth accounts into auth_identities (never overwrites)
+#   copy+verify+auth-import  the three in order, under one approval; stops at the first failure
 # Prod runs need the azure-prod reviewer, like every other prod change.
 
 on:
@@ -18,7 +19,7 @@ on:
         required: true
       mode:
         type: choice
-        options: [selftest, copy, verify, delta, auth-import]
+        options: [selftest, copy, verify, delta, auth-import, copy+verify+auth-import]
         required: true
       since:
         description: "delta only: when the copy started (ISO 8601, e.g. 2026-12-01T10:00:00Z)"
@@ -55,32 +56,37 @@ jobs:
           rg="rg-${name}"
           job="caj-${name}-data"
 
-          args="$MODE"
-          if [ "$MODE" = delta ]; then
-            if ! [[ "$SINCE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(:[0-9]{2}(\.[0-9]+)?)?Z$ ]]; then
-              echo "::error::delta needs since as a UTC ISO time, e.g. 2026-12-01T10:00:00Z"; exit 1
-            fi
-            args="delta ${SINCE}"
-          fi
-
           image=$(az containerapp show -n "ca-${name}-api" -g "$rg" --query "properties.template.containers[0].image" -o tsv)
-          echo "Job image: \`${image}\`, mode: \`${args}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Job image: \`${image}\`" >> "$GITHUB_STEP_SUMMARY"
           # The Container Apps job API returns intermittent 500s; retry before giving up.
           retry() { for attempt in 1 2 3 4 5; do "$@" && return 0; echo "attempt ${attempt} failed, retrying"; sleep 20; done; return 1; }
-          # shellcheck disable=SC2086
-          retry az containerapp job update -n "$job" -g "$rg" --image "$image" --args $args -o none
-          execution=$(retry az containerapp job start -n "$job" -g "$rg" --query name -o tsv)
-          echo "Execution: \`${execution}\`" >> "$GITHUB_STEP_SUMMARY"
 
-          for _ in $(seq 1 120); do
-            # The execution API returns the odd 500 while a job runs; ask again on the next tick.
-            status=$(az containerapp job execution show -n "$job" -g "$rg" --job-execution-name "$execution" --query properties.status -o tsv) || status=unknown
-            case "$status" in
-              Succeeded) echo "Result: succeeded" >> "$GITHUB_STEP_SUMMARY"; exit 0 ;;
-              Failed|Stopped|Degraded)
-                echo "Result: ${status}. Logs: ContainerAppConsoleLogs_CL where ContainerJobName_s == '${job}'" >> "$GITHUB_STEP_SUMMARY"
-                echo "::error::migration ${MODE} ${status}"; exit 1 ;;
-            esac
-            sleep 15
-          done
-          echo "::error::migration ${MODE} still running after 30 minutes"; exit 1
+          run_mode() {
+            local mode="$1" args="$1"
+            if [ "$mode" = delta ]; then
+              if ! [[ "$SINCE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(:[0-9]{2}(\.[0-9]+)?)?Z$ ]]; then
+                echo "::error::delta needs since as a UTC ISO time, e.g. 2026-12-01T10:00:00Z"; return 1
+              fi
+              args="delta ${SINCE}"
+            fi
+            # shellcheck disable=SC2086
+            retry az containerapp job update -n "$job" -g "$rg" --image "$image" --args $args -o none
+            local execution
+            execution=$(retry az containerapp job start -n "$job" -g "$rg" --query name -o tsv)
+            echo "- \`${args}\`: execution \`${execution}\`" >> "$GITHUB_STEP_SUMMARY"
+            for _ in $(seq 1 120); do
+              # The execution API returns the odd 500 while a job runs; ask again on the next tick.
+              status=$(az containerapp job execution show -n "$job" -g "$rg" --job-execution-name "$execution" --query properties.status -o tsv) || status=unknown
+              case "$status" in
+                Succeeded) echo "  succeeded" >> "$GITHUB_STEP_SUMMARY"; return 0 ;;
+                Failed|Stopped|Degraded)
+                  echo "  ${status}. Logs: ContainerAppConsoleLogs_CL where ContainerName_s == 'migrate'" >> "$GITHUB_STEP_SUMMARY"
+                  echo "::error::migration ${mode} ${status}"; return 1 ;;
+              esac
+              sleep 15
+            done
+            echo "::error::migration ${mode} still running after 30 minutes"; return 1
+          }
+
+          IFS='+' read -ra modes <<< "$MODE"
+          for mode in "${modes[@]}"; do run_mode "$mode"; done
