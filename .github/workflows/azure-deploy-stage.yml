@@ -21,8 +21,10 @@ permissions:
   id-token: write
   contents: read
 
+# Shared with the infra workflow: an apply that updates a container app sends the image
+# recorded at plan time, so a release finishing in between would be rolled back. One at a time.
 concurrency:
-  group: azure-deploy-stage
+  group: azure-stage-release
   cancel-in-progress: false
 
 jobs:

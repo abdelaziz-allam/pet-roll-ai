@@ -40,6 +40,9 @@ module "environment" {
   resource_group_name = "rg-petfolioo-prod-swc"
   vnet_cidr           = "10.60.0.0/16"
 
+  # Copied and verified by the data-migration job (1,582 documents, every collection matching).
+  data_store = "cosmos"
+
   # The other environment's VNet and its ingress IP (output container_app_environment_static_ip).
   deny_egress_cidrs = ["10.70.0.0/16", "20.191.55.123/32"]
 
