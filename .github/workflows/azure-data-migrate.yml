@@ -64,9 +64,11 @@ jobs:
 
           image=$(az containerapp show -n "ca-${name}-api" -g "$rg" --query "properties.template.containers[0].image" -o tsv)
           echo "Job image: \`${image}\`, mode: \`${args}\`" >> "$GITHUB_STEP_SUMMARY"
+          # The Container Apps job API returns intermittent 500s; retry before giving up.
+          retry() { for attempt in 1 2 3 4 5; do "$@" && return 0; echo "attempt ${attempt} failed, retrying"; sleep 20; done; return 1; }
           # shellcheck disable=SC2086
-          az containerapp job update -n "$job" -g "$rg" --image "$image" --args $args -o none
-          execution=$(az containerapp job start -n "$job" -g "$rg" --query name -o tsv)
+          retry az containerapp job update -n "$job" -g "$rg" --image "$image" --args $args -o none
+          execution=$(retry az containerapp job start -n "$job" -g "$rg" --query name -o tsv)
           echo "Execution: \`${execution}\`" >> "$GITHUB_STEP_SUMMARY"
 
           for _ in $(seq 1 120); do
