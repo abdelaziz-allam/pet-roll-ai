@@ -47,6 +47,9 @@ module "environment" {
   cosmos_location       = "swedencentral"
   cosmos_location_short = "swc"
 
+  # Copied and verified by the data-migration job (1,446 documents, every collection matching).
+  data_store = "cosmos"
+
   # The other environment's VNet and its ingress IP (output container_app_environment_static_ip).
   deny_egress_cidrs = ["10.60.0.0/16", "172.135.116.76/32"]
 
