@@ -72,6 +72,10 @@ module "environment" {
 
   api_settings = {
     SITE_URL = "https://petfolioo.com"
+    # OAuth audiences the API accepts for Google and Apple sign-in: the app's web and iOS Google
+    # clients (petroll-production) and the iOS bundle id. Public values, not secrets.
+    GOOGLE_CLIENT_IDS = "834040996278-0lmec5vdgu349d8fktcog17qmd2ae3tt.apps.googleusercontent.com,834040996278-ufif9vc0k72ogrlqkmet34glafhvupkb.apps.googleusercontent.com"
+    APPLE_CLIENT_IDS  = "com.petroll.app"
   }
 
   api_generated_secrets = {
@@ -81,6 +85,8 @@ module "environment" {
   api_copied_secrets = {
     # Same key as GCP, so sessions issued before the cutover stay valid after it.
     JWT_SECRET = "jwt-secret"
+    # Firebase Auth's scrypt hash config (petroll-production), to check imported passwords.
+    FIREBASE_SCRYPT_PARAMS = "firebase-scrypt-params"
   }
 }
 

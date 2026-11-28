@@ -207,8 +207,8 @@ Steps per environment (stage first, then prod):
 
 ### 8b. Sign-in: Firebase Auth to the API (backend, then an app release)
 
-1. Export users once with `firebase auth:export` (uids, emails, providers, scrypt password hashes and the project's hash parameters). Store them in Cosmos (`auth_identities`), keyed by the existing uid, so every user keeps the same id and all their data stays linked.
-2. New API endpoints: email/password register, login and reset (reset mail through the existing mailer), and Google and Apple sign-in, which verify the provider's ID token against Google's and Apple's published keys. A Firebase-hashed password is checked once with Firebase's scrypt parameters, then re-stored with the API's own hash.
+1. The `auth-import` mode of the data-migration job copies Firebase Auth accounts (uids, emails, Google and Apple links, scrypt password hashes) into `auth_identities`, pointing at the existing uid, so every user keeps the same id and all their data stays linked. It never overwrites an existing identity, so it is rerun at the end of the overlap to pick up late Firebase sign-ups. The project's hash parameters go into Key Vault (`firebase-scrypt-params`).
+2. New API endpoints: email/password register and login, and Google and Apple sign-in, which verify the provider's ID token against Google's and Apple's published keys (Apple also checks the nonce). A Firebase-hashed password is checked once with Firebase's scrypt parameters, then re-stored with the API's own hash. A new provider account attaches to the user with the same verified email. Password reset needs an email sender, which Azure does not have yet (Azure Communication Services Email, verified through the Azure DNS zone); the app has no reset screen today either.
 3. During the overlap the API also keeps accepting Firebase ID tokens (`x-firebase-token`), so installed apps keep working.
 4. App release: replace `firebase_auth` with `google_sign_in` and `sign_in_with_apple` (already dependencies) plus the API endpoints; require the new version.
 5. Remove the `test-login` and `test-register` routes, which only need `JWT_SECRET`.
@@ -238,7 +238,7 @@ The `petroll-production` and `petfolioo-stage` projects hold only FCM. Firestore
 | DNS hosting | Done 2026-11-27: the petfolioo.com zone moved to Azure DNS (`azure/envs/prod/dns.tf`), with all 20 records checked against GoDaddy before the switch. The domain stays registered at GoDaddy, whose nameservers now point to `ns1-05.azure-dns.com`, `ns2-05.azure-dns.net`, `ns3-05.azure-dns.org` and `ns4-05.azure-dns.info`. GoDaddy keeps its copy of the records, so resolvers still holding the old nameservers get the same answers |
 | 7 Decommission | 2026-11-27: the three Cloud Run services set to internal ingress (closed to the public, nothing billed) and the GCP build and deploy jobs gated on `GCP_DEPLOY_ENABLED`. Deleting the services, the uploads bucket and the images waits for the owner's explicit OK. The project stays: Firestore, Firebase Auth and FCM still serve the app |
 | 8a Data to Cosmos DB | 2026-11-28: plan, Terraform (Cosmos, private endpoint, migration job), data layer and migration script in review. Prod Firestore holds 1,582 documents in 22 collections; the app's direct chat path holds none |
-| 8b Sign-in to the API | Planned: backend endpoints, then an app release |
+| 8b Sign-in to the API | 2026-11-28: API endpoints (`/auth/password/register`, `/auth/password/login`, `/auth/google`, `/auth/apple`), Firebase password check and `auth-import` job mode in review; `test-login`/`test-register` removed. Prod Firebase Auth has 9 accounts (5 password, 4 Google). App release next |
 | 8c Chat through the API | Planned with the 8b app release |
 
 ## 10. Risks and notes

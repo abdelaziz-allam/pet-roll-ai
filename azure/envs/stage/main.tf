@@ -82,6 +82,11 @@ module "environment" {
     SITE_URL = "https://stage.petfolioo.com"
     # Stage starts empty: fill it with demo pets and synthetic users, never real customer data.
     SEED_DEMO_DATA = "true"
+    # OAuth audiences the API accepts for Google and Apple sign-in: the app's web and iOS Google
+    # clients and the iOS bundle id. Stage is tested with the prod app build, so they match prod.
+    # Public values, not secrets.
+    GOOGLE_CLIENT_IDS = "834040996278-0lmec5vdgu349d8fktcog17qmd2ae3tt.apps.googleusercontent.com,834040996278-ufif9vc0k72ogrlqkmet34glafhvupkb.apps.googleusercontent.com"
+    APPLE_CLIENT_IDS  = "com.petroll.app"
   }
 
   api_generated_secrets = {
@@ -90,7 +95,10 @@ module "environment" {
     ADMIN_PASSWORD = "admin-seed-password"
   }
 
-  api_copied_secrets = {}
+  api_copied_secrets = {
+    # Firebase Auth's scrypt hash config (petfolioo-stage), to check imported passwords.
+    FIREBASE_SCRYPT_PARAMS = "firebase-scrypt-params"
+  }
 }
 
 output "environment" {

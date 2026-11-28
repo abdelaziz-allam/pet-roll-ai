@@ -1,6 +1,14 @@
 import { FastifyInstance } from 'fastify';
 import { authService } from './auth.service';
-import { registerSchema, updateProfileSchema } from './auth.schema';
+import {
+  appleSignInSchema,
+  googleSignInSchema,
+  passwordLoginSchema,
+  passwordRegisterSchema,
+  registerSchema,
+  updateProfileSchema,
+} from './auth.schema';
+import { identityService } from './identity/identity.service';
 import { requireAuth } from '../../middleware/require-auth';
 import { auth, db } from '../../config/firebase';
 import { env } from '../../config/env';
@@ -47,56 +55,30 @@ export async function authRoutes(fastify: FastifyInstance) {
     return reply.code(200).send({ user: { id: userDoc.id, ...userData }, ...tokens });
   });
 
-  fastify.post('/test-login', async (request, reply) => {
-    const { email, secret } = request.body as { email: string; secret: string };
-    if (!email || !secret) {
-      return reply.code(400).send({ error: 'Email and secret required' });
-    }
-    if (secret !== env.JWT_SECRET) {
-      return reply.code(403).send({ error: 'Invalid secret' });
-    }
-    const snapshot = await db.collection('users').where('email', '==', email).limit(1).get();
-    if (snapshot.empty) {
-      return reply.code(404).send({ error: 'User not found. Use /auth/test-register first.' });
-    }
-    const userDoc = snapshot.docs[0];
-    const userData = userDoc.data();
-    const tokens = authService.generateTokens(userDoc.id, userData.email);
-    return reply.code(200).send({ user: { id: userDoc.id, ...userData }, ...tokens });
+  // Sign-in without Firebase. Stricter rate limit: these endpoints check passwords and tokens.
+  const signInLimit = { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } };
+
+  fastify.post('/password/register', signInLimit, async (request, reply) => {
+    const { email, password, ...profile } = passwordRegisterSchema.parse(request.body);
+    const result = await identityService.registerWithPassword(email, password, profile);
+    return reply.code(201).send(result);
   });
 
-  fastify.post('/test-register', async (request, reply) => {
-    const { email, displayName, secret } = request.body as { email: string; displayName: string; secret: string };
-    if (!email || !displayName || !secret) {
-      return reply.code(400).send({ error: 'Email, displayName and secret required' });
-    }
-    if (secret !== env.JWT_SECRET) {
-      return reply.code(403).send({ error: 'Invalid secret' });
-    }
-    const existing = await db.collection('users').where('email', '==', email).limit(1).get();
-    if (!existing.empty) {
-      const userDoc = existing.docs[0];
-      const userData = userDoc.data();
-      const tokens = authService.generateTokens(userDoc.id, userData.email);
-      return reply.code(200).send({ user: { id: userDoc.id, ...userData }, ...tokens });
-    }
-    const { FieldValue } = await import('../../config/firebase.js');
-    const userData = {
-      email,
-      displayName,
-      phone: null,
-      timezone: 'Europe/Stockholm',
-      role: 'user',
-      status: 'active',
-      isVerifiedBreeder: false,
-      fcmTokens: [],
-      settings: { notifications: true, language: 'en', theme: 'light' },
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    };
-    const docRef = await db.collection('users').add(userData);
-    const tokens = authService.generateTokens(docRef.id, email);
-    return reply.code(201).send({ user: { id: docRef.id, ...userData }, ...tokens });
+  fastify.post('/password/login', signInLimit, async (request, reply) => {
+    const { email, password } = passwordLoginSchema.parse(request.body);
+    return reply.code(200).send(await identityService.loginWithPassword(email, password));
+  });
+
+  fastify.post('/google', signInLimit, async (request, reply) => {
+    const { idToken, ...profile } = googleSignInSchema.parse(request.body);
+    const result = await identityService.signInWithGoogle(idToken, profile);
+    return reply.code(result.isNewUser ? 201 : 200).send(result);
+  });
+
+  fastify.post('/apple', signInLimit, async (request, reply) => {
+    const { identityToken, rawNonce, ...profile } = appleSignInSchema.parse(request.body);
+    const result = await identityService.signInWithApple(identityToken, rawNonce, profile);
+    return reply.code(result.isNewUser ? 201 : 200).send(result);
   });
 
   fastify.post('/refresh', async (request, reply) => {
@@ -129,6 +111,7 @@ export async function authRoutes(fastify: FastifyInstance) {
 
   fastify.delete('/me', { preHandler: [requireAuth] }, async (request, reply) => {
     await authService.deleteAccount(request.user!.uid);
+    await identityService.removeAll(request.user!.uid);
     return reply.code(204).send();
   });
 }

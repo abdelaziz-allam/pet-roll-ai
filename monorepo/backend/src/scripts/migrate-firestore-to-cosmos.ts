@@ -11,6 +11,9 @@
  *   verify                compare every document; exits 1 on any difference
  *   selftest              exercise the Cosmos-backed Firestore API against the real container
  *                         in a scratch collection, then remove it
+ *   auth-import           copy Firebase Auth accounts into auth_identities (uid, email, Google and
+ *                         Apple links, password hashes) so the API can sign them in. Rerunnable:
+ *                         an identity that already exists is never overwritten.
  */
 import assert from 'node:assert/strict';
 import type { Container } from '@azure/cosmos';
@@ -18,6 +21,7 @@ import { federatedFirebaseCredential, prepareWifCredentialFile } from '../config
 import { openContainer } from '../data-store/cosmos-client';
 import { assertValidId, CosmosFirestore, StoredItem, toItem } from '../data-store/cosmos-firestore';
 import { canonical, FieldValue, Timestamp, toStored } from '../data-store/values';
+import { identityId, normalizeEmail } from '../modules/auth/identity/identity-keys';
 
 type FsDoc = {
   id: string;
@@ -205,6 +209,72 @@ async function selftest(container: Container): Promise<void> {
   }
 }
 
+type FirebaseUser = {
+  uid: string;
+  email?: string;
+  displayName?: string;
+  disabled: boolean;
+  passwordHash?: string;
+  passwordSalt?: string;
+  providerData: Array<{ providerId: string; uid: string }>;
+};
+
+async function importAuth(container: Container): Promise<void> {
+  openFirestore(); // initialises firebase-admin with the federated credential
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const admin = require('firebase-admin');
+  const db = new CosmosFirestore(container);
+  const counts = { users: 0, disabled: 0, created: { password: 0, google: 0, apple: 0 }, existing: 0, passwordWithoutHash: 0 };
+
+  let pageToken: string | undefined;
+  do {
+    const page: { users: FirebaseUser[]; pageToken?: string } = await admin.auth().listUsers(1000, pageToken);
+    for (const user of page.users) {
+      counts.users++;
+      if (user.disabled) {
+        counts.disabled++;
+        continue;
+      }
+      const email = user.email ? normalizeEmail(user.email) : undefined;
+      const entries: Array<{ id: string; provider: 'password' | 'google' | 'apple'; record: Record<string, unknown> }> = [];
+      const base = { uid: user.uid, ...(email ? { email } : {}), ...(user.displayName ? { displayName: user.displayName } : {}) };
+
+      const hasPassword = user.providerData.some((p) => p.providerId === 'password');
+      if (hasPassword && email) {
+        if (user.passwordHash && user.passwordSalt) {
+          entries.push({
+            id: identityId('password', email),
+            provider: 'password',
+            record: { ...base, provider: 'password', firebase: { hash: user.passwordHash, salt: user.passwordSalt } },
+          });
+        } else {
+          counts.passwordWithoutHash++;
+        }
+      }
+      for (const p of user.providerData) {
+        const provider = p.providerId === 'google.com' ? 'google' : p.providerId === 'apple.com' ? 'apple' : undefined;
+        if (provider) entries.push({ id: identityId(provider, p.uid), provider, record: { ...base, provider } });
+      }
+
+      for (const entry of entries) {
+        const ref = db.collection('auth_identities').doc(entry.id);
+        if ((await ref.get()).exists) {
+          counts.existing++;
+          continue;
+        }
+        await ref.create({ ...entry.record, importedAt: FieldValue.serverTimestamp() });
+        counts.created[entry.provider]++;
+      }
+    }
+    pageToken = page.pageToken;
+  } while (pageToken);
+
+  console.log(JSON.stringify({ mode: 'auth-import', ...counts }));
+  if (counts.passwordWithoutHash > 0) {
+    throw new Error('Firebase returned no password hash for some users; the federated identity needs firebaseauth.admin');
+  }
+}
+
 async function main(): Promise<void> {
   const [mode, ...args] = process.argv.slice(2);
   const container = openContainer({
@@ -227,8 +297,10 @@ async function main(): Promise<void> {
       return;
     case 'selftest':
       return selftest(container);
+    case 'auth-import':
+      return importAuth(container);
     default:
-      throw new Error('mode must be copy, delta, verify or selftest');
+      throw new Error('mode must be copy, delta, verify, selftest or auth-import');
   }
 }
 
