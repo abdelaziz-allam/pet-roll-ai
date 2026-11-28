@@ -25,6 +25,21 @@ describe('error-handler plugin', () => {
     return app;
   }
 
+  it('turns a rejected request body (ZodError) into 400 naming the fields', async () => {
+    const { z } = await import('zod');
+    const app = await buildApp();
+    app.post('/validate', async (request) => z.object({ email: z.string().email() }).parse(request.body));
+    await app.ready();
+
+    const response = await app.inject({ method: 'POST', url: '/validate', payload: { email: 'nope' } });
+    expect(response.statusCode).toBe(400);
+    expect(JSON.parse(response.body)).toMatchObject({
+      error: 'ValidationError',
+      statusCode: 400,
+      issues: [{ path: 'email' }],
+    });
+  });
+
   it('should return 400 with client error message', async () => {
     const app = await buildApp();
     app.get('/bad-request', async () => {
