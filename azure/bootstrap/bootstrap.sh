@@ -29,7 +29,7 @@ STATE_RG="rg-petfolioo-tfstate-swc"
 ENVIRONMENTS=(stage prod)
 PROVIDERS=(Microsoft.App Microsoft.OperationalInsights Microsoft.ContainerRegistry Microsoft.KeyVault
            Microsoft.Network Microsoft.Storage Microsoft.ManagedIdentity Microsoft.Consumption
-           Microsoft.CostManagement)
+           Microsoft.CostManagement Microsoft.DocumentDB)
 
 env_location() { if [ "$1" = stage ]; then echo northeurope; else echo swedencentral; fi; }
 env_subscription() { if [ "$1" = stage ]; then echo "$STAGE_SUBSCRIPTION_ID"; else echo "$PROD_SUBSCRIPTION_ID"; fi; }

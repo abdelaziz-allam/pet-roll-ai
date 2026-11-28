@@ -58,3 +58,11 @@ output "public_storage_base_url" {
 output "vnet_cidr" {
   value = var.vnet_cidr
 }
+
+output "cosmos_account_name" {
+  value = azurerm_cosmosdb_account.data.name
+}
+
+output "data_migration_job_name" {
+  value = azurerm_container_app_job.data_migration.name
+}

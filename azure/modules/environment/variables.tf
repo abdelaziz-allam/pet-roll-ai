@@ -103,6 +103,17 @@ variable "gcp" {
   })
 }
 
+variable "data_store" {
+  description = "Where the API keeps app data: firestore (Google, through federation) or cosmos (this environment's Cosmos DB). Switch only after the data-migration job has copied and verified the data."
+  type        = string
+  default     = "firestore"
+
+  validation {
+    condition     = contains(["firestore", "cosmos"], var.data_store)
+    error_message = "data_store must be firestore or cosmos."
+  }
+}
+
 variable "legacy_gcs_bucket" {
   description = "Bucket named in file URLs that Firestore stored on GCP. The API maps them onto the Azure containers on read."
   type        = string
