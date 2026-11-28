@@ -8,6 +8,17 @@ export const chatRoomQuerySchema = z.object({
   cursor: z.string().optional(),
 });
 
+export const messagesQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+});
+
+export const sendMessageSchema = z
+  .object({
+    text: z.string().trim().min(1).max(2000).optional(),
+    imageUrl: z.string().url().max(2048).optional(),
+  })
+  .refine((b) => b.text !== undefined || b.imageUrl !== undefined, { message: 'text or imageUrl is required' });
+
 export interface ChatRoom {
   id: string;
   participants: string[];
