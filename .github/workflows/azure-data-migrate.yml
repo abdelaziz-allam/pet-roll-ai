@@ -70,7 +70,8 @@ jobs:
           echo "Execution: \`${execution}\`" >> "$GITHUB_STEP_SUMMARY"
 
           for _ in $(seq 1 120); do
-            status=$(az containerapp job execution show -n "$job" -g "$rg" --job-execution-name "$execution" --query properties.status -o tsv)
+            # The execution API returns the odd 500 while a job runs; ask again on the next tick.
+            status=$(az containerapp job execution show -n "$job" -g "$rg" --job-execution-name "$execution" --query properties.status -o tsv) || status=unknown
             case "$status" in
               Succeeded) echo "Result: succeeded" >> "$GITHUB_STEP_SUMMARY"; exit 0 ;;
               Failed|Stopped|Degraded)
